@@ -38,6 +38,7 @@ class TestFunctions(TestCase):
     def test_select(self):
         self.assertEqual(self.empty.select(lambda x: x['value']).count(), 0, "Empty enumerable should still have 0 elements")
 
+        self.assertRaises(NullArgumentError, self.simple.select, None)
         simple_select = self.simple.select(lambda x: { 'value' : x }).to_list()
         first_simple = simple_select[0]
         simple_count = len(simple_select)
@@ -65,3 +66,53 @@ class TestFunctions(TestCase):
         self.assertRaises(NoElementsError, self.empty.avg)
         self.assertEqual(self.simple.avg(), avg, "Avg value of simple enumerable is {0:.5f}".format(avg))
         self.assertEqual(self.complex.avg(lambda x: x['value']), avg, "Avg value of complex enumerable is {0:.5f}".format(avg))
+
+    def test_first_last(self):
+        self.assertRaises(NoElementsError, self.empty.first)
+        self.assertEqual(self.empty.first_or_default(), None, "First or default should be None")
+        self.assertIsInstance(self.simple.first(), int, "First element in simple enumerable is int")
+        self.assertEqual(self.simple.first(), 1, "First element in simple enumerable is 1")
+        self.assertEqual(self.simple.first(), self.simple.first_or_default(), "First and first or default should equal")
+        self.assertIsInstance(self.complex.first(), dict, "First element in complex enumerable is dict")
+        self.assertDictEqual(self.complex.first(), {'value': 1}, "First element in complex enumerable is not correct dict")
+        self.assertDictEqual(self.complex.first(), self.complex.first_or_default(), "First and first or default should equal")
+        self.assertEqual(self.simple.first(), self.complex.select(lambda x: x['value']).first(), "First values in simple and complex should equal")
+
+
+        self.assertRaises(NoElementsError, self.empty.last)
+        self.assertEqual(self.empty.last_or_default(), None, "Last or default should be None")
+        self.assertIsInstance(self.simple.last(), int, "Last element in simple enumerable is int")
+        self.assertEqual(self.simple.last(), 3, "Last element in simple enumerable is 3")
+        self.assertEqual(self.simple.last(), self.simple.last_or_default(), "Last and last or default should equal")
+        self.assertIsInstance(self.complex.last(), dict, "Last element in complex enumerable is dict")
+        self.assertDictEqual(self.complex.last(), {'value': 3}, "Last element in complex enumerable is not correct dict")
+        self.assertDictEqual(self.complex.last(), self.complex.last_or_default(), "Last and last or default should equal")
+        self.assertEqual(self.simple.last(), self.complex.select(lambda x: x['value']).last(), "Last values in simple and complex should equal")
+
+    def test_sort(self):
+        self.assertRaises(NullArgumentError, self.simple.order_by, None)
+        self.assertRaises(NullArgumentError, self.simple.order_by_descending, None)
+
+        self.assertListEqual(self.simple.order_by(lambda x: x).to_list(), self.simple.to_list(), "Simple enumerable sort ascending should yield same list")
+        self.assertListEqual(self.simple.order_by_descending(lambda x: x).to_list(), sorted(self.simple, key=lambda x: x, reverse=True), "Simple enumerable sort descending should yield reverse list")
+
+        self.assertListEqual(self.complex.order_by(lambda x: x['value']).to_list(), self.complex.to_list(), "Complex enumerable sort ascending should yield same list")
+        self.assertListEqual(self.complex.order_by_descending(lambda x: x['value']).to_list(), sorted(self.complex, key=lambda x: x['value'], reverse=True), "Complex enumerable sort descending should yield reverse list")
+
+        self.assertListEqual(self.simple.order_by(lambda x: x).to_list(), self.complex.select(lambda x: x['value']).order_by(lambda x: x).to_list(), "Projection and sort ascending of complex should yield simple")
+
+    def test_median(self):
+        self.assertRaises(NoElementsError, self.empty.median)
+
+        median = float(2)
+        self.assertEqual(self.simple.median(), median, "Median of simple enumerable should be {0:.5f}".format(median))
+        self.assertEqual(self.complex.median(lambda x: x['value']), median, "Median of complex enumerable should be {0:.5f}".format(median))
+
+    def test_skip_take(self):
+        self.assertListEqual(self.empty.skip(2).to_list(), [], "Skip 2 of empty list should yield empty list")
+        self.assertListEqual(self.empty.take(2).to_list(), [], "Take 2 of empty list should yield empty list")
+
+        self.assertEqual(self.simple.skip(1).take(1).first(), 2, "Skip 1 and take 1 of simple should yield 2")
+        self.assertDictEqual(self.complex.select(lambda x: x['value']).skip(1).take(1).first(), 2, "Skip 1 and take 1 of complex with projection should yield 2")
+
+
