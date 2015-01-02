@@ -1,6 +1,7 @@
 __author__ = 'ViraLogic Software'
 
 import itertools
+from exceptions import *
 
 class Enumerable(object):
     def __init__(self, data=[]):
@@ -11,32 +12,11 @@ class Enumerable(object):
         """
         if not hasattr(data, "__iter__"):
             raise TypeError("Enumerable must be instantiated with an iterable object")
-        self._data = iter(data) if not hasattr(data, "__next__") or not hasattr(data, "next") else data
+        self._data = data
 
     def __iter__(self):
-        return self._data
-
-    def __next__(self):
-        """
-        For Python 3 compatibility
-        :yield: The next object in the iterator
-        """
-        yield self.next()
-
-    def next(self):
-        """
-        Gets the next object in iterator
-        :return: Next object in iterator
-        """
-        yield self._data.next()
-
-    def __getitem__(self, item):
-        """
-        Indexer into data
-        :param item: integer object as index value
-        :return: item at specified index if within bounds, else raises error
-        """
-        return self.to_list().__getitem__(item)
+        for element in self._data.__iter__():
+            yield element
 
     def to_list(self):
         """
@@ -50,16 +30,98 @@ class Enumerable(object):
         Returns the number of elements in iterable
         :return: integer object
         """
-        return sum(self.select(lambda x: 1))
+        return len(self.to_list())
 
     def select(self, func):
         """
         Transforms data into different form
         :param func: lambda expression on how to perform transformation
-        :return: new Enumerable object containing transformed elements
+        :return: new Enumerable object containing transformed data
         """
         return Enumerable(itertools.imap(func, self))
 
+    def sum(self, func=lambda x: x):
+        """
+        Returns the sum of af data elements
+        :param func: lambda expression to transform data
+        :return: sum of selected elements
+        """
+        return sum(self.select(func))
 
+    def min(self, func=lambda x: x):
+        """
+        Returns the min value of data elements
+        :param func: lambda expression to transform data
+        :return: minimum value
+        """
+        if self.count() == 0:
+            raise NoElementsError("Iterable contains no elements")
+        return min(self.select(func))
+
+    def max(self, func=lambda x: x):
+        """
+        Returns the max value of data elements
+        :param func: lambda expression to transform data
+        :return: maximum value
+        """
+        if self.count() == 0:
+            raise NoElementsError("Iterable contains no elements")
+        return max(self.select(func))
+
+    def avg(self, func=lambda x: x):
+        """
+        Returns the average value of data elements
+        :param func: lambda expression to transform data
+        :return: average value as float object
+        """
+        count = self.count()
+        if count == 0:
+            raise NoElementsError("Iterable contains no elements")
+        return float(self.sum(func))/float(count)
+
+    def first(self, func=lambda x: x):
+        """
+        Returns the first element
+        :param func: lambda expression to transform data
+        :return: data element as object or NoElementsError if transformed data contains no elements
+        """
+        result = self.select(func).to_list()
+        if len(result) == 0:
+            raise NoElementsError("Iterable contains no elements")
+        return result[0]
+
+    def first_or_default(self, func=lambda x: x):
+        """
+        Return the first element
+        :param func: lambda expression to transform data
+        :return: data element as object or None if transformed data contains no elements
+        """
+        try:
+            return self.first(func)
+        except NoElementsError:
+            return None
+
+    def last(self, func=lambda x: x):
+        """
+        Return the last element
+        :param func: lambda expression to transform data
+        :return: data element as object or NoElementsError if transformed data contains no elements
+        """
+        result = self.select(func).to_list()
+        if len(result) == 0:
+            raise NoElementsError("Iterable contains no elements")
+        return result[len(result) - 1]
+
+    def last_or_default(self, func=lambda x: x):
+        """
+        Return the last element
+        :param func: lambda expression to transform data
+        :return: data element as object or None if transformed data contains no elements
+        """
+        try:
+            return self.last(func)
+        except NoElementsError:
+            return None
+        
 
 
