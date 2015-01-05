@@ -2,7 +2,7 @@ __author__ = 'Viralogic Software'
 
 from unittest import TestCase
 from py_linq import Enumerable
-from tests import _empty, _simple, _complex
+from tests import _empty, _simple, _complex, _locations
 from py_linq.exceptions import *
 
 
@@ -157,8 +157,21 @@ class TestFunctions(TestCase):
         self.assertListEqual(_simple.select_many().to_list(), [1,2,3,4,5,6,7,8,9], "Select many of enumerable of simple lists should yield simple enumerable with single list")
         self.assertListEqual(_complex.select_many(lambda x: x['values']).to_list(), _simple.select_many().to_list(), "Select many of enumerable of complex list should yield simple enumerable with single list")
 
+    def test_concat(self):
+        self.assertListEqual(self.empty.concat(self.empty).to_list(), [], "Concatenation of 2 empty lists gives empty list")
+        self.assertListEqual(self.empty.concat(self.simple).to_list(), _simple, "Concatenation of empty to simple yields simple")
+        self.assertListEqual(self.simple.concat(self.empty).to_list(), _simple, "Concatenation of simple to empty yields simple")
+        self.assertListEqual(self.simple.concat(self.complex).to_list(), _simple + _complex, "Concatentation of simple to complex yields simple + complex")
+
     def test_group_by(self):
-        self
+        self.assertRaises(Exception, self.empty.group_by, lambda x: x)
+
+        simple_grouped = self.simple.group_by().to_list()
+        self.assertEqual(simple_grouped.count(), 3, "Three grouped elements in simple grouped")
+        for g in simple_grouped:
+            self.assertEqual(g.key.id, g.first(), "Each id in simple grouped should match first value")
+
+
 
 
 

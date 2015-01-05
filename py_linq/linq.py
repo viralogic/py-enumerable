@@ -7,6 +7,7 @@ class Enumerable(object):
     def __init__(self, data=[]):
         """
         Constructor
+        ** Note: no type checking is performed during instantiation. **
         :param data: iterable object
         :return: None
         """
@@ -219,34 +220,58 @@ class Enumerable(object):
         """
         return Enumerable(itertools.chain.from_iterable(self.select(func)))
 
+    def add(self, element):
+        """
+        Adds an element to the enumerable.
+        :param element: An element
+        :return: new Enumerable object
+        """
+        if element is None:
+            return self
+        return self.concat(Enumerable([element]))
+
+    def concat(self, enumerable):
+        """
+        Adds enumerable to an enumerable
+        :param elements: An iterable object
+        :return: new Enumerable object
+        """
+        if not isinstance(enumerable, Enumerable):
+            raise Exception("enumerable argument must be an instance of Enumerable")
+        return Enumerable(itertools.chain(self._data, enumerable._data))
+
+    def group_by(self, key=None):
+        """
+        Groups an enumerable on given key selector
+        :param key: key selector as lambda expression
+        :return: Enumerable of grouping objects
+        """
+        if key is None:
+            key = {'id' : lambda x: x }
+        result = []
+        group_funcs = [v for k,v in key.iteritems()]
+        grouped = itertools.groupby(self, lambda x: group_funcs)
+        for k, g in grouped:
+            print "{0}, {1}".format(k, list(g))
+            key_attrs = {}
+            for index, p in enumerate(key):
+                key_attrs.setdefault(p, k[index])
+            key_object = Key(key_attrs)
+            result.append(Grouping(key_object, g))
+        return Enumerable(result)
 
 class Key(object):
-    def __init__(self, key=None, **kwargs):
-        """
-        Constructor of key class
-        :param key: dict of name value pairs for key mapping
-        :return: void
-        """
+    def __init__(self, key, **kwargs):
         key = key if key is not None else kwargs
-        if len(key) == 0:
-            raise KeyError("No keys found for {0}".format(key))
         self.__dict__.update(key)
 
-
 class Grouping(Enumerable):
-    def __init__(self, key, enumerable):
+    def __init__(self, key, data):
         """
         Constructor of Grouping class used for group by operations of Enumerable class
         :param key: dict of name value pairs for key mapping
         :param data: iterable object
         :return: void
         """
-        if not isinstance(enumerable, Enumerable):
-            raise Exception("enumerable argument is not an instance of enumerable")
-        self.key = Key(key)
-        super(Grouping, self).__init__(data=self._filter_data(enumerable))
-
-    def _filter_data(self, enumerable):
-        self._data = enumerable._data
-        for p, v in vars(self.key).iteritems():
-            self._data = itertools.ifilter(lambda x: hasattr(x, v), self._data)
+        self.key = key
+        super(Grouping, self).__init__(data)
