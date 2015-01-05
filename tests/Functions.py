@@ -113,6 +113,56 @@ class TestFunctions(TestCase):
         self.assertListEqual(self.empty.take(2).to_list(), [], "Take 2 of empty list should yield empty list")
 
         self.assertEqual(self.simple.skip(1).take(1).first(), 2, "Skip 1 and take 1 of simple should yield 2")
-        self.assertDictEqual(self.complex.select(lambda x: x['value']).skip(1).take(1).first(), 2, "Skip 1 and take 1 of complex with projection should yield 2")
+        self.assertEqual(self.complex.select(lambda x: x['value']).skip(1).take(1).first(), 2, "Skip 1 and take 1 of complex with projection should yield 2")
+
+    def test_filter(self):
+        self.assertListEqual(self.empty.where(lambda x: x == 0).to_list(), [], "Filter on empty list should yield empty list")
+        self.assertListEqual(self.simple.where(lambda x: x==2).to_list(), [2], "Filter where element equals 2 should yield list with one element")
+        self.assertListEqual(self.complex.where(lambda x: x['value'] == 2).to_list(), [{'value':2}], "Filter where element value is 2 should yield list with one element")
+        self.assertListEqual(self.complex.where(lambda x: x['value'] == 2).select(lambda x: x['value']).to_list(), self.simple.where(lambda x: x == 2).to_list(), "Filter and projection of complex enumerable should equal filter of simple enumerable")
+        self.assertListEqual(self.simple.where(lambda x: x== 0).to_list(), self.empty.to_list(), "Filter simple enumerable with no matching elements yields empty list")
+
+    def test_single_single_or_default(self):
+        self.assertRaises(NullArgumentError, self.empty.single, None)
+
+        self.assertRaises(NoMatchingElement, self.empty.single, lambda x: x == 0)
+        self.assertRaises(NoMatchingElement, self.simple.single, lambda x: x == 0)
+        self.assertRaises(NoMatchingElement, self.complex.single, lambda x: x['value'] == 0)
+
+        self.assertRaises(MoreThanOneMatchingElement, self.simple.single, lambda x: x > 0)
+        self.assertRaises(MoreThanOneMatchingElement, self.complex.single, lambda x: x['value'] > 0)
+
+        self.assertRaises(MoreThanOneMatchingElement, self.simple.single_or_default, lambda x: x > 0)
+        self.assertRaises(MoreThanOneMatchingElement, self.complex.single_or_default, lambda x: x['value'] > 0)
+
+        simple_single = self.simple.single(lambda x: x == 2)
+        self.assertIsInstance(simple_single, int, "Single on simple enumerable where element value equals 2 should yield int")
+        self.assertEqual(simple_single, 2, "Single on simple enumerable where element value equals 2 should yield 2")
+
+        complex_single = self.complex.single(lambda x: x['value'] == 2)
+        self.assertIsInstance(complex_single, dict, "Single on complex enumerable where element value equals 2 should yield dict")
+        self.assertDictEqual(complex_single, {'value': 2}, "Single on complex enumerable where element value equals 2 should yield '{'value':2}'")
+        self.assertEqual(simple_single, self.complex.select(lambda x: x['value']).single(lambda x: x == 2), "Projection and single on complex should yield single on simple")
+
+        self.assertEqual(self.empty.single_or_default(lambda x: x == 0), None, "Single or default on empty list should yield None")
+        self.assertEqual(self.simple.single_or_default(lambda x: x == 0), None, "Single or default filtering on simple enumerable with element value equals 0 should yield None")
+        self.assertEqual(self.complex.single_or_default(lambda x: x['value'] == 0), None, "Single or default filtering on complex enumerable with element value equals 0 should yield None")
+
+    def test_select_many(self):
+        _empty = Enumerable([[], [], []])
+        _simple = Enumerable([[1,2,3], [4,5,6], [7,8,9]])
+        _complex = Enumerable([{'key': 1, 'values': [1,2,3]}, {'key': 2, 'values': [4,5,6]}, {'key': 3, 'values': [7,8,9]}])
+
+        self.assertListEqual(_empty.select_many().to_list(), [], "Select many of enumerable of empty lists should yield empty list")
+        self.assertListEqual(_simple.select_many().to_list(), [1,2,3,4,5,6,7,8,9], "Select many of enumerable of simple lists should yield simple enumerable with single list")
+        self.assertListEqual(_complex.select_many(lambda x: x['values']).to_list(), _simple.select_many().to_list(), "Select many of enumerable of complex list should yield simple enumerable with single list")
+
+    def test_group_by(self):
+        self
+
+
+
+
+
 
 

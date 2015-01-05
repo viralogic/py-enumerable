@@ -5,3 +5,9 @@ class NoElementsError(Exception):
 
 class NullArgumentError(Exception):
     pass
+
+class NoMatchingElement(Exception):
+    pass
+
+class MoreThanOneMatchingElement(Exception):
+    pass

@@ -100,10 +100,10 @@ class Enumerable(object):
         :param func: lambda expression to transform data
         :return: data element as object or NoElementsError if transformed data contains no elements
         """
-        if self.count() == 0:
+        result = self.take(1).to_list()
+        if len(result) == 0:
             raise NoElementsError("Iterable contains no elements")
-        first = Enumerable(itertools.islice(self, 0, 1, 1)).to_list()
-        return first[0]
+        return result[0]
 
     def first_or_default(self):
         """
@@ -122,10 +122,7 @@ class Enumerable(object):
         :param func: lambda expression to transform data
         :return: data element as object or NoElementsError if transformed data contains no elements
         """
-        count = self.count()
-        if count == 0:
-            raise NoElementsError("Iterable contains no elements")
-        return Enumerable(itertools.islice(self, count-1, None, 1)).to_list()[0]
+        return Enumerable(sorted(self, None, reverse=True)).first()
 
     def last_or_default(self):
         """
@@ -174,4 +171,82 @@ class Enumerable(object):
         """
         return Enumerable(itertools.islice(self, 0, n, 1))
 
+    def where(self, predicate):
+        """
+        Returns new Enumerable where elements matching predicate are selected
+        :param predicate: predicate as a lambda expression
+        :return: new Enumerable object
+        """
+        if predicate is None:
+            raise NullArgumentError("No predicate given for where clause")
+        return Enumerable(itertools.ifilter(predicate, self))
 
+    def single(self, predicate):
+        """
+        Returns single element that matches given predicate.
+        Raises:
+            * NoMatchingElement error if no matching elements are found
+            * MoreThanOneMatchingElement error if more than one matching element is found
+        :param predicate: predicate as a lambda expression
+        :return: Matching element as object
+        """
+        result = self.where(predicate).to_list()
+        count = len(result)
+        if count == 0:
+            raise NoMatchingElement("No matching element found")
+        if count > 1:
+            raise MoreThanOneMatchingElement("More than one matching element found. Use where instead")
+        return result[0]
+
+    def single_or_default(self, predicate):
+        """
+        Return single element that matches given predicate. If no matching element is found, returns None
+        Raises:
+            * MoreThanOneMatchingElement error if more than one matching element is found
+        :param predicate: predicate as a lambda expression
+        :return: Matching element as object or None if no matches are found
+        """
+        try:
+            return self.single(predicate)
+        except NoMatchingElement:
+            return None
+
+    def select_many(self, func=lambda x: x):
+        """
+        Flattens an iterable of iterables returning a new Enumerable
+        :param func: selector as lambda expression
+        :return: new Enumerable object
+        """
+        return Enumerable(itertools.chain.from_iterable(self.select(func)))
+
+
+class Key(object):
+    def __init__(self, key=None, **kwargs):
+        """
+        Constructor of key class
+        :param key: dict of name value pairs for key mapping
+        :return: void
+        """
+        key = key if key is not None else kwargs
+        if len(key) == 0:
+            raise KeyError("No keys found for {0}".format(key))
+        self.__dict__.update(key)
+
+
+class Grouping(Enumerable):
+    def __init__(self, key, enumerable):
+        """
+        Constructor of Grouping class used for group by operations of Enumerable class
+        :param key: dict of name value pairs for key mapping
+        :param data: iterable object
+        :return: void
+        """
+        if not isinstance(enumerable, Enumerable):
+            raise Exception("enumerable argument is not an instance of enumerable")
+        self.key = Key(key)
+        super(Grouping, self).__init__(data=self._filter_data(enumerable))
+
+    def _filter_data(self, enumerable):
+        self._data = enumerable._data
+        for p, v in vars(self.key).iteritems():
+            self._data = itertools.ifilter(lambda x: hasattr(x, v), self._data)
