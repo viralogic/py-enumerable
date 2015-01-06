@@ -290,6 +290,49 @@ class Enumerable(object):
         """
         return self.group_by(key=key).select(lambda g: g.first())
 
+    def join(self, inner_enumerable, outer_key, inner_key):
+        """
+        Return enumerable of inner equi-join between two enumerables
+        :param inner_enumerable: inner enumerable to join to self
+        :param outer_key: key selector of outer enumerable as lambda expression
+        :param inner_key: key selector of inner enumerable as lambda expression
+        :return: new Enumerable object
+        """
+        raise NotImplementedError()
+
+    def default_if_empty(self):
+        raise NotImplementedError()
+
+    def group_join(self, inner_enumerable, outer_key, inner_key):
+        """
+        Return enumerable of group join between two enumerables
+        :param inner_enumerable: inner enumerable to join to self
+        :param outer_key: key selector of outer enumerable as lambda expression
+        :param inner_key: key selector of inner enumerable as lambda expression
+        :return: new Enumerable object
+        """
+        raise NotImplementedError()
+
+    def any(self, predicate):
+        """
+        Returns true if any elements that satisfy predicate are found
+        :param predicate: condition to satisfy as lambda expression
+        :return: boolean True or False
+        """
+        raise NotImplementedError()
+
+    def union(self, enumerable, key=lambda x: x):
+        """
+        Returns enumerable that is a union of elements between self and given enumerable
+        :param enumerable: enumerable to union self to
+        :param key: key selector used to determine uniqueness
+        :return: new Enumerable object
+        """
+        raise NotImplementedError()
+
+    def except_(self, enumerable, key=lambda x: x):
+        raise NotImplementedError()
+
 class Key(object):
     def __init__(self, key, **kwargs):
         """
