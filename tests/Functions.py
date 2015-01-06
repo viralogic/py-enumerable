@@ -164,12 +164,35 @@ class TestFunctions(TestCase):
         self.assertListEqual(self.simple.concat(self.complex).to_list(), _simple + _complex, "Concatentation of simple to complex yields simple + complex")
 
     def test_group_by(self):
-        self.assertRaises(Exception, self.empty.group_by, lambda x: x)
-
-        simple_grouped = self.simple.group_by().to_list()
+        simple_grouped = self.simple.group_by(key_names=['id'])
         self.assertEqual(simple_grouped.count(), 3, "Three grouped elements in simple grouped")
         for g in simple_grouped:
             self.assertEqual(g.key.id, g.first(), "Each id in simple grouped should match first value")
+
+        complex_grouped = self.complex.group_by(key_names=['value'], key=lambda x: x['value'])
+        self.assertEqual(complex_grouped.count(), 3, "Three grouped elements in complex grouped")
+        for g in complex_grouped:
+            self.assertEqual(g.key.value, g.select(lambda x: x['value']).first(), "Each value in complex grouped should mach first value")
+
+        locations_grouped = Enumerable(_locations).group_by(key_names=['country', 'city'], key=lambda x: [x[0], x[1]])
+        self.assertEqual(locations_grouped.count(), 7, "Seven grouped elements in locations grouped")
+
+        london = locations_grouped.single(lambda g: g.key.city == 'London' and g.key.country == 'England')
+        self.assertEqual(london.sum(lambda g: g[3]), 240000, "Sum of London, England location does not equal")
+
+    def test_distinct(self):
+        self.assertListEqual(self.empty.distinct().to_list(), [], "Distinct empty enumerable yields empty list")
+        self.assertListEqual(self.simple.concat(self.simple).distinct().to_list(), _simple, "Distinct simple enumerable concatenated to simple enumerable yields simple list")
+        locations = Enumerable(_locations).distinct(lambda x: x[0]).to_list()
+        self.assertEqual(len(locations), 3, "Three distinct countries in locations enumerable")
+        self.assertListEqual(locations,
+                             [
+                                 ('England', 'London', 'Branch1', 90000),
+                                 ('Scotland', 'Edinburgh', 'Branch1', 20000),
+                                 ('Wales', 'Cardiff', 'Branch1', 29700)
+                             ],
+                             "Distinct locations do not match")
+
 
 
 

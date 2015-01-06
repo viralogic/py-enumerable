@@ -19,6 +19,9 @@ class Enumerable(object):
         for element in self._data.__iter__():
             yield element
 
+    def __repr__(self):
+        return self._data.__repr__()
+
     def to_list(self):
         """
         Converts the iterable into a list
@@ -240,30 +243,66 @@ class Enumerable(object):
             raise Exception("enumerable argument must be an instance of Enumerable")
         return Enumerable(itertools.chain(self._data, enumerable._data))
 
-    def group_by(self, key=None):
+    def group_by(self, key_names=[], key=lambda x: x):
         """
-        Groups an enumerable on given key selector
+        Groups an enumerable on given key selector. Index of key name corresponds to index of key lambda function.
+
+        Usage:
+            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x).to_list() --> Enumerable object [
+                Grouping object {
+                    key.id: 1,
+                    _data: [1]
+                },
+                Grouping object {
+                    key.id: 2,
+                    _data: [2]
+                },
+                Grouping object {
+                    key.id: 3,
+                    _data: [3]
+                }
+            ]
+            Thus the key names for each grouping object can be referenced through the key property. Using the above example:
+
+            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x).select(lambda g: { 'key': g.key.id, 'count': g.count() }
+
+        :param key_names: list of key names
         :param key: key selector as lambda expression
         :return: Enumerable of grouping objects
         """
-        if key is None:
-            key = {'id' : lambda x: x }
         result = []
-        group_funcs = [v for k,v in key.iteritems()]
-        grouped = itertools.groupby(self, lambda x: group_funcs)
+        ordered = sorted(self, key=key)
+        grouped = itertools.groupby(ordered, key)
         for k, g in grouped:
-            print "{0}, {1}".format(k, list(g))
-            key_attrs = {}
-            for index, p in enumerate(key):
-                key_attrs.setdefault(p, k[index])
-            key_object = Key(key_attrs)
-            result.append(Grouping(key_object, g))
+            is_list = isinstance(k, list)
+            key_prop = {}
+            for i, prop in enumerate(key_names):
+                key_prop.setdefault(prop, k[i] if is_list else k)
+            key_object = Key(key_prop)
+            result.append(Grouping(key_object, list(g)))
         return Enumerable(result)
+
+    def distinct(self, key=lambda x: x):
+        """
+        Returns enumerable containing elements that are distinct based on given key selector
+        :param key: key selector as lambda expression
+        :return: new Enumerable object
+        """
+        return self.group_by(key=key).select(lambda g: g.first())
 
 class Key(object):
     def __init__(self, key, **kwargs):
+        """
+        Constructor for Key class. Autogenerates key properties in object given dict or kwargs
+        :param key: dict of name-values
+        :param kwargs: optional keyword arguments
+        :return: void
+        """
         key = key if key is not None else kwargs
         self.__dict__.update(key)
+
+    def __repr__(self):
+        return self.__dict__.__repr__()
 
 class Grouping(Enumerable):
     def __init__(self, key, data):
@@ -273,5 +312,13 @@ class Grouping(Enumerable):
         :param data: iterable object
         :return: void
         """
+        if not isinstance(key, Key):
+            raise Exception("key argument should be a Key instance")
         self.key = key
         super(Grouping, self).__init__(data)
+
+    def __repr__(self):
+        return {
+            'key': self.key.__repr__(),
+            'collection': self._data.__repr__()
+        }.__repr__()
