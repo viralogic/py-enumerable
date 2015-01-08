@@ -177,10 +177,10 @@ class TestFunctions(TestCase):
         for g in complex_grouped:
             self.assertEqual(g.key.value, g.select(lambda x: x['value']).first(), "Each value in complex grouped should mach first value")
 
-        locations_grouped = Enumerable(_locations).group_by(key_names=['country', 'city'], key=lambda x: [x[0], x[1]])
-        self.assertEqual(locations_grouped.count(), 7, "Seven grouped elements in locations grouped")
+        locations_grouped = Enumerable(_locations).group_by(key_names=['country', 'city'], key=lambda x: [x[0], x[1]]).to_list()
+        self.assertEqual(len(locations_grouped), 7, "Seven grouped elements in locations grouped")
 
-        london = locations_grouped.single(lambda g: g.key.city == 'London' and g.key.country == 'England')
+        london = Enumerable(locations_grouped).single(lambda g: g.key.city == 'London' and g.key.country == 'England')
         self.assertEqual(london.sum(lambda g: g[3]), 240000, "Sum of London, England location does not equal")
 
     def test_distinct(self):
@@ -268,32 +268,34 @@ class TestFunctions(TestCase):
         self.assertListEqual(self.empty.group_join(self.empty).to_list(), [], "Group join 2 empty yields empty")
 
         simple_empty_gj = self.simple.group_join(self.empty).to_list()
-        print simple_empty_gj
         self.assertEqual(len(simple_empty_gj), 3, "Should have 3 elements")
-        for e in simple_empty_gj:
-            self.assertEqual(e[0].count(), 0, "Should have 0 elements")
+        for i, e in enumerate(simple_empty_gj):
+            self.assertEqual(e[0], i + 1, "number property should be {0}".format(i + 1))
+            self.assertEqual(e[1].count(), 0, "Should have 0 elements")
             self.assertEqual(e[1].first_or_default(), None, "Value of first element should be None")
 
-        simple_gj = self.simple.group_join(self.simple, result_func=lambda (x, y): {'number' : x, 'collection': y}).to_list()
-        print simple_gj
+        simple_gj = self.simple.group_join(self.simple, result_func=lambda (x, y): {'number' : x, 'collection': y})
         for i, e in enumerate(simple_gj):
             self.assertEqual(e['number'], i + 1, "number property should be {0}".format(i + 1))
-            self.assertEqual(e['collection'].count(), 1, "Should only have one element")
-            self.assertEqual(e['collection'].first(), i + 1, "Value of first element should equal {0}".format(i + 1))
+            collection = e['collection'].to_list()
+            self.assertEqual(len(collection), 1, "Should only have one element")
+            self.assertEqual(collection[0], i + 1, "Value of first element should equal {0}".format(i + 1))
 
         complex_simple_gj = self.complex.group_join(self.simple, outer_key=lambda x: x['value'])
         for i, e in enumerate(complex_simple_gj):
             self.assertEqual(e[0]['value'], i + 1, "value property of each element should be {0}".format(i + 1))
-            self.assertEqual(e[1].count(), 1, "Should only have one element")
-            self.assertEqual(e[1].first(), i + 1, "Value of first element should equal {0}".format(i + 1))
+            collection = e[1].to_list()
+            self.assertEqual(len(collection), 1, "Should only have one element")
+            self.assertEqual(collection[0], i + 1, "Value of first element should equal {0}".format(i + 1))
 
         simple_gj = self.simple.group_join(Enumerable([2,3]), result_func=lambda (x, y): {'number': x, 'collection': y}).to_list()
         print simple_gj
         self.assertEqual(len(simple_gj), 3, "Should be 3 elements")
         for i, e in enumerate(simple_gj):
             self.assertEqual(e['number'], i + 1, "number property should be {0}".format(i + 1))
-            self.assertEqual(e['collection'].default_if_empty().count(), 1, "should have {0} element(s)".format(1))
-            self.assertEqual(e['collection'].default_if_empty().first(), None if i==0 else i + 1, "Value of first element should equal {0}".format(None if i==0 else i + 1))
+            collection = e['collection'].to_list()
+            self.assertEqual(len(collection), 0 if i == 0 else 1, "should have {0} element(s)".format(0 if i == 0 else 1))
+            self.assertListEqual(collection, [] if i==0 else [i + 1], "Collection should equal {0}".format([] if i==0 else [i + 1]))
 
 
 

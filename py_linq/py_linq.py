@@ -265,7 +265,7 @@ class Enumerable(object):
                 raise TypeError("type mismatch between concatenated enumerables")
         return Enumerable(itertools.chain(self._data, enumerable._data))
 
-    def group_by(self, key_names=[], key=lambda x: x):
+    def group_by(self, key_names=[], key=lambda x: x, result_func=lambda x: x):
         """
         Groups an enumerable on given key selector. Index of key name corresponds to index of key lambda function.
 
@@ -302,7 +302,7 @@ class Enumerable(object):
                 key_prop.setdefault(prop, k[i] if can_enumerate else k)
             key_object = Key(key_prop)
             result.append(Grouping(key_object, list(g)))
-        return Enumerable(result)
+        return Enumerable(result).select(result_func)
 
     def distinct(self, key=lambda x: x):
         """
@@ -346,17 +346,18 @@ class Enumerable(object):
         :param outer_key: key selector of outer enumerable as lambda expression
         :param inner_key: key selector of inner enumerable as lambda expression
         :param result_func: lambda expression to transform the result of group join
-        :return: new Grouping object
+        :return: new Enumerable object
         """
         if not isinstance(inner_enumerable, Enumerable):
             raise TypeError("inner enumerable parameter must be an instance of Enumerable")
         return Enumerable(
             itertools.product(
                 self,
-                Enumerable().default_if_empty(),
-                Enumerable(itertools.ifilter(lambda y: inner_key(y) in itertools.imap(outer_key, self), inner_enumerable)).default_if_empty()
+                inner_enumerable.default_if_empty()
             )
-        )
+        ).group_by(key_names=['id'], key=lambda x: outer_key(x[0]), result_func=lambda g: (g.first()[0], g.where(lambda x: inner_key(x[1]) == g.key.id).select(lambda x: x[1]))).\
+        select(result_func)
+
 
     def any(self, predicate):
         """
