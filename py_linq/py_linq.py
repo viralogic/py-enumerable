@@ -7,7 +7,7 @@ class Enumerable(object):
     def __init__(self, data=[]):
         """
         Constructor
-        ** Note: no type checking is performed during instantiation. **
+        ** Note: no type checking of the data elements are performed during instantiation. **
         :param data: iterable object
         :return: None
         """
@@ -346,17 +346,17 @@ class Enumerable(object):
         :param outer_key: key selector of outer enumerable as lambda expression
         :param inner_key: key selector of inner enumerable as lambda expression
         :param result_func: lambda expression to transform the result of group join
-        :return: new Enumerable object
+        :return: new Grouping object
         """
         if not isinstance(inner_enumerable, Enumerable):
             raise TypeError("inner enumerable parameter must be an instance of Enumerable")
-        return self.join(
-            inner_enumerable.group_by(key_names=['id'], key=inner_key),
-            outer_key,
-            lambda x: x.key.id,
-            result_func
+        return Enumerable(
+            itertools.product(
+                self,
+                Enumerable().default_if_empty(),
+                Enumerable(itertools.ifilter(lambda y: inner_key(y) in itertools.imap(outer_key, self), inner_enumerable)).default_if_empty()
+            )
         )
-
 
     def any(self, predicate):
         """
@@ -407,8 +407,7 @@ class Enumerable(object):
         :param key: key selector to use for membership comparison
         :return: boolean True or False
         """
-        value = map(key, [element])[0]
-        return self.select(key).any(lambda x: x == value)
+        return self.select(key).any(lambda x: x == key(element))
 
 class Key(object):
     def __init__(self, key, **kwargs):
@@ -428,7 +427,7 @@ class Grouping(Enumerable):
     def __init__(self, key, data):
         """
         Constructor of Grouping class used for group by operations of Enumerable class
-        :param key: dict of name value pairs for key mapping
+        :param key: Key instance
         :param data: iterable object
         :return: void
         """

@@ -266,9 +266,16 @@ class TestFunctions(TestCase):
     def test_group_join(self):
         self.assertRaises(TypeError, self.empty.group_join, [])
         self.assertListEqual(self.empty.group_join(self.empty).to_list(), [], "Group join 2 empty yields empty")
-        self.assertListEqual(self.simple.group_join(self.empty).to_list(), [], "Group join simple to empty list yields empty list")
 
-        simple_gj = self.simple.group_join(self.simple, result_func=lambda (x, y): {'number' : x, 'collection': y})
+        simple_empty_gj = self.simple.group_join(self.empty).to_list()
+        print simple_empty_gj
+        self.assertEqual(len(simple_empty_gj), 3, "Should have 3 elements")
+        for e in simple_empty_gj:
+            self.assertEqual(e[0].count(), 0, "Should have 0 elements")
+            self.assertEqual(e[1].first_or_default(), None, "Value of first element should be None")
+
+        simple_gj = self.simple.group_join(self.simple, result_func=lambda (x, y): {'number' : x, 'collection': y}).to_list()
+        print simple_gj
         for i, e in enumerate(simple_gj):
             self.assertEqual(e['number'], i + 1, "number property should be {0}".format(i + 1))
             self.assertEqual(e['collection'].count(), 1, "Should only have one element")
@@ -279,6 +286,15 @@ class TestFunctions(TestCase):
             self.assertEqual(e[0]['value'], i + 1, "value property of each element should be {0}".format(i + 1))
             self.assertEqual(e[1].count(), 1, "Should only have one element")
             self.assertEqual(e[1].first(), i + 1, "Value of first element should equal {0}".format(i + 1))
+
+        simple_gj = self.simple.group_join(Enumerable([2,3]), result_func=lambda (x, y): {'number': x, 'collection': y}).to_list()
+        print simple_gj
+        self.assertEqual(len(simple_gj), 3, "Should be 3 elements")
+        for i, e in enumerate(simple_gj):
+            self.assertEqual(e['number'], i + 1, "number property should be {0}".format(i + 1))
+            self.assertEqual(e['collection'].default_if_empty().count(), 1, "should have {0} element(s)".format(1))
+            self.assertEqual(e['collection'].default_if_empty().first(), None if i==0 else i + 1, "Value of first element should equal {0}".format(None if i==0 else i + 1))
+
 
 
 
