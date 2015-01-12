@@ -15,10 +15,8 @@ Usage
 -----
 To access the LINQ functions an iterable needs to be wrapped by the Enumerable class.
 
-:code:`from py_linq import Enumerable
-my_collection = Enumerable([1,2,3])`
-..  role:: python(code)
-    :language: python
+`from py_linq import Enumerable`
+`my_collection = Enumerable([1,2,3])`
 
 Executing Functions
 -------------------
@@ -26,20 +24,16 @@ Similar to LINQ in C#, there are certain functions in py-linq that cause the que
 py-linq uses iterables as its underlying data source, once an expression is evaluated, the iterable is exhausted. Thus,
 the following statement would give erroneous results
 
-:code:`my_collection = Enumerable([1,2,3])
-count = my_collection.count() **gives 3**
-sum = my_collection.sum() **iterable exhausted - gives 0, but should give 6**`
-..  role:: python(code)
-    :language: python
+`my_collection = Enumerable([1,2,3])`
+`count = my_collection.count() **gives 3**`
+`sum = my_collection.sum() **iterable exhausted - gives 0, but should give 6**`
 
 If you need to perform multiple "executing" functions on the same Enumerable, first save it to memory using the to_list()
 function and re-wrap the list as an Enumerable.
 
-:code:`my_collection = Enumerable([1,2,3]).where(lambda x: x==1).to_list() **Save to memory**
-count = len(my_collection) **gives 1**
-sum = Enumerable(my_collection).sum() **gives 1**`
-..  role:: python(code)
-    :language: python(code)
+`my_collection = Enumerable([1,2,3]).where(lambda x: x==1).to_list() **Save to memory**`
+`count = len(my_collection) **gives 1**`
+`sum = Enumerable(my_collection).sum() **gives 1**`
 
 The following functions will execute an Enumerable query expression:
 
@@ -58,8 +52,8 @@ Similar to LINQ, py-linq makes extensive use of Python lambda expressions as fun
 
 Most of the standard LINQ functions are available from the Enumerable class:
 
-
 **Non excecuting functions**
+
 1. select
 2. elementAt
 3. elementAtOrDefault
@@ -89,6 +83,7 @@ Most of the standard LINQ functions are available from the Enumerable class:
 26. contains
 
 **Executing functions**
+
 27. to_list
 28. count
 29. sum
@@ -97,5 +92,5 @@ Most of the standard LINQ functions are available from the Enumerable class:
 32. avg
 33. median
 
-Please refer to the `MSDN Enumerable class <http://msdn.microsoft.com/en-us/library/system.linq.enumerable_methods(v=vs.100).aspx
-for more information on how to use each function>`.
+Please refer to the `MSDN Enumerable class <http://msdn.microsoft.com/en-us/library/system.linq.enumerable_methods(v=vs.100).aspx>`
+for more information on how to use each function.
