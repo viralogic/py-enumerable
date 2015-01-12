@@ -98,6 +98,6 @@ class for more information on how to use each function.
 
 Enumerable class source
 -----------------------
-.. literalinclude:: py_linq/py_linq.py
+.. literalinclude:: ./py_linq/py_linq.py
     :start-after: 5
     :end-before: 445
