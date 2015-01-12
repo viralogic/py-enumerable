@@ -9,14 +9,14 @@ Install
 -------
 Available as a package from PyPI.
 
-`pip install py-linq`
+:code:`pip install py-linq`
 
 Usage
 -----
 To access the LINQ functions an iterable needs to be wrapped by the Enumerable class.
 
-`from py_linq import Enumerable`
-`my_collection = Enumerable([1,2,3])`
+:code:`from py_linq import Enumerable`
+:code:`my_collection = Enumerable([1,2,3])`
 
 Executing Functions
 -------------------
@@ -24,16 +24,16 @@ Similar to LINQ in C#, there are certain functions in py-linq that cause the que
 py-linq uses iterables as its underlying data source, once an expression is evaluated, the iterable is exhausted. Thus,
 the following statement would give erroneous results
 
-`my_collection = Enumerable([1,2,3])`
-`count = my_collection.count() **gives 3**`
-`sum = my_collection.sum() **iterable exhausted - gives 0, but should give 6**`
+:code:`my_collection = Enumerable([1,2,3])`
+:code:`count = my_collection.count() **gives 3**`
+:code:`sum = my_collection.sum() **iterable exhausted - gives 0, but should give 6**`
 
 If you need to perform multiple "executing" functions on the same Enumerable, first save it to memory using the to_list()
 function and re-wrap the list as an Enumerable.
 
-`my_collection = Enumerable([1,2,3]).where(lambda x: x==1).to_list() **Save to memory**`
-`count = len(my_collection) **gives 1**`
-`sum = Enumerable(my_collection).sum() **gives 1**`
+:code:`my_collection = Enumerable([1,2,3]).where(lambda x: x==1).to_list() **Save to memory**`
+:code:`count = len(my_collection) **gives 1**`
+:code:`sum = Enumerable(my_collection).sum() **gives 1**`
 
 The following functions will execute an Enumerable query expression:
 
@@ -57,40 +57,40 @@ Most of the standard LINQ functions are available from the Enumerable class:
 1. select
 2. elementAt
 3. elementAtOrDefault
-3. first
-4. first_or_default
-5. last
-6. last_or_default
-7. order_by
-8. order_by_descending
-9. skip
-10. take
-11. where
-12. single
-13. single_or_default
-14. select_many
-15. add
-16. concat
-17. group_by
-18. distinct
-19. join
-20. default_if_empty
-21. group_join
-22. any
-23. intersect
-24. except_
-25. union
-26. contains
+4. first
+5. first_or_default
+6. last
+7. last_or_default
+8. order_by
+9. order_by_descending
+10. skip
+11. take
+12. where
+13. single
+14. single_or_default
+15. select_many
+16. add
+17. concat
+18. group_by
+19. distinct
+20. join
+21. default_if_empty
+22. group_join
+23. any
+24. intersect
+25. except_
+26. union
+27. contains
 
 **Executing functions**
 
-27. to_list
-28. count
-29. sum
-30. min
-31. max
-32. avg
-33. median
+28. to_list
+29. count
+30. sum
+31. min
+32. max
+33. avg
+34. median
 
 Please refer to the `MSDN Enumerable class <http://msdn.microsoft.com/en-us/library/system.linq.enumerable_methods(v=vs.100).aspx>`
 for more information on how to use each function.
