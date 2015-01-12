@@ -8,32 +8,33 @@ with experience using the expressiveness and power of LINQ.
 Install
 -------
 Available as a package from PyPI.
-
-:code:`pip install py-linq`
+::
+    pip install py-linq
 
 Usage
 -----
 To access the LINQ functions an iterable needs to be wrapped by the Enumerable class.
-
-:code:`from py_linq import Enumerable`
-:code:`my_collection = Enumerable([1,2,3])`
+::
+    from py_linq import Enumerable
+    my_collection = Enumerable([1,2,3])
 
 Executing Functions
 -------------------
 Similar to LINQ in C#, there are certain functions in py-linq that cause the query expression to be evaluated. Because
 py-linq uses iterables as its underlying data source, once an expression is evaluated, the iterable is exhausted. Thus,
-the following statement would give erroneous results
+the following statement would give erroneous results:
+::
 
-:code:`my_collection = Enumerable([1,2,3])`
-:code:`count = my_collection.count() **gives 3**`
-:code:`sum = my_collection.sum() **iterable exhausted - gives 0, but should give 6**`
+    my_collection = Enumerable([1,2,3])
+    count = my_collection.count() **gives 3**
+    sum = my_collection.sum() **iterable exhausted - gives 0, but should give 6**
 
 If you need to perform multiple "executing" functions on the same Enumerable, first save it to memory using the to_list()
 function and re-wrap the list as an Enumerable.
-
-:code:`my_collection = Enumerable([1,2,3]).where(lambda x: x==1).to_list() **Save to memory**`
-:code:`count = len(my_collection) **gives 1**`
-:code:`sum = Enumerable(my_collection).sum() **gives 1**`
+::
+    my_collection = Enumerable([1,2,3]).where(lambda x: x==1).to_list() **Save to memory**
+    count = len(my_collection) **gives 1**
+    sum = Enumerable(my_collection).sum() **gives 1**
 
 The following functions will execute an Enumerable query expression:
 
@@ -92,5 +93,5 @@ Most of the standard LINQ functions are available from the Enumerable class:
 33. avg
 34. median
 
-Please refer to the `MSDN Enumerable class <http://msdn.microsoft.com/en-us/library/system.linq.enumerable_methods(v=vs.100).aspx>`
-for more information on how to use each function.
+Please refer to the MSDN Enumerable_ class for more information on how to use each function.
+.. _Enumerable:http://msdn.microsoft.com/en-us/library/system.linq.enumerable_methods(v=vs.100).aspx
