@@ -93,4 +93,11 @@ Most of the standard LINQ functions are available from the Enumerable class:
 33. avg
 34. median
 
-Please refer to the MSDN `Enumerable <http://msdn.microsoft.com/en-us/library/system.linq.enumerable_methods(v=vs.100).aspx>`_ class for more information on how to use each function.
+Please refer to the MSDN `Enumerable <http://msdn.microsoft.com/en-us/library/system.linq.enumerable_methods(v=vs.100).aspx>`_
+class for more information on how to use each function.
+
+Enumerable class source
+-----------------------
+.. literalinclude:: py_linq/py_linq.py
+    :start-after: 5
+    :end-before: 445
