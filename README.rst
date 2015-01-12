@@ -93,5 +93,4 @@ Most of the standard LINQ functions are available from the Enumerable class:
 33. avg
 34. median
 
-Please refer to the MSDN Enumerable_ class for more information on how to use each function.
-.. _Enumerable:http://msdn.microsoft.com/en-us/library/system.linq.enumerable_methods(v=vs.100).aspx
+Please refer to the MSDN `Enumerable_ <http://msdn.microsoft.com/en-us/library/system.linq.enumerable_methods(v=vs.100).aspx>`_ class for more information on how to use each function.
