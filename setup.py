@@ -14,7 +14,7 @@ def read(*paths):
 
 setup(
     name='py-linq',
-    version='0.2.0',
+    version='0.3.0',
     description='Linq for Python',
     long_description=(read('README.rst') + '\n\n' + read('HISTORY.rst') + '\n\n' + read('AUTHORS.rst') + '\n\n' + read('CONTRIBUTING.rst')),
     url='https://github.com/viralogic/py-enumerable',

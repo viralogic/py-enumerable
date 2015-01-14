@@ -20,21 +20,7 @@ To access the LINQ functions an iterable needs to be wrapped by the Enumerable c
 
 Executing Functions
 -------------------
-Similar to LINQ in C#, there are certain functions in py-linq that cause the query expression to be evaluated. Because
-py-linq uses iterables as its underlying data source, once an expression is evaluated, the iterable is exhausted. Thus,
-the following statement would give erroneous results:
-::
-
-    my_collection = Enumerable([1,2,3])
-    count = my_collection.count() **gives 3**
-    sum = my_collection.sum() **iterable exhausted - gives 0, but should give 6**
-
-If you need to perform multiple "executing" functions on the same Enumerable, first save it to memory using the to_list()
-function and re-wrap the list as an Enumerable.
-::
-    my_collection = Enumerable([1,2,3]).where(lambda x: x==1).to_list() **Save to memory**
-    count = len(my_collection) **gives 1**
-    sum = Enumerable(my_collection).sum() **gives 1**
+Similar to LINQ in C#, there are certain functions in py-linq that cause the query expression to be evaluated.
 
 The following functions will execute an Enumerable query expression:
 
@@ -45,6 +31,15 @@ The following functions will execute an Enumerable query expression:
 5. max
 6. avg
 7. median
+8. any
+9. elementAt
+10. elemantAtOrDefault
+11. first
+12. first_or_default
+13. last
+14. last_or_default
+15. contains
+
 
 
 Available Functions

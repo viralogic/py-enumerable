@@ -13,17 +13,9 @@ class TestFunctions(TestCase):
         self.complex = Enumerable(_complex)
 
     def test_to_list(self):
-        empty_list = self.empty.to_list()
-        simple_list = self.simple.to_list()
-        complex_list = self.complex.to_list()
-
-        self.assertIsInstance(empty_list, list, "Empty enumerable not converted to list")
-        self.assertIsInstance(simple_list, list, "Simple enumerable not converted to list")
-        self.assertIsInstance(complex_list, list, "Complex enumerable not converted to list")
-
-        self.assertEqual(len(empty_list), 0, "Empty enumerable has 0 elements")
-        self.assertEqual(len(simple_list), 3, "Simple enumerable has 3 elements")
-        self.assertEqual(len(complex_list), 3, "Complex enumerable has 3 elements")
+        self.assertListEqual(self.empty.to_list(), _empty, "Empty to_list not correct")
+        self.assertListEqual(self.simple.to_list(), _simple, "Simple to_list not correct")
+        self.assertListEqual(self.complex.to_list(), _complex, "Comple to_list not correct")
 
     def test_sum(self):
         self.assertEqual(self.empty.sum(), 0, "Sum of empty enumerable should be 0")
@@ -38,19 +30,13 @@ class TestFunctions(TestCase):
     def test_select(self):
         self.assertEqual(self.empty.select(lambda x: x['value']).count(), 0, "Empty enumerable should still have 0 elements")
 
-        self.assertRaises(NullArgumentError, self.simple.select, None)
-        simple_select = self.simple.select(lambda x: { 'value' : x }).to_list()
-        first_simple = simple_select[0]
-        simple_count = len(simple_select)
-        self.assertIsInstance(first_simple, dict, "Transformed simple enumerable element is dictionary")
-        self.assertEqual(simple_count, 3, "Transformed simple enumerable has 3 elements")
+        simple_select = self.simple.select(lambda x: { 'value' : x })
+        self.assertDictEqual(simple_select.first(), {'value': 1 }, "Transformed simple enumerable element is dictionary")
+        self.assertEqual(simple_select.count(), 3, "Transformed simple enumerable has 3 elements")
 
-
-        complex_select = self.complex.select(lambda x: x['value']).to_list()
-        first_complex = complex_select[0]
-        complex_count = len(complex_select)
-        self.assertEqual(complex_count, 3, "Transformed complex enumerable has 3 elements")
-        self.assertIsInstance(first_complex, int, "Transformed complex enumerable element is integer")
+        complex_select = self.complex.select(lambda x: x['value'])
+        self.assertEqual(complex_select.count(), 3, "Transformed complex enumerable has 3 elements")
+        self.assertIsInstance(complex_select.first(), int, "Transformed complex enumerable element is integer")
 
     def test_max_min(self):
         self.assertRaises(NoElementsError, self.empty.min)
@@ -177,18 +163,18 @@ class TestFunctions(TestCase):
         for g in complex_grouped:
             self.assertEqual(g.key.value, g.select(lambda x: x['value']).first(), "Each value in complex grouped should mach first value")
 
-        locations_grouped = Enumerable(_locations).group_by(key_names=['country', 'city'], key=lambda x: [x[0], x[1]]).to_list()
-        self.assertEqual(len(locations_grouped), 7, "Seven grouped elements in locations grouped")
+        locations_grouped = Enumerable(_locations).group_by(key_names=['country', 'city'], key=lambda x: [x[0], x[1]])
+        self.assertEqual(locations_grouped.count(), 7, "Seven grouped elements in locations grouped")
 
-        london = Enumerable(locations_grouped).single(lambda g: g.key.city == 'London' and g.key.country == 'England')
+        london = locations_grouped.single(lambda g: g.key.city == 'London' and g.key.country == 'England')
         self.assertEqual(london.sum(lambda g: g[3]), 240000, "Sum of London, England location does not equal")
 
     def test_distinct(self):
         self.assertListEqual(self.empty.distinct().to_list(), [], "Distinct empty enumerable yields empty list")
         self.assertListEqual(self.simple.concat(self.simple).distinct().to_list(), _simple, "Distinct simple enumerable concatenated to simple enumerable yields simple list")
-        locations = Enumerable(_locations).distinct(lambda x: x[0]).to_list()
-        self.assertEqual(len(locations), 3, "Three distinct countries in locations enumerable")
-        self.assertListEqual(locations,
+        locations = Enumerable(_locations).distinct(lambda x: x[0])
+        self.assertEqual(locations.count(), 3, "Three distinct countries in locations enumerable")
+        self.assertListEqual(locations.to_list(),
                              [
                                  ('England', 'London', 'Branch1', 90000),
                                  ('Scotland', 'Edinburgh', 'Branch1', 20000),
@@ -267,8 +253,8 @@ class TestFunctions(TestCase):
         self.assertRaises(TypeError, self.empty.group_join, [])
         self.assertListEqual(self.empty.group_join(self.empty).to_list(), [], "Group join 2 empty yields empty")
 
-        simple_empty_gj = self.simple.group_join(self.empty).to_list()
-        self.assertEqual(len(simple_empty_gj), 3, "Should have 3 elements")
+        simple_empty_gj = self.simple.group_join(self.empty)
+        self.assertEqual(simple_empty_gj.count(), 3, "Should have 3 elements")
         for i, e in enumerate(simple_empty_gj):
             self.assertEqual(e[0], i + 1, "number property should be {0}".format(i + 1))
             self.assertEqual(e[1].count(), 0, "Should have 0 elements")
@@ -277,25 +263,23 @@ class TestFunctions(TestCase):
         simple_gj = self.simple.group_join(self.simple, result_func=lambda (x, y): {'number' : x, 'collection': y})
         for i, e in enumerate(simple_gj):
             self.assertEqual(e['number'], i + 1, "number property should be {0}".format(i + 1))
-            collection = e['collection'].to_list()
-            self.assertEqual(len(collection), 1, "Should only have one element")
-            self.assertEqual(collection[0], i + 1, "Value of first element should equal {0}".format(i + 1))
+            self.assertEqual(e['collection'].count(), 1, "Should only have one element")
+            self.assertEqual(e['collection'].first(), i + 1, "Value of first element should equal {0}".format(i + 1))
 
         complex_simple_gj = self.complex.group_join(self.simple, outer_key=lambda x: x['value'])
         for i, e in enumerate(complex_simple_gj):
             self.assertEqual(e[0]['value'], i + 1, "value property of each element should be {0}".format(i + 1))
-            collection = e[1].to_list()
-            self.assertEqual(len(collection), 1, "Should only have one element")
-            self.assertEqual(collection[0], i + 1, "Value of first element should equal {0}".format(i + 1))
+            self.assertEqual(e[1].count(), 1, "Should only have one element")
+            self.assertEqual(e[1].first(), i + 1, "Value of first element should equal {0}".format(i + 1))
 
         simple_gj = self.simple.group_join(Enumerable([2,3]), result_func=lambda (x, y): {'number': x, 'collection': y}).to_list()
-        print simple_gj
         self.assertEqual(len(simple_gj), 3, "Should be 3 elements")
         for i, e in enumerate(simple_gj):
             self.assertEqual(e['number'], i + 1, "number property should be {0}".format(i + 1))
-            collection = e['collection'].to_list()
-            self.assertEqual(len(collection), 0 if i == 0 else 1, "should have {0} element(s)".format(0 if i == 0 else 1))
-            self.assertListEqual(collection, [] if i==0 else [i + 1], "Collection should equal {0}".format([] if i==0 else [i + 1]))
+            self.assertEqual(e['collection'].count(), 0 if i == 0 else 1, "should have {0} element(s)".format(0 if i == 0 else 1))
+            self.assertListEqual(e['collection'].to_list(), [] if i==0 else [i + 1], "Collection should equal {0}".format([] if i==0 else [i + 1]))
+
+
 
 
 

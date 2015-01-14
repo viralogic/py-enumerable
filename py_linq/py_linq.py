@@ -16,8 +16,11 @@ class Enumerable(object):
         self._data = data
 
     def __iter__(self):
-        for element in self._data.__iter__():
+        cache = []
+        for element in self._data:
+            cache.append(element)
             yield element
+        self._data = cache
 
     def __repr__(self):
         return self._data.__repr__()
@@ -36,15 +39,14 @@ class Enumerable(object):
         """
         return sum(1 for element in self)
 
-    def select(self, func):
+    def select(self, func=lambda x: x):
         """
         Transforms data into different form
         :param func: lambda expression on how to perform transformation
         :return: new Enumerable object containing transformed data
         """
-        if func is None:
-            raise NullArgumentError("Func cannot be None")
         return Enumerable(itertools.imap(func, self))
+
 
     def sum(self, func=lambda x: x):
         """
@@ -105,7 +107,7 @@ class Enumerable(object):
         :param n: index as int object
         :return: Element at given index
         """
-        result = self.skip(max(0, n - 1)).take(1).to_list()
+        result = list(itertools.islice(self.to_list(), max(0, n), n+1, 1))
         if len(result) == 0:
             raise NoElementsError("No element found at index {0}".format(n))
         return result[0]
@@ -378,7 +380,7 @@ class Enumerable(object):
         """
         if not isinstance(enumerable, Enumerable):
             raise TypeError("enumerable parameter must be an instance of Enumerable")
-        return Enumerable(itertools.ifilter(lambda x: enumerable.contains(x, key), self))
+        return self.join(enumerable, key, key, result_func=lambda (x, y): x)
 
 
     def union(self, enumerable, key=lambda x: x):
@@ -388,7 +390,7 @@ class Enumerable(object):
         :param key: key selector used to determine uniqueness
         :return: new Enumerable object
         """
-        return self.concat(enumerable).except_(self.intersect(enumerable, key))
+        return self.concat(enumerable).distinct(key)
 
     def except_(self, enumerable, key=lambda x: x):
         """
