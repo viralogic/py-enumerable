@@ -31,14 +31,18 @@ The following functions will execute an Enumerable query expression:
 5. max
 6. avg
 7. median
-8. any
-9. elementAt
-10. elemantAtOrDefault
-11. first
-12. first_or_default
-13. last
-14. last_or_default
-15. contains
+8. any -- uses count in algorithm
+9. elementAt -- has to store data in list to allow resetting of iterator
+10. elemantAtOrDefault --uses elementAt
+11. first --uses elementAt
+12. first_or_default --uses first
+13. last --uses first after sorting
+14. last_or_default --uses last
+15. contains --uses any
+16. group_by -- due to grouped iterables having to be saved to memory when iterating through itertools.groupby result
+17. distinct -- uses group by in algorithm
+18. group_join -- uses group by in algorithm
+19. union -- uses distinct in algorithm
 
 
 
@@ -51,42 +55,39 @@ Most of the standard LINQ functions are available from the Enumerable class:
 **Non excecuting functions**
 
 1. select
-2. elementAt
-3. elementAtOrDefault
-4. first
-5. first_or_default
-6. last
-7. last_or_default
-8. order_by
-9. order_by_descending
-10. skip
-11. take
-12. where
-13. single
-14. single_or_default
-15. select_many
-16. add
-17. concat
-18. group_by
-19. distinct
-20. join
-21. default_if_empty
-22. group_join
-23. any
-24. intersect
-25. except_
-26. union
-27. contains
+2. order_by
+3. order_by_descending
+4. skip
+5. take
+6. where
+7. select_many
+8. add
+9. concat
+10. join
+11. intersect
+12. except_
 
 **Executing functions**
 
-28. to_list
-29. count
-30. sum
-31. min
-32. max
-33. avg
-34. median
+13. to_list
+14. count
+15. sum
+16. min
+17. max
+18. avg
+19. median
+20. any -- uses count in algorithm
+21. elementAt -- has to store data in list to allow resetting of iterator
+22. elemantAtOrDefault --uses elementAt
+23. first --uses elementAt
+24. first_or_default --uses first
+25. last --uses first after sorting
+26. last_or_default --uses last
+27. contains --uses any
+28. group_by -- due to grouped iterables having to be saved to memory when iterating through itertools.groupby result
+29. distinct -- uses group by in algorithm
+30. group_join -- uses group by in algorithm
+31. union -- uses distinct in algorithm
 
 Please refer to the MSDN `Enumerable <http://msdn.microsoft.com/en-us/library/system.linq.enumerable_methods(v=vs.100).aspx>`_
 class for more information on how to use each function or view the Enumerable class `source <https://github.com/viralogic/py-enumerable/blob/master/py_linq/py_linq.py>`_ code.

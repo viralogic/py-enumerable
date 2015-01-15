@@ -390,6 +390,8 @@ class Enumerable(object):
         :param key: key selector used to determine uniqueness
         :return: new Enumerable object
         """
+        if not isinstance(enumerable, Enumerable):
+            raise TypeError("enumerable parameter must be an instance of Enumerable")
         return self.concat(enumerable).distinct(key)
 
     def except_(self, enumerable, key=lambda x: x):
@@ -401,7 +403,13 @@ class Enumerable(object):
         """
         if not isinstance(enumerable, Enumerable):
             raise TypeError("enumerable parameter must be an instance of Enumerable")
-        return Enumerable(itertools.ifilter(lambda x: not enumerable.contains(x, key), self))
+        membership = (0 if key(element) in enumerable.intersect(self).select(key) else 1 for element in self)
+        return Enumerable(
+            itertools.compress(
+                self,
+                membership
+            )
+        )
 
     def contains(self, element, key=lambda x: x):
         """
@@ -444,3 +452,5 @@ class Grouping(Enumerable):
             'key': self.key.__repr__(),
             'enumerable': self._data.__repr__()
         }.__repr__()
+
+
