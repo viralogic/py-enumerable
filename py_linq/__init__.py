@@ -1,3 +1,6 @@
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
-from py_linq import Enumerable
+try:
+    from py_linq import Enumerable
+except ImportError:
+    from py_linq.py_linq import Enumerable

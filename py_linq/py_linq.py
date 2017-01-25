@@ -3,6 +3,7 @@ __author__ = 'ViraLogic Software'
 import itertools
 from exceptions import *
 
+
 class Enumerable(object):
     def __init__(self, data=[]):
         """
@@ -47,7 +48,6 @@ class Enumerable(object):
         """
         return Enumerable(itertools.imap(func, self))
 
-
     def sum(self, func=lambda x: x):
         """
         Returns the sum of af data elements
@@ -85,7 +85,7 @@ class Enumerable(object):
         count = self.count()
         if count == 0:
             raise NoElementsError("Iterable contains no elements")
-        return float(self.sum(func))/float(count)
+        return float(self.sum(func)) / float(count)
 
     def median(self, func=lambda x: x):
         """
@@ -98,7 +98,7 @@ class Enumerable(object):
         result = self.order_by(func).select(func).to_list()
         length = len(result)
         i = int(length / 2)
-        return result[i] if length % 2 == 1 else (float(result[i - 1]) + float(result[i]))/ float(2)
+        return result[i] if length % 2 == 1 else (float(result[i - 1]) + float(result[i])) / float(2)
 
     def elementAt(self, n):
         """
@@ -107,7 +107,7 @@ class Enumerable(object):
         :param n: index as int object
         :return: Element at given index
         """
-        result = list(itertools.islice(self.to_list(), max(0, n), n+1, 1))
+        result = list(itertools.islice(self.to_list(), max(0, n), n + 1, 1))
         if len(result) == 0:
             raise NoElementsError("No element found at index {0}".format(n))
         return result[0]
@@ -357,9 +357,9 @@ class Enumerable(object):
                 self,
                 inner_enumerable.default_if_empty()
             )
-        ).group_by(key_names=['id'], key=lambda x: outer_key(x[0]), result_func=lambda g: (g.first()[0], g.where(lambda x: inner_key(x[1]) == g.key.id).select(lambda x: x[1]))).\
-        select(result_func)
-
+        ).group_by(key_names=['id'], key=lambda x: outer_key(x[0]), result_func=lambda g: (
+        g.first()[0], g.where(lambda x: inner_key(x[1]) == g.key.id).select(lambda x: x[1]))). \
+            select(result_func)
 
     def any(self, predicate):
         """
@@ -381,7 +381,6 @@ class Enumerable(object):
         if not isinstance(enumerable, Enumerable):
             raise TypeError("enumerable parameter must be an instance of Enumerable")
         return self.join(enumerable, key, key, result_func=lambda (x, y): x)
-
 
     def union(self, enumerable, key=lambda x: x):
         """
@@ -420,6 +419,7 @@ class Enumerable(object):
         """
         return self.select(key).any(lambda x: x == key(element))
 
+
 class Key(object):
     def __init__(self, key, **kwargs):
         """
@@ -433,6 +433,7 @@ class Key(object):
 
     def __repr__(self):
         return self.__dict__.__repr__()
+
 
 class Grouping(Enumerable):
     def __init__(self, key, data):
@@ -452,5 +453,3 @@ class Grouping(Enumerable):
             'key': self.key.__repr__(),
             'enumerable': self._data.__repr__()
         }.__repr__()
-
-
