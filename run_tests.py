@@ -1,4 +1,4 @@
-__author__ = 'Viralogic Software'
+__author__ = 'Bruce Fenske'
 
 import unittest
 

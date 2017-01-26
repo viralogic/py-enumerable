@@ -1,4 +1,4 @@
-__author__ = 'Viralogic Software'
+__author__ = 'Bruce Fenske'
 
 import os
 from setuptools import setup, find_packages
@@ -14,12 +14,12 @@ def read(*paths):
 
 setup(
     name='py-linq',
-    version='0.3.0',
+    version='0.4.0',
     description='Linq for Python',
     long_description=(read('README.rst') + '\n\n' + read('HISTORY.rst') + '\n\n' + read('AUTHORS.rst') + '\n\n' + read('CONTRIBUTING.rst')),
     url='https://github.com/viralogic/py-enumerable',
     license='MIT',
-    author='ViraLogic Software',
+    author='Bruce Fenske',
     author_email='bwfenske@ualberta.ca',
     packages=find_packages(exclude=['tests*']),
     classifiers=[

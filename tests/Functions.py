@@ -1,5 +1,6 @@
 __author__ = 'Bruce Fenske'
 
+import sys
 from unittest import TestCase
 from py_linq import Enumerable
 from tests import _empty, _simple, _complex, _locations
@@ -7,6 +8,7 @@ from py_linq.exceptions import *
 
 
 class TestFunctions(TestCase):
+
     def setUp(self):
         self.empty = Enumerable(_empty)
         self.simple = Enumerable(_simple)
@@ -234,8 +236,8 @@ class TestFunctions(TestCase):
         self.assertListEqual(self.simple.union(Enumerable([1,4,5])).order_by(lambda x: x).to_list(), simple_extended, "Union of simple and [1,4,5] yield simple + [4,5]")
 
         complex_extended = _complex + [{'value': 4}, {'value': 5}]
-        self.assertListEqual(self.complex.union(Enumerable([{'value': 4}, {'value': 5}])).to_list(), complex_extended, "Union of complex and [{'value': 4}, {'value': 5}] yield complex + [{'value': 4}, {'value': 5}]")
-        self.assertListEqual(self.complex.union(Enumerable([{'value': 1}, {'value': 4}, {'value': 5}])).order_by(lambda x: x['value']).to_list(), complex_extended, "Union of complex and [{'value': 1}, {'value': 4}, {'value': 5}] yield complex + [{'value': 4}, {'value': 5}]")
+        self.assertListEqual(self.complex.union(Enumerable([{'value': 4}, {'value': 5}]), lambda x: x['value']).to_list(), complex_extended, "Union of complex and [{'value': 4}, {'value': 5}] yield complex + [{'value': 4}, {'value': 5}]")
+        self.assertListEqual(self.complex.union(Enumerable([{'value': 1}, {'value': 4}, {'value': 5}]), lambda x: x['value']).order_by(lambda x: x['value']).to_list(), complex_extended, "Union of complex and [{'value': 1}, {'value': 4}, {'value': 5}] yield complex + [{'value': 4}, {'value': 5}]")
 
     def test_join(self):
         self.assertRaises(TypeError, self.empty.join, [])
@@ -245,9 +247,9 @@ class TestFunctions(TestCase):
 
         self.assertListEqual(self.simple.join(self.empty).to_list(), [], "Joining simple to empty yields empty list")
         self.assertListEqual(self.simple.join(self.simple).order_by(lambda x: (x[0], x[1])).to_list(), [(1,1), (2,2), (3,3)], "Joining simple to simple yields [(1,1), (2,2), (3,3)]")
-        self.assertListEqual(self.simple.join(self.complex, inner_key=lambda x: x['value'], result_func=lambda (x, y): (x, y['value'])).order_by(lambda x: (x[0], x[1])).to_list(), [(1,1), (2,2), (3,3)], "Joining simple to complex and projecting result yields [(1,1), (2,2), (3,3)]")
+        self.assertListEqual(self.simple.join(self.complex, inner_key=lambda x: x['value'], result_func=lambda x: (x[0], x[1]['value'])).order_by(lambda x: (x[0], x[1])).to_list(), [(1,1), (2,2), (3,3)], "Joining simple to complex and projecting result yields [(1,1), (2,2), (3,3)]")
 
-        self.assertListEqual(self.complex.join(self.complex, result_func=lambda (x, y): (x['value'], y['value'])).order_by(lambda x: (x[0], x[1])).to_list(), [(1,1), (2,2), (3,3)], "Joining complex to complex and projecting result yields [(1,1), (2,2), (3,3)]")
+        self.assertListEqual(self.complex.join(self.complex, result_func=lambda x: (x[0]['value'], x[1]['value'])).order_by(lambda x: (x[0], x[1])).to_list(), [(1,1), (2,2), (3,3)], "Joining complex to complex and projecting result yields [(1,1), (2,2), (3,3)]")
 
     def test_group_join(self):
         self.assertRaises(TypeError, self.empty.group_join, [])
@@ -260,7 +262,7 @@ class TestFunctions(TestCase):
             self.assertEqual(e[1].count(), 0, "Should have 0 elements")
             self.assertEqual(e[1].first_or_default(), None, "Value of first element should be None")
 
-        simple_gj = self.simple.group_join(self.simple, result_func=lambda (x, y): {'number' : x, 'collection': y})
+        simple_gj = self.simple.group_join(self.simple, result_func=lambda x: {'number' : x[0], 'collection': x[1]})
         for i, e in enumerate(simple_gj):
             self.assertEqual(e['number'], i + 1, "number property should be {0}".format(i + 1))
             self.assertEqual(e['collection'].count(), 1, "Should only have one element")
@@ -272,7 +274,7 @@ class TestFunctions(TestCase):
             self.assertEqual(e[1].count(), 1, "Should only have one element")
             self.assertEqual(e[1].first(), i + 1, "Value of first element should equal {0}".format(i + 1))
 
-        simple_gj = self.simple.group_join(Enumerable([2,3]), result_func=lambda (x, y): {'number': x, 'collection': y}).to_list()
+        simple_gj = self.simple.group_join(Enumerable([2,3]), result_func=lambda x: {'number': x[0], 'collection': x[1]}).to_list()
         self.assertEqual(len(simple_gj), 3, "Should be 3 elements")
         for i, e in enumerate(simple_gj):
             self.assertEqual(e['number'], i + 1, "number property should be {0}".format(i + 1))
