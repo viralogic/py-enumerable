@@ -1,4 +1,4 @@
-__author__ = 'Viralogic Software'
+__author__ = 'Bruce Fenske'
 
 from unittest import TestCase
 from py_linq import Enumerable

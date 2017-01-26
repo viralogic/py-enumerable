@@ -1,4 +1,4 @@
-__author__ = 'Viralogic Software'
+__author__ = 'Bruce Fenske'
 
 _empty = []
 _simple = [1, 2, 3]

@@ -1,7 +1,11 @@
-__author__ = 'ViraLogic Software'
+__author__ = 'Bruce Fenske'
 
 import itertools
-from exceptions import *
+
+try:
+    from exceptions import *
+except ImportError:
+    from py_linq.exceptions import *
 
 
 class Enumerable(object):
@@ -358,7 +362,7 @@ class Enumerable(object):
                 inner_enumerable.default_if_empty()
             )
         ).group_by(key_names=['id'], key=lambda x: outer_key(x[0]), result_func=lambda g: (
-        g.first()[0], g.where(lambda x: inner_key(x[1]) == g.key.id).select(lambda x: x[1]))). \
+            g.first()[0], g.where(lambda x: inner_key(x[1]) == g.key.id).select(lambda x: x[1]))). \
             select(result_func)
 
     def any(self, predicate):
@@ -380,7 +384,7 @@ class Enumerable(object):
         """
         if not isinstance(enumerable, Enumerable):
             raise TypeError("enumerable parameter must be an instance of Enumerable")
-        return self.join(enumerable, key, key, result_func=lambda (x, y): x)
+        return self.join(enumerable, key, key, result_func=lambda x: (x[0], x[1]))
 
     def union(self, enumerable, key=lambda x: x):
         """

@@ -1,4 +1,4 @@
-__author__ = 'ViraLogic Software'
+__author__ = 'Bruce Fenske'
 
 class NoElementsError(Exception):
     pass
