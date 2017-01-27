@@ -425,7 +425,11 @@ class Enumerable(object):
 
 
 class Enumerable3(object):
-
+    """
+    Could probably optimize code by inheriting from Enumerable and overwriting only the methods that need refactoring to
+    support python 3. Admittedly code duplication here. Thought this would be OK design for separation of concerns since
+    Python 3 is a distinct codebase from Python 2.
+    """
     def __init__(self, data=[]):
         """
         Constructor
