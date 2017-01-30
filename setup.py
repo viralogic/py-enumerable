@@ -15,7 +15,7 @@ def read(*paths):
 setup(
     name='py-linq',
     version='0.4.0',
-    description='Linq for Python',
+    description='Linq for Python. Now supports Python 3',
     long_description=(read('README.rst') + '\n\n' + read('HISTORY.rst') + '\n\n' + read('AUTHORS.rst') + '\n\n' + read('CONTRIBUTING.rst')),
     url='https://github.com/viralogic/py-enumerable',
     license='MIT',
@@ -29,7 +29,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 2.7 :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ]
 
