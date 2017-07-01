@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/scls19fr/py-enumerable.svg?branch=master
+    :target: https://travis-ci.org/scls19fr/py-enumerable
+
 =============
 py-linq
 =============
