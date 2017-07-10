@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/scls19fr/py-enumerable.svg?branch=master
-    :target: https://travis-ci.org/scls19fr/py-enumerable
+.. image:: https://travis-ci.org/viralogic/py-enumerable.svg?branch=master
+    :target: https://travis-ci.org/viralogic/py-enumerable
 
 =============
 py-linq
