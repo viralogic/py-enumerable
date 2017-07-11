@@ -1,23 +1,22 @@
-__author__ = 'Bruce Fenske'
-
 import itertools
 
-try:
-    from exceptions import *
-except ImportError:
-    from py_linq.exceptions import *
+from .exceptions import NoElementsError, NoMatchingElement, \
+    NullArgumentError, MoreThanOneMatchingElement
 
 
 class Enumerable(object):
     def __init__(self, data=[]):
         """
         Constructor
-        ** Note: no type checking of the data elements are performed during instantiation. **
+        ** Note: no type checking of the data elements are performed during
+         instantiation. **
         :param data: iterable object
         :return: None
         """
         if not hasattr(data, "__iter__"):
-            raise TypeError("Enumerable must be instantiated with an iterable object")
+            raise TypeError(
+                "Enumerable must be instantiated with an iterable object"
+            )
         self._data = data
 
     def __iter__(self):
@@ -102,9 +101,10 @@ class Enumerable(object):
         result = self.order_by(func).select(func).to_list()
         length = len(result)
         i = int(length / 2)
-        return result[i] if length % 2 == 1 else (float(result[i - 1]) + float(result[i])) / float(2)
+        return result[i] if length % 2 == 1 else (float(result[i - 1]) +
+                                                  float(result[i])) / float(2)
 
-    def elementAt(self, n):
+    def element_at(self, n):
         """
         Returns element at given index.
             * Raises NoElementsError if no element found at specified position
@@ -116,47 +116,52 @@ class Enumerable(object):
             raise NoElementsError("No element found at index {0}".format(n))
         return result[0]
 
-    def elementAtOrDefault(self, n):
+    def element_at_or_default(self, n):
         """
         Returns element at given index or None if no element found
-            * Raises IndexError if n is greater than the number of elements in enumerable
+            * Raises IndexError if n is greater than the number of elements in
+            enumerable
         :param n: index as int object
         :return: Element at given index
         """
         try:
-            return self.elementAt(n)
+            return self.element_at(n)
         except NoElementsError:
             return None
 
     def first(self):
         """
         Returns the first element
-        :return: data element as object or NoElementsError if transformed data contains no elements
+        :return: data element as object or NoElementsError if transformed data
+        contains no elements
         """
-        return self.elementAt(0)
+        return self.element_at(0)
 
     def first_or_default(self):
         """
         Return the first element
-        :return: data element as object or None if transformed data contains no elements
+        :return: data element as object or None if transformed data contains no
+         elements
         """
-        return self.elementAtOrDefault(0)
+        return self.element_at_or_default(0)
 
     def last(self):
         """
         Return the last element
         :param func: lambda expression to transform data
-        :return: data element as object or NoElementsError if transformed data contains no elements
+        :return: data element as object or NoElementsError if transformed data
+        contains no elements
         """
-        return Enumerable(sorted(self, None, reverse=True)).first()
+        return self.element_at(self.count() - 1)
 
     def last_or_default(self):
         """
         Return the last element
         :param func: lambda expression to transform data
-        :return: data element as object or None if transformed data contains no elements
+        :return: data element as object or None if transformed data contains no
+         elements
         """
-        return Enumerable(sorted(self, None, reverse=True)).first_or_default()
+        return self.element_at_or_default(self.count() - 1)
 
     def order_by(self, key):
         """
@@ -209,7 +214,8 @@ class Enumerable(object):
         Returns single element that matches given predicate.
         Raises:
             * NoMatchingElement error if no matching elements are found
-            * MoreThanOneMatchingElement error if more than one matching element is found
+            * MoreThanOneMatchingElement error if more than one matching
+            element is found
         :param predicate: predicate as a lambda expression
         :return: Matching element as object
         """
@@ -218,14 +224,18 @@ class Enumerable(object):
         if count == 0:
             raise NoMatchingElement("No matching element found")
         if count > 1:
-            raise MoreThanOneMatchingElement("More than one matching element found. Use where instead")
+            raise MoreThanOneMatchingElement(
+                "More than one matching element found. Use where instead"
+            )
         return result[0]
 
     def single_or_default(self, predicate):
         """
-        Return single element that matches given predicate. If no matching element is found, returns None
+        Return single element that matches given predicate. If no matching
+        element is found, returns None
         Raises:
-            * MoreThanOneMatchingElement error if more than one matching element is found
+            * MoreThanOneMatchingElement error if more than one matching
+            element is found
         :param predicate: predicate as a lambda expression
         :return: Matching element as object or None if no matches are found
         """
@@ -256,10 +266,12 @@ class Enumerable(object):
         """
         Adds enumerable to an enumerable
         ** NOTE **
-        This operation can be expensive depending on the size of the enumerable to be concatenated. This is because
-        the concatenation algorithm performs type checking to ensure that the same object types are being added. If
-        the self enumerable has n elements and the enumerable to be added has m elements then the type checking
-        takes O(mn) time.
+        This operation can be expensive depending on the size of the enumerable
+         to be concatenated. This is because
+        the concatenation algorithm performs type checking to ensure that the
+        same object types are being added. If the self enumerable has n
+        elements and the enumerable to be added has m elements then the type
+        checking takes O(mn) time.
         :param enumerable: An iterable object
         :return: new Enumerable object
         """
