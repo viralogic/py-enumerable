@@ -1,5 +1,6 @@
 import itertools
 
+from .decorators import deprecated
 from .exceptions import NoElementsError, NoMatchingElement, \
     NullArgumentError, MoreThanOneMatchingElement
 
@@ -15,9 +16,17 @@ class Enumerable(object):
         """
         if not hasattr(data, "__iter__"):
             raise TypeError(
-                "Enumerable must be instantiated with an iterable object"
+                u"Enumerable must be instantiated with an iterable object"
             )
         self._data = data
+
+    @property
+    def data(self):
+        """
+        The iterable of the Enumerable instance
+        :return: iterable
+        """
+        return self._data
 
     def __iter__(self):
         cache = []
@@ -66,7 +75,7 @@ class Enumerable(object):
         :return: minimum value
         """
         if self.count() == 0:
-            raise NoElementsError("Iterable contains no elements")
+            raise NoElementsError(u"Iterable contains no elements")
         return min(self.select(func))
 
     def max(self, func=lambda x: x):
@@ -76,7 +85,7 @@ class Enumerable(object):
         :return: maximum value
         """
         if self.count() == 0:
-            raise NoElementsError("Iterable contains no elements")
+            raise NoElementsError(u"Iterable contains no elements")
         return max(self.select(func))
 
     def avg(self, func=lambda x: x):
@@ -87,7 +96,7 @@ class Enumerable(object):
         """
         count = self.count()
         if count == 0:
-            raise NoElementsError("Iterable contains no elements")
+            raise NoElementsError(u"Iterable contains no elements")
         return float(self.sum(func)) / float(count)
 
     def median(self, func=lambda x: x):
@@ -97,7 +106,7 @@ class Enumerable(object):
         :return: median value
         """
         if self.count() == 0:
-            raise NoElementsError("Iterable contains no elements")
+            raise NoElementsError(u"Iterable contains no elements")
         result = self.order_by(func).select(func).to_list()
         length = len(result)
         i = int(length / 2)
@@ -113,8 +122,12 @@ class Enumerable(object):
         """
         result = list(itertools.islice(self.to_list(), max(0, n), n + 1, 1))
         if len(result) == 0:
-            raise NoElementsError("No element found at index {0}".format(n))
+            raise NoElementsError(u"No element found at index {0}".format(n))
         return result[0]
+
+    @deprecated(u"Please use element_at instead")
+    def elementAt(self, n):
+        return self.element_at(n)
 
     def element_at_or_default(self, n):
         """
@@ -128,6 +141,10 @@ class Enumerable(object):
             return self.element_at(n)
         except NoElementsError:
             return None
+
+    @deprecated(u"Please use element_at_or_default instead")
+    def elementAtOrDefault(self, n):
+        return self.element_at_or_default(n)
 
     def first(self):
         """
@@ -148,7 +165,6 @@ class Enumerable(object):
     def last(self):
         """
         Return the last element
-        :param func: lambda expression to transform data
         :return: data element as object or NoElementsError if transformed data
         contains no elements
         """
@@ -157,7 +173,6 @@ class Enumerable(object):
     def last_or_default(self):
         """
         Return the last element
-        :param func: lambda expression to transform data
         :return: data element as object or None if transformed data contains no
          elements
         """
@@ -170,7 +185,7 @@ class Enumerable(object):
         :return: new Enumerable object
         """
         if key is None:
-            raise NullArgumentError("No key for sorting given")
+            raise NullArgumentError(u"No key for sorting given")
         return Enumerable(sorted(self, key=key))
 
     def order_by_descending(self, key):
@@ -180,7 +195,7 @@ class Enumerable(object):
         :return: new Enumerable object
         """
         if key is None:
-            raise NullArgumentError("No key for sorting given")
+            raise NullArgumentError(u"No key for sorting given")
         return Enumerable(sorted(self, key=key, reverse=True))
 
     def skip(self, n):
@@ -276,45 +291,56 @@ class Enumerable(object):
         :return: new Enumerable object
         """
         if not isinstance(enumerable, Enumerable):
-            raise TypeError("enumerable argument must be an instance of Enumerable")
-        for element in enumerable._data:
+            raise TypeError(
+                u"enumerable argument must be an instance of Enumerable"
+            )
+        for element in enumerable.data:
             element_type = type(element)
             if self.any(lambda x: type(x) != element_type):
-                raise TypeError("type mismatch between concatenated enumerables")
-        return Enumerable(itertools.chain(self._data, enumerable._data))
+                raise TypeError(
+                    u"type mismatch between concatenated Enumerable objects"
+                )
+        return Enumerable(itertools.chain(self._data, enumerable.data))
 
     def group_by(self, key_names=[], key=lambda x: x, result_func=lambda x: x):
         """
-        Groups an enumerable on given key selector. Index of key name corresponds to index of key lambda function.
+        Groups an enumerable on given key selector. Index of key name
+        corresponds to index of key lambda function.
 
         Usage:
-            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x).to_list() --> Enumerable object [
-                Grouping object {
-                    key.id: 1,
-                    _data: [1]
-                },
-                Grouping object {
-                    key.id: 2,
-                    _data: [2]
-                },
-                Grouping object {
-                    key.id: 3,
-                    _data: [3]
-                }
-            ]
-            Thus the key names for each grouping object can be referenced through the key property. Using the above example:
+            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x) _
+                .to_list() -->
+                Enumerable object [
+                    Grouping object {
+                        key.id: 1,
+                        _data: [1]
+                    },
+                    Grouping object {
+                        key.id: 2,
+                        _data: [2]
+                    },
+                    Grouping object {
+                        key.id: 3,
+                        _data: [3]
+                    }
+                ]
+            Thus the key names for each grouping object can be referenced
+            through the key property. Using the above example:
 
-            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x).select(lambda g: { 'key': g.key.id, 'count': g.count() }
+            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x) _
+            .select(lambda g: { 'key': g.key.id, 'count': g.count() }
 
         :param key_names: list of key names
         :param key: key selector as lambda expression
+        :param result_func: transformation function as lambda expression
         :return: Enumerable of grouping objects
         """
         result = []
         ordered = sorted(self, key=key)
         grouped = itertools.groupby(ordered, key)
         for k, g in grouped:
-            can_enumerate = isinstance(k, list) or isinstance(k, tuple) and len(k) > 0
+            can_enumerate = isinstance(k, list) or isinstance(k, tuple) \
+                                                   and len(k) > 0
             key_prop = {}
             for i, prop in enumerate(key_names):
                 key_prop.setdefault(prop, k[i] if can_enumerate else k)
@@ -324,13 +350,20 @@ class Enumerable(object):
 
     def distinct(self, key=lambda x: x):
         """
-        Returns enumerable containing elements that are distinct based on given key selector
+        Returns enumerable containing elements that are distinct based on
+        given key selector
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
         return self.group_by(key=key).select(lambda g: g.first())
 
-    def join(self, inner_enumerable, outer_key=lambda x: x, inner_key=lambda x: x, result_func=lambda x: x):
+    def join(
+            self,
+            inner_enumerable,
+            outer_key=lambda x: x,
+            inner_key=lambda x: x,
+            result_func=lambda x: x
+    ):
         """
         Return enumerable of inner equi-join between two enumerables
         :param inner_enumerable: inner enumerable to join to self
@@ -340,42 +373,75 @@ class Enumerable(object):
         :return: new Enumerable object
         """
         if not isinstance(inner_enumerable, Enumerable):
-            raise TypeError("inner_enumerable parameter must be an instance of Enumerable")
+            raise TypeError(
+                u"inner_enumerable parameter must be an instance of Enumerable"
+            )
         return Enumerable(
             itertools.product(
-                itertools.ifilter(lambda x: outer_key(x) in itertools.imap(inner_key, inner_enumerable), self),
-                itertools.ifilter(lambda y: inner_key(y) in itertools.imap(outer_key, self), inner_enumerable)
+                itertools.ifilter(
+                    lambda x: outer_key(x) in itertools.imap(
+                        inner_key,
+                        inner_enumerable
+                    ), self
+                ),
+                itertools.ifilter(
+                    lambda y: inner_key(y) in itertools.imap(
+                        outer_key,
+                        self),
+                    inner_enumerable
+                )
             )
-        ).where(lambda x: outer_key(x[0]) == inner_key(x[1])).select(result_func)
+        )\
+            .where(lambda x: outer_key(x[0]) == inner_key(x[1])) \
+            .select(
+            result_func)
 
     def default_if_empty(self, value=None):
         """
-        Returns an enumerable containing a single None element if enumerable is empty, otherwise the enumerable itself
+        Returns an enumerable containing a single None element if enumerable is
+        empty, otherwise the enumerable itself
         :return: an Enumerable object
         """
         if self.count() == 0:
             return Enumerable([value])
         return self
 
-    def group_join(self, inner_enumerable, outer_key=lambda x: x, inner_key=lambda x: x, result_func=lambda x: x):
+    def group_join(
+            self,
+            inner_enumerable,
+            outer_key=lambda x: x,
+            inner_key=lambda x: x,
+            result_func=lambda x: x
+    ):
         """
         Return enumerable of group join between two enumerables
         :param inner_enumerable: inner enumerable to join to self
         :param outer_key: key selector of outer enumerable as lambda expression
         :param inner_key: key selector of inner enumerable as lambda expression
-        :param result_func: lambda expression to transform the result of group join
+        :param result_func: lambda expression to transform the result of group
+        join
         :return: new Enumerable object
         """
         if not isinstance(inner_enumerable, Enumerable):
-            raise TypeError("inner enumerable parameter must be an instance of Enumerable")
+            raise TypeError(
+                u"inner enumerable parameter must be an instance of Enumerable"
+            )
         return Enumerable(
             itertools.product(
                 self,
                 inner_enumerable.default_if_empty()
             )
-        ).group_by(key_names=['id'], key=lambda x: outer_key(x[0]), result_func=lambda g: (
-            g.first()[0], g.where(lambda x: inner_key(x[1]) == g.key.id).select(lambda x: x[1]))). \
-            select(result_func)
+        ).group_by(
+            key_names=['id'],
+            key=lambda x: outer_key(x[0]),
+            result_func=lambda g: (
+                g.first()[0],
+                g.where(
+                    lambda x: inner_key(x[1]) == g.key.id).select(
+                        lambda x: x[1]
+                )
+            )
+        ).select(result_func)
 
     def any(self, predicate):
         """
@@ -384,29 +450,34 @@ class Enumerable(object):
         :return: boolean True or False
         """
         if predicate is None:
-            raise NullArgumentError("predicate lambda expression is necessary")
+            raise NullArgumentError(
+                u"predicate lambda expression is necessary")
         return self.where(predicate).count() > 0
 
     def intersect(self, enumerable, key=lambda x: x):
         """
-        Returns enumerable that is the intersection between given enumerable and self
+        Returns enumerable that is the intersection between given enumerable
+        and self
         :param enumerable: enumerable object
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
         if not isinstance(enumerable, Enumerable):
-            raise TypeError("enumerable parameter must be an instance of Enumerable")
+            raise TypeError(
+                u"enumerable parameter must be an instance of Enumerable")
         return self.join(enumerable, key, key).select(lambda x: x[0])
 
     def union(self, enumerable, key=lambda x: x):
         """
-        Returns enumerable that is a union of elements between self and given enumerable
+        Returns enumerable that is a union of elements between self and given
+        enumerable
         :param enumerable: enumerable to union self to
         :param key: key selector used to determine uniqueness
         :return: new Enumerable object
         """
         if not isinstance(enumerable, Enumerable):
-            raise TypeError("enumerable parameter must be an instance of Enumerable")
+            raise TypeError(
+                u"enumerable parameter must be an instance of Enumerable")
         return self.concat(enumerable).distinct(key)
 
     def except_(self, enumerable, key=lambda x: x):
@@ -417,14 +488,13 @@ class Enumerable(object):
         :return: new Enumerable object
         """
         if not isinstance(enumerable, Enumerable):
-            raise TypeError("enumerable parameter must be an instance of Enumerable")
-        membership = (0 if key(element) in enumerable.intersect(self).select(key) else 1 for element in self)
-        return Enumerable(
-            itertools.compress(
-                self,
-                membership
-            )
+            raise TypeError(
+                u"enumerable parameter must be an instance of Enumerable")
+        membership = (
+            0 if key(element) in enumerable.intersect(self).select(key) else 1
+            for element in self
         )
+        return Enumerable(itertools.compress(self, membership))
 
     def contains(self, element, key=lambda x: x):
         """
@@ -438,20 +508,31 @@ class Enumerable(object):
 
 class Enumerable3(object):
     """
-    Could probably optimize code by inheriting from Enumerable and overwriting only the methods that need refactoring to
-    support python 3. Admittedly code duplication here. Thought this would be OK design for separation of concerns since
-    Python 3 is a distinct codebase from Python 2.
+    Could probably optimize code by inheriting from Enumerable and overwriting
+    only the methods that need refactoring to support python 3. Admittedly
+    code duplication here. Thought this would be OK design for separation of
+    concerns since Python 3 is a distinct codebase from Python 2.
     """
     def __init__(self, data=[]):
         """
         Constructor
-        ** Note: no type checking of the data elements are performed during instantiation. **
+        ** Note: no type checking of the data elements are performed during
+        instantiation. **
         :param data: iterable object
         :return: None
         """
         if not hasattr(data, "__iter__"):
-            raise TypeError("Enumerable must be instantiated with an iterable object")
+            raise TypeError(
+                u"Enumerable must be instantiated with an iterable object")
         self._data = data
+
+    @property
+    def data(self):
+        """
+        The iterable of the Enumerable instance
+        :return: iterable
+        """
+        return self._data
 
     def __iter__(self):
         cache = []
@@ -500,7 +581,7 @@ class Enumerable3(object):
         :return: minimum value
         """
         if self.count() == 0:
-            raise NoElementsError("Iterable contains no elements")
+            raise NoElementsError(u"Iterable contains no elements")
         return min(self.select(func))
 
     def max(self, func=lambda x: x):
@@ -510,7 +591,7 @@ class Enumerable3(object):
         :return: maximum value
         """
         if self.count() == 0:
-            raise NoElementsError("Iterable contains no elements")
+            raise NoElementsError(u"Iterable contains no elements")
         return max(self.select(func))
 
     def avg(self, func=lambda x: x):
@@ -521,7 +602,7 @@ class Enumerable3(object):
         """
         count = self.count()
         if count == 0:
-            raise NoElementsError("Iterable contains no elements")
+            raise NoElementsError(u"Iterable contains no elements")
         return float(self.sum(func)) / float(count)
 
     def median(self, func=lambda x: x):
@@ -531,13 +612,14 @@ class Enumerable3(object):
         :return: median value
         """
         if self.count() == 0:
-            raise NoElementsError("Iterable contains no elements")
+            raise NoElementsError(u"Iterable contains no elements")
         result = self.order_by(func).select(func).to_list()
         length = len(result)
         i = int(length / 2)
-        return result[i] if length % 2 == 1 else (float(result[i - 1]) + float(result[i])) / float(2)
+        return result[i] if length % 2 == 1 else (float(result[i - 1]) +
+                                                  float(result[i])) / float(2)
 
-    def elementAt(self, n):
+    def element_at(self, n):
         """
         Returns element at given index.
             * Raises NoElementsError if no element found at specified position
@@ -546,48 +628,59 @@ class Enumerable3(object):
         """
         result = list(itertools.islice(self.to_list(), max(0, n), n + 1, 1))
         if len(result) == 0:
-            raise NoElementsError("No element found at index {0}".format(n))
+            raise NoElementsError(u"No element found at index {0}".format(n))
         return result[0]
 
-    def elementAtOrDefault(self, n):
+    @deprecated(u"Please use element_at instead")
+    def elementAt(self, n):
+        return self.element_at(n)
+
+    def element_at_or_default(self, n):
         """
         Returns element at given index or None if no element found
-            * Raises IndexError if n is greater than the number of elements in enumerable
+            * Raises IndexError if n is greater than the number of elements in
+            enumerable
         :param n: index as int object
         :return: Element at given index
         """
         try:
-            return self.elementAt(n)
+            return self.element_at(n)
         except NoElementsError:
             return None
+
+    @deprecated(u"Please use element_at_or_default instead")
+    def elementAtOrDefault(self, n):
+        return self.element_at_or_default(n)
 
     def first(self):
         """
         Returns the first element
-        :return: data element as object or NoElementsError if transformed data contains no elements
+        :return: data element as object or NoElementsError if transformed data
+        contains no elements
         """
-        return self.elementAt(0)
+        return self.element_at(0)
 
     def first_or_default(self):
         """
         Return the first element
-        :return: data element as object or None if transformed data contains no elements
+        :return: data element as object or None if transformed data contains
+        no elements
         """
-        return self.elementAtOrDefault(0)
+        return self.element_at_or_default(0)
 
     def last(self):
         """
         Return the last element
-        :param func: lambda expression to transform data
-        :return: data element as object or NoElementsError if transformed data contains no elements
+        :return: data element as object or NoElementsError if transformed data
+        contains no elements
         """
         return Enumerable3(reversed(self.to_list())).first()
 
     def last_or_default(self):
         """
         Return the last element
-        :param func: lambda expression to transform data
-        :return: data element as object or None if transformed data contains no elements
+        :return: data element as object or None if transformed data contains no
+        elements
         """
         return Enumerable3(reversed(self.to_list())).first_or_default()
 
@@ -598,7 +691,7 @@ class Enumerable3(object):
         :return: new Enumerable object
         """
         if key is None:
-            raise NullArgumentError("No key for sorting given")
+            raise NullArgumentError(u"No key for sorting given")
         return Enumerable3(sorted(self, key=key))
 
     def order_by_descending(self, key):
@@ -608,7 +701,7 @@ class Enumerable3(object):
         :return: new Enumerable object
         """
         if key is None:
-            raise NullArgumentError("No key for sorting given")
+            raise NullArgumentError(u"No key for sorting given")
         return Enumerable3(sorted(self, key=key, reverse=True))
 
     def skip(self, n):
@@ -634,7 +727,7 @@ class Enumerable3(object):
         :return: new Enumerable object
         """
         if predicate is None:
-            raise NullArgumentError("No predicate given for where clause")
+            raise NullArgumentError(u"No predicate given for where clause")
         return Enumerable3(filter(predicate, self))
 
     def single(self, predicate):
@@ -642,23 +735,27 @@ class Enumerable3(object):
         Returns single element that matches given predicate.
         Raises:
             * NoMatchingElement error if no matching elements are found
-            * MoreThanOneMatchingElement error if more than one matching element is found
+            * MoreThanOneMatchingElement error if more than one matching
+            element is found
         :param predicate: predicate as a lambda expression
         :return: Matching element as object
         """
         result = self.where(predicate).to_list()
         count = len(result)
         if count == 0:
-            raise NoMatchingElement("No matching element found")
+            raise NoMatchingElement(u"No matching element found")
         if count > 1:
-            raise MoreThanOneMatchingElement("More than one matching element found. Use where instead")
+            raise MoreThanOneMatchingElement(
+                u"More than one matching element found. Use where instead")
         return result[0]
 
     def single_or_default(self, predicate):
         """
-        Return single element that matches given predicate. If no matching element is found, returns None
+        Return single element that matches given predicate. If no matching
+        element is found, returns None
         Raises:
-            * MoreThanOneMatchingElement error if more than one matching element is found
+            * MoreThanOneMatchingElement error if more than one matching
+            element is found
         :param predicate: predicate as a lambda expression
         :return: Matching element as object or None if no matches are found
         """
@@ -689,54 +786,64 @@ class Enumerable3(object):
         """
         Adds enumerable to an enumerable
         ** NOTE **
-        This operation can be expensive depending on the size of the enumerable to be concatenated. This is because
-        the concatenation algorithm performs type checking to ensure that the same object types are being added. If
-        the self enumerable has n elements and the enumerable to be added has m elements then the type checking
-        takes O(mn) time.
+        This operation can be expensive depending on the size of the enumerable
+        to be concatenated. This is because the concatenation algorithm
+        performs type checking to ensure that the same object types are being
+        added. If
+        the self enumerable has n elements and the enumerable to be added has
+        m elements then the type checking takes O(mn) time.
         :param enumerable: An iterable object
         :return: new Enumerable object
         """
         if not isinstance(enumerable, Enumerable3):
-            raise TypeError("enumerable argument must be an instance of Enumerable")
-        for element in enumerable._data:
+            raise TypeError(
+                u"enumerable argument must be an instance of Enumerable")
+        for element in enumerable.data:
             element_type = type(element)
             if self.any(lambda x: type(x) != element_type):
-                raise TypeError("type mismatch between concatenated enumerables")
-        return Enumerable3(itertools.chain(self._data, enumerable._data))
+                raise TypeError(
+                    u"type mismatch between concatenated enumerables")
+        return Enumerable3(itertools.chain(self._data, enumerable.data))
 
     def group_by(self, key_names=[], key=lambda x: x, result_func=lambda x: x):
         """
-        Groups an enumerable on given key selector. Index of key name corresponds to index of key lambda function.
+        Groups an enumerable on given key selector. Index of key name
+        corresponds to index of key lambda function.
 
         Usage:
-            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x).to_list() --> Enumerable object [
-                Grouping object {
-                    key.id: 1,
-                    _data: [1]
-                },
-                Grouping object {
-                    key.id: 2,
-                    _data: [2]
-                },
-                Grouping object {
-                    key.id: 3,
-                    _data: [3]
-                }
-            ]
-            Thus the key names for each grouping object can be referenced through the key property. Using the above example:
+            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x) _
+                .to_list() --> Enumerable object [
+                    Grouping object {
+                        key.id: 1,
+                        _data: [1]
+                    },
+                    Grouping object {
+                        key.id: 2,
+                        _data: [2]
+                    },
+                    Grouping object {
+                        key.id: 3,
+                        _data: [3]
+                    }
+                ]
+            Thus the key names for each grouping object can be referenced
+            through the key property. Using the above example:
 
-            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x).select(lambda g: { 'key': g.key.id, 'count': g.count() }
+            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x) _
+            .select(lambda g: { 'key': g.key.id, 'count': g.count() }
 
         :param key_names: list of key names
         :param key: key selector as lambda expression
-        :param result_func: lamda function to transform group_join into desired structure
+        :param result_func: lambda function to transform group_join into
+        desired structure
         :return: Enumerable of grouping objects
         """
         result = []
         ordered = sorted(self, key=key)
         grouped = itertools.groupby(ordered, key)
         for k, g in grouped:
-            can_enumerate = isinstance(k, list) or isinstance(k, tuple) and len(k) > 0
+            can_enumerate = isinstance(k, list) or isinstance(k, tuple) \
+                                                   and len(k) > 0
             key_prop = {}
             for i, prop in enumerate(key_names):
                 key_prop.setdefault(prop, k[i] if can_enumerate else k)
@@ -746,13 +853,20 @@ class Enumerable3(object):
 
     def distinct(self, key=lambda x: x):
         """
-        Returns enumerable containing elements that are distinct based on given key selector
+        Returns enumerable containing elements that are distinct based on given
+        key selector
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
         return self.group_by(key=key).select(lambda g: g.first())
 
-    def join(self, inner_enumerable, outer_key=lambda x: x, inner_key=lambda x: x, result_func=lambda x: x):
+    def join(
+            self,
+            inner_enumerable,
+            outer_key=lambda x: x,
+            inner_key=lambda x: x,
+            result_func=lambda x: x
+    ):
         """
         Return enumerable of inner equi-join between two enumerables
         :param inner_enumerable: inner enumerable to join to self
@@ -762,42 +876,69 @@ class Enumerable3(object):
         :return: new Enumerable object
         """
         if not isinstance(inner_enumerable, Enumerable3):
-            raise TypeError("inner_enumerable parameter must be an instance of Enumerable")
+            raise TypeError(
+                u"inner_enumerable parameter must be an instance of Enumerable"
+            )
         return Enumerable3(
             itertools.product(
-                filter(lambda x: outer_key(x) in map(inner_key, inner_enumerable), self),
-                filter(lambda y: inner_key(y) in map(outer_key, self), inner_enumerable)
+                filter(
+                    lambda x: outer_key(x) in map(inner_key, inner_enumerable),
+                    self
+                ),
+                filter(
+                    lambda y: inner_key(y) in map(outer_key, self),
+                    inner_enumerable
+                )
             )
-        ).where(lambda x: outer_key(x[0]) == inner_key(x[1])).select(result_func)
+        )\
+            .where(lambda x: outer_key(x[0]) == inner_key(x[1]))\
+            .select(result_func)
 
     def default_if_empty(self, value=None):
         """
-        Returns an enumerable containing a single None element if enumerable is empty, otherwise the enumerable itself
+        Returns an enumerable containing a single None element if enumerable is
+        empty, otherwise the enumerable itself
         :return: an Enumerable object
         """
         if self.count() == 0:
             return Enumerable3([value])
         return self
 
-    def group_join(self, inner_enumerable, outer_key=lambda x: x, inner_key=lambda x: x, result_func=lambda x: x):
+    def group_join(
+            self,
+            inner_enumerable,
+            outer_key=lambda x: x,
+            inner_key=lambda x: x,
+            result_func=lambda x: x
+    ):
         """
         Return enumerable of group join between two enumerables
         :param inner_enumerable: inner enumerable to join to self
         :param outer_key: key selector of outer enumerable as lambda expression
         :param inner_key: key selector of inner enumerable as lambda expression
-        :param result_func: lambda expression to transform the result of group join
+        :param result_func: lambda expression to transform the result of group
+        join
         :return: new Enumerable object
         """
         if not isinstance(inner_enumerable, Enumerable3):
-            raise TypeError("inner enumerable parameter must be an instance of Enumerable")
+            raise TypeError(
+                u"inner enumerable parameter must be an instance of Enumerable"
+            )
         return Enumerable3(
             itertools.product(
                 self,
                 inner_enumerable.default_if_empty()
             )
-        ).group_by(key_names=['id'], key=lambda x: outer_key(x[0]), result_func=lambda g: (
-            g.first()[0], g.where(lambda x: inner_key(x[1]) == g.key.id).select(lambda x: x[1]))). \
-            select(result_func)
+        ).group_by(
+            key_names=['id'],
+            key=lambda x: outer_key(x[0]),
+            result_func=lambda g: (
+                g.first()[0],
+                g.where(lambda x: inner_key(x[1]) == g.key.id).select(
+                    lambda x: x[1]
+                )
+            )
+        ).select(result_func)
 
     def any(self, predicate):
         """
@@ -806,29 +947,34 @@ class Enumerable3(object):
         :return: boolean True or False
         """
         if predicate is None:
-            raise NullArgumentError("predicate lambda expression is necessary")
+            raise NullArgumentError(
+                u"predicate lambda expression is necessary")
         return self.where(predicate).count() > 0
 
     def intersect(self, enumerable, key=lambda x: x):
         """
-        Returns enumerable that is the intersection between given enumerable and self
+        Returns enumerable that is the intersection between given enumerable
+        and self
         :param enumerable: enumerable object
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
         if not isinstance(enumerable, Enumerable3):
-            raise TypeError("enumerable parameter must be an instance of Enumerable")
+            raise TypeError(
+                u"enumerable parameter must be an instance of Enumerable")
         return self.join(enumerable, key, key).select(lambda x: x[0])
 
     def union(self, enumerable, key=lambda x: x):
         """
-        Returns enumerable that is a union of elements between self and given enumerable
+        Returns enumerable that is a union of elements between self and given
+        enumerable
         :param enumerable: enumerable to union self to
         :param key: key selector used to determine uniqueness
         :return: new Enumerable object
         """
         if not isinstance(enumerable, Enumerable3):
-            raise TypeError("enumerable parameter must be an instance of Enumerable")
+            raise TypeError(
+                u"enumerable parameter must be an instance of Enumerable")
         if self.count() == 0:
             return enumerable
         if enumerable.count() == 0:
@@ -843,8 +989,12 @@ class Enumerable3(object):
         :return: new Enumerable object
         """
         if not isinstance(enumerable, Enumerable3):
-            raise TypeError("enumerable parameter must be an instance of Enumerable")
-        membership = (0 if key(element) in enumerable.intersect(self).select(key) else 1 for element in self)
+            raise TypeError(
+                u"enumerable parameter must be an instance of Enumerable")
+        membership = (
+            0 if key(element) in enumerable.intersect(self).select(key) else 1
+            for element in self
+        )
         return Enumerable3(
             itertools.compress(
                 self,
@@ -865,7 +1015,8 @@ class Enumerable3(object):
 class Key(object):
     def __init__(self, key, **kwargs):
         """
-        Constructor for Key class. Autogenerates key properties in object given dict or kwargs
+        Constructor for Key class. Autogenerates key properties in object
+        given dict or kwargs
         :param key: dict of name-values
         :param kwargs: optional keyword arguments
         :return: void
@@ -880,7 +1031,8 @@ class Key(object):
 class Grouping(Enumerable):
     def __init__(self, key, data):
         """
-        Constructor of Grouping class used for group by operations of Enumerable class
+        Constructor of Grouping class used for group by operations of
+        Enumerable class
         :param key: Key instance
         :param data: iterable object
         :return: void
@@ -900,7 +1052,8 @@ class Grouping(Enumerable):
 class Grouping3(Enumerable3):
     def __init__(self, key, data):
         """
-        Constructor of Grouping class used for group by operations of Enumerable class
+        Constructor of Grouping class used for group by operations of
+        Enumerable class
         :param key: Key instance
         :param data: iterable object
         :return: void
