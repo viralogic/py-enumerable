@@ -18,7 +18,7 @@ install:
 script:
   - py.test -s --cov=py_linq --cov-report xml:/tmp/cov-py_linq.xml --junitxml=/tmp/py_linq.xml
 #  - flake8 --version
-#  - flake8 --ignore E501 py_linq tests
+  - flake8 --ignore E501 py_linq tests
 
 after_success:
   - coveralls
