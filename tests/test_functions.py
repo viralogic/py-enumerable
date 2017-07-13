@@ -1,7 +1,8 @@
 from unittest import TestCase
 from py_linq import Enumerable
 from tests import _empty, _simple, _complex, _locations
-from py_linq.exceptions import *
+from py_linq.exceptions import NoElementsError, NullArgumentError, \
+    NoMatchingElement, MoreThanOneMatchingElement
 
 
 class TestFunctions(TestCase):
@@ -22,7 +23,7 @@ class TestFunctions(TestCase):
         self.assertListEqual(
             self.complex.to_list(),
             _complex,
-            u"Comple to_list not correct")
+            u"Complex to_list not correct")
 
     def test_sum(self):
         self.assertEqual(
@@ -422,8 +423,7 @@ class TestFunctions(TestCase):
 
         london = locations_grouped \
             .single(
-                lambda c: c.key.city == 'London'
-                and c.key.country == 'England'
+                lambda c: c.key.city == 'London' and c.key.country == 'England'
             )
         self.assertEqual(
             london.sum(lambda c: c[3]),
@@ -649,8 +649,7 @@ class TestFunctions(TestCase):
             self.complex.join(
                 self.complex,
                 result_func=lambda x: (x[0]['value'], x[1]['value'])).order_by(
-                    lambda x: (x[0], x[1])
-                ).to_list(),
+                    lambda x: (x[0], x[1])).to_list(),
             [(1, 1), (2, 2), (3, 3)],
             u"Should yield [(1,1), (2,2), (3,3)]")
 
