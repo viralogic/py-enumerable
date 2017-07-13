@@ -340,7 +340,7 @@ class Enumerable(object):
         grouped = itertools.groupby(ordered, key)
         for k, g in grouped:
             can_enumerate = isinstance(k, list) or isinstance(k, tuple) \
-                                                   and len(k) > 0
+                and len(k) > 0
             key_prop = {}
             for i, prop in enumerate(key_names):
                 key_prop.setdefault(prop, k[i] if can_enumerate else k)
@@ -843,7 +843,7 @@ class Enumerable3(object):
         grouped = itertools.groupby(ordered, key)
         for k, g in grouped:
             can_enumerate = isinstance(k, list) or isinstance(k, tuple) \
-                                                   and len(k) > 0
+                and len(k) > 0
             key_prop = {}
             for i, prop in enumerate(key_names):
                 key_prop.setdefault(prop, k[i] if can_enumerate else k)
