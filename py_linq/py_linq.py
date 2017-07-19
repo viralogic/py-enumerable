@@ -1106,11 +1106,11 @@ class SortedEnumerable(Enumerable):
     def __iter__(self):
         for o in reversed(self._key_funcs):
             self._data = sorted(self._data, key=o.key, reverse=o.descending)
-        cache=[]
+        cache = []
         for d in self._data:
             cache.append(d)
             yield d
-        self._data=cache
+        self._data = cache
 
     def then_by(self, func):
         """

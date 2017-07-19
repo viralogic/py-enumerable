@@ -797,4 +797,3 @@ class TestFunctions(TestCase):
             ],
             u"then_by_descending ordering is not correct"
         )
-
