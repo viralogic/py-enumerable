@@ -741,3 +741,60 @@ class TestFunctions(TestCase):
                 u"Collection should equal {0}".format(
                     [] if i == 0 else [i + 1])
             )
+
+    def test_then_by(self):
+        locations = Enumerable(_locations)
+        self.assertListEqual(
+            locations.order_by(lambda l: l[0])
+            .then_by(lambda l: l[1])
+            .select(lambda l: u"{0}, {1}".format(l[1], l[0]))
+            .to_list(),
+            [
+                u'Liverpool, England',
+                u'Liverpool, England',
+                u'London, England',
+                u'London, England',
+                u'London, England',
+                u'Manchester, England',
+                u'Manchester, England',
+                u'Edinburgh, Scotland',
+                u'Glasgow, Scotland',
+                u'Glasgow, Scotland',
+                u'Bangor, Wales',
+                u'Cardiff, Wales',
+                u'Cardiff, Wales'
+            ],
+            u"then_by locations ordering is not correct")
+        self.assertRaises(
+            NullArgumentError,
+            locations.order_by(lambda l: l[0]).then_by,
+            None)
+
+    def test_then_by_descending(self):
+        locations = Enumerable(_locations)
+        self.assertListEqual(
+            locations.order_by(lambda l: l[0])
+            .then_by(lambda l: l[1])
+            .then_by_descending(lambda l: l[3])
+            .select(lambda l: u"{0}, {1}: {2}".format(
+                l[1], l[0], l[3]
+            ))
+            .to_list(),
+            [
+                u'Liverpool, England: 29700',
+                u'Liverpool, England: 25000',
+                u'London, England: 90000',
+                u'London, England: 80000',
+                u'London, England: 70000',
+                u'Manchester, England: 50000',
+                u'Manchester, England: 45600',
+                u'Edinburgh, Scotland: 20000',
+                u'Glasgow, Scotland: 12500',
+                u'Glasgow, Scotland: 12000',
+                u'Bangor, Wales: 12800',
+                u'Cardiff, Wales: 30000',
+                u'Cardiff, Wales: 29700'
+            ],
+            u"then_by_descending ordering is not correct"
+        )
+

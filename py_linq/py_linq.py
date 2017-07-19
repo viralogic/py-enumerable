@@ -186,7 +186,8 @@ class Enumerable(object):
         """
         if key is None:
             raise NullArgumentError(u"No key for sorting given")
-        return Enumerable(sorted(self, key=key))
+        kf = [OrderingDirection(key, reverse=False)]
+        return SortedEnumerable(key_funcs=kf, data=self._data)
 
     def order_by_descending(self, key):
         """
@@ -196,7 +197,8 @@ class Enumerable(object):
         """
         if key is None:
             raise NullArgumentError(u"No key for sorting given")
-        return Enumerable(sorted(self, key=key, reverse=True))
+        kf = [OrderingDirection(key, reverse=True)]
+        return SortedEnumerable(key_funcs=kf, data=self._data)
 
     def skip(self, n):
         """
@@ -692,7 +694,8 @@ class Enumerable3(object):
         """
         if key is None:
             raise NullArgumentError(u"No key for sorting given")
-        return Enumerable3(sorted(self, key=key))
+        kf = [OrderingDirection(key, reverse=False)]
+        return SortedEnumerable3(kf, self._data)
 
     def order_by_descending(self, key):
         """
@@ -702,7 +705,8 @@ class Enumerable3(object):
         """
         if key is None:
             raise NullArgumentError(u"No key for sorting given")
-        return Enumerable3(sorted(self, key=key, reverse=True))
+        kf = [OrderingDirection(key, reverse=True)]
+        return SortedEnumerable3(kf, self._data)
 
     def skip(self, n):
         """
@@ -1068,3 +1072,118 @@ class Grouping3(Enumerable3):
             'key': self.key.__repr__(),
             'enumerable': self._data.__repr__()
         }.__repr__()
+
+
+class OrderingDirection(object):
+    def __init__(self, key, reverse):
+        """
+        A container to hold the lambda key and sorting direction
+        :param key: lambda function
+        :param reverse: boolean. True for reverse sort
+        """
+        self.key = key
+        self.descending = reverse
+
+
+class SortedEnumerable(Enumerable):
+    def __init__(self, key_funcs, data):
+        """
+        Constructor
+        :param key_funcs: list of OrderingDirection instances in order of
+        primary key
+        --> less important keys
+        :param data: data as iterable
+        """
+        if key_funcs is None:
+            raise NullArgumentError(u"key_funcs argument cannot be None")
+        if not isinstance(key_funcs, list):
+            raise TypeError(u"key_funcs should be a list instance")
+        self._key_funcs = [
+            f for f in key_funcs if isinstance(f, OrderingDirection)
+        ]
+        super(SortedEnumerable, self).__init__(data)
+
+    def __iter__(self):
+        for o in reversed(self._key_funcs):
+            self._data = sorted(self._data, key=o.key, reverse=o.descending)
+        cache=[]
+        for d in self._data:
+            cache.append(d)
+            yield d
+        self._data=cache
+
+    def then_by(self, func):
+        """
+        Subsequent sorting function in ascending order
+        :param func: lambda expression for secondary sort key
+        :return: SortedEnumerable instance
+        """
+        if func is None:
+            raise NullArgumentError(u"then by requires a lambda function arg")
+        self._key_funcs.append(OrderingDirection(key=func, reverse=False))
+        return SortedEnumerable(self._key_funcs, self._data)
+
+    def then_by_descending(self, func):
+        """
+        Subsequent sorting function in descending order
+        :param func: lambda function for secondary sort key
+        :return: SortedEnumerable instance
+        """
+        if func is None:
+            raise NullArgumentError(
+                u"then_by_descending requires a lambda function arg")
+        self._key_funcs.append(OrderingDirection(key=func, reverse=True))
+        return SortedEnumerable(self._key_funcs, self._data)
+
+
+class SortedEnumerable3(Enumerable3):
+    def __init__(self, key_funcs, data):
+        """
+        Constructor
+        :param key_funcs: list of OrderingDirection instances in order of
+        primary key
+        --> less important keys
+        :param data: data as iterable
+        """
+        if key_funcs is None:
+            raise NullArgumentError(u"key_funcs argument cannot be None")
+        if not isinstance(key_funcs, list):
+            raise TypeError(u"key_funcs should be a list instance")
+        self._key_funcs = [
+            f for f in key_funcs if isinstance(f, OrderingDirection)
+        ]
+        super(SortedEnumerable3, self).__init__(data)
+
+    def __iter__(self):
+        for o in reversed(self._key_funcs):
+            self._data = sorted(self._data, key=o.key,
+                                reverse=o.descending)
+        cache = []
+        for d in self._data:
+            cache.append(d)
+            yield d
+        self._data = cache
+
+    def then_by(self, func):
+        """
+        Subsequent sorting function in ascending order
+        :param func: lambda expression for secondary sort key
+        :return: SortedEnumerable instance
+        """
+        if func is None:
+            raise NullArgumentError(
+                u"then by requires a lambda function arg")
+        self._key_funcs.append(OrderingDirection(key=func, reverse=False))
+        return SortedEnumerable3(self._key_funcs, self._data)
+
+    def then_by_descending(self, func):
+        """
+        Subsequent sorting function in descending order
+        :param func: lambda function for secondary sort key
+        :return: SortedEnumerable instance
+        """
+        if func is None:
+            raise NullArgumentError(
+                u"then_by_descending requires a lambda function arg")
+        self._key_funcs.append(OrderingDirection(key=func, reverse=True))
+        return SortedEnumerable3(self._key_funcs, self._data)
