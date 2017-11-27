@@ -5,6 +5,10 @@ from .exceptions import NoElementsError, NoMatchingElement, \
     NullArgumentError, MoreThanOneMatchingElement
 
 
+def identity(x):
+    return x
+
+
 class Enumerable(object):
     def __init__(self, data=[]):
         """
@@ -52,7 +56,7 @@ class Enumerable(object):
         """
         return sum(1 for element in self)
 
-    def select(self, func=lambda x: x):
+    def select(self, func=identity):
         """
         Transforms data into different form
         :param func: lambda expression on how to perform transformation
@@ -60,7 +64,7 @@ class Enumerable(object):
         """
         return Enumerable(itertools.imap(func, self))
 
-    def sum(self, func=lambda x: x):
+    def sum(self, func=identity):
         """
         Returns the sum of af data elements
         :param func: lambda expression to transform data
@@ -68,7 +72,7 @@ class Enumerable(object):
         """
         return sum(self.select(func))
 
-    def min(self, func=lambda x: x):
+    def min(self, func=identity):
         """
         Returns the min value of data elements
         :param func: lambda expression to transform data
@@ -78,7 +82,7 @@ class Enumerable(object):
             raise NoElementsError(u"Iterable contains no elements")
         return min(self.select(func))
 
-    def max(self, func=lambda x: x):
+    def max(self, func=identity):
         """
         Returns the max value of data elements
         :param func: lambda expression to transform data
@@ -88,7 +92,7 @@ class Enumerable(object):
             raise NoElementsError(u"Iterable contains no elements")
         return max(self.select(func))
 
-    def avg(self, func=lambda x: x):
+    def avg(self, func=identity):
         """
         Returns the average value of data elements
         :param func: lambda expression to transform data
@@ -99,7 +103,7 @@ class Enumerable(object):
             raise NoElementsError(u"Iterable contains no elements")
         return float(self.sum(func)) / float(count)
 
-    def median(self, func=lambda x: x):
+    def median(self, func=identity):
         """
         Return the median value of data elements
         :param func: lambda expression to project and sort data
@@ -261,7 +265,7 @@ class Enumerable(object):
         except NoMatchingElement:
             return None
 
-    def select_many(self, func=lambda x: x):
+    def select_many(self, func=identity):
         """
         Flattens an iterable of iterables returning a new Enumerable
         :param func: selector as lambda expression
@@ -304,13 +308,13 @@ class Enumerable(object):
                 )
         return Enumerable(itertools.chain(self._data, enumerable.data))
 
-    def group_by(self, key_names=[], key=lambda x: x, result_func=lambda x: x):
+    def group_by(self, key_names=[], key=identity, result_func=identity):
         """
         Groups an enumerable on given key selector. Index of key name
         corresponds to index of key lambda function.
 
         Usage:
-            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x) _
+            Enumerable([1,2,3]).group_by(key_names=['id'], key=identity) _
                 .to_list() -->
                 Enumerable object [
                     Grouping object {
@@ -329,7 +333,7 @@ class Enumerable(object):
             Thus the key names for each grouping object can be referenced
             through the key property. Using the above example:
 
-            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x) _
+            Enumerable([1,2,3]).group_by(key_names=['id'], key=identity) _
             .select(lambda g: { 'key': g.key.id, 'count': g.count() }
 
         :param key_names: list of key names
@@ -350,7 +354,7 @@ class Enumerable(object):
             result.append(Grouping(key_object, list(g)))
         return Enumerable(result).select(result_func)
 
-    def distinct(self, key=lambda x: x):
+    def distinct(self, key=identity):
         """
         Returns enumerable containing elements that are distinct based on
         given key selector
@@ -362,9 +366,9 @@ class Enumerable(object):
     def join(
             self,
             inner_enumerable,
-            outer_key=lambda x: x,
-            inner_key=lambda x: x,
-            result_func=lambda x: x
+            outer_key=identity,
+            inner_key=identity,
+            result_func=identity
     ):
         """
         Return enumerable of inner equi-join between two enumerables
@@ -411,9 +415,9 @@ class Enumerable(object):
     def group_join(
             self,
             inner_enumerable,
-            outer_key=lambda x: x,
-            inner_key=lambda x: x,
-            result_func=lambda x: x
+            outer_key=identity,
+            inner_key=identity,
+            result_func=identity
     ):
         """
         Return enumerable of group join between two enumerables
@@ -456,7 +460,7 @@ class Enumerable(object):
                 u"predicate lambda expression is necessary")
         return self.where(predicate).count() > 0
 
-    def intersect(self, enumerable, key=lambda x: x):
+    def intersect(self, enumerable, key=identity):
         """
         Returns enumerable that is the intersection between given enumerable
         and self
@@ -469,7 +473,7 @@ class Enumerable(object):
                 u"enumerable parameter must be an instance of Enumerable")
         return self.join(enumerable, key, key).select(lambda x: x[0])
 
-    def union(self, enumerable, key=lambda x: x):
+    def union(self, enumerable, key=identity):
         """
         Returns enumerable that is a union of elements between self and given
         enumerable
@@ -482,7 +486,7 @@ class Enumerable(object):
                 u"enumerable parameter must be an instance of Enumerable")
         return self.concat(enumerable).distinct(key)
 
-    def except_(self, enumerable, key=lambda x: x):
+    def except_(self, enumerable, key=identity):
         """
         Returns enumerable that subtracts given enumerable elements from self
         :param enumerable: enumerable object
@@ -498,7 +502,7 @@ class Enumerable(object):
         )
         return Enumerable(itertools.compress(self, membership))
 
-    def contains(self, element, key=lambda x: x):
+    def contains(self, element, key=identity):
         """
         Returns True if element is found in enumerable, otherwise False
         :param element: the element being tested for membership in enumerable
@@ -560,7 +564,7 @@ class Enumerable3(object):
         """
         return sum(1 for element in self)
 
-    def select(self, func=lambda x: x):
+    def select(self, func=identity):
         """
         Transforms data into different form
         :param func: lambda expression on how to perform transformation
@@ -568,7 +572,7 @@ class Enumerable3(object):
         """
         return Enumerable3(map(func, self))
 
-    def sum(self, func=lambda x: x):
+    def sum(self, func=identity):
         """
         Returns the sum of af data elements
         :param func: lambda expression to transform data
@@ -576,7 +580,7 @@ class Enumerable3(object):
         """
         return sum(self.select(func))
 
-    def min(self, func=lambda x: x):
+    def min(self, func=identity):
         """
         Returns the min value of data elements
         :param func: lambda expression to transform data
@@ -586,7 +590,7 @@ class Enumerable3(object):
             raise NoElementsError(u"Iterable contains no elements")
         return min(self.select(func))
 
-    def max(self, func=lambda x: x):
+    def max(self, func=identity):
         """
         Returns the max value of data elements
         :param func: lambda expression to transform data
@@ -596,7 +600,7 @@ class Enumerable3(object):
             raise NoElementsError(u"Iterable contains no elements")
         return max(self.select(func))
 
-    def avg(self, func=lambda x: x):
+    def avg(self, func=identity):
         """
         Returns the average value of data elements
         :param func: lambda expression to transform data
@@ -607,7 +611,7 @@ class Enumerable3(object):
             raise NoElementsError(u"Iterable contains no elements")
         return float(self.sum(func)) / float(count)
 
-    def median(self, func=lambda x: x):
+    def median(self, func=identity):
         """
         Return the median value of data elements
         :param func: lambda expression to project and sort data
@@ -768,7 +772,7 @@ class Enumerable3(object):
         except NoMatchingElement:
             return None
 
-    def select_many(self, func=lambda x: x):
+    def select_many(self, func=identity):
         """
         Flattens an iterable of iterables returning a new Enumerable
         :param func: selector as lambda expression
@@ -809,13 +813,13 @@ class Enumerable3(object):
                     u"type mismatch between concatenated enumerables")
         return Enumerable3(itertools.chain(self._data, enumerable.data))
 
-    def group_by(self, key_names=[], key=lambda x: x, result_func=lambda x: x):
+    def group_by(self, key_names=[], key=identity, result_func=identity):
         """
         Groups an enumerable on given key selector. Index of key name
         corresponds to index of key lambda function.
 
         Usage:
-            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x) _
+            Enumerable([1,2,3]).group_by(key_names=['id'], key=identity) _
                 .to_list() --> Enumerable object [
                     Grouping object {
                         key.id: 1,
@@ -833,7 +837,7 @@ class Enumerable3(object):
             Thus the key names for each grouping object can be referenced
             through the key property. Using the above example:
 
-            Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x) _
+            Enumerable([1,2,3]).group_by(key_names=['id'], key=identity) _
             .select(lambda g: { 'key': g.key.id, 'count': g.count() }
 
         :param key_names: list of key names
@@ -855,7 +859,7 @@ class Enumerable3(object):
             result.append(Grouping3(key_object, list(g)))
         return Enumerable3(result).select(result_func)
 
-    def distinct(self, key=lambda x: x):
+    def distinct(self, key=identity):
         """
         Returns enumerable containing elements that are distinct based on given
         key selector
@@ -867,9 +871,9 @@ class Enumerable3(object):
     def join(
             self,
             inner_enumerable,
-            outer_key=lambda x: x,
-            inner_key=lambda x: x,
-            result_func=lambda x: x
+            outer_key=identity,
+            inner_key=identity,
+            result_func=identity
     ):
         """
         Return enumerable of inner equi-join between two enumerables
@@ -911,9 +915,9 @@ class Enumerable3(object):
     def group_join(
             self,
             inner_enumerable,
-            outer_key=lambda x: x,
-            inner_key=lambda x: x,
-            result_func=lambda x: x
+            outer_key=identity,
+            inner_key=identity,
+            result_func=identity
     ):
         """
         Return enumerable of group join between two enumerables
@@ -955,7 +959,7 @@ class Enumerable3(object):
                 u"predicate lambda expression is necessary")
         return self.where(predicate).count() > 0
 
-    def intersect(self, enumerable, key=lambda x: x):
+    def intersect(self, enumerable, key=identity):
         """
         Returns enumerable that is the intersection between given enumerable
         and self
@@ -968,7 +972,7 @@ class Enumerable3(object):
                 u"enumerable parameter must be an instance of Enumerable")
         return self.join(enumerable, key, key).select(lambda x: x[0])
 
-    def union(self, enumerable, key=lambda x: x):
+    def union(self, enumerable, key=identity):
         """
         Returns enumerable that is a union of elements between self and given
         enumerable
@@ -985,7 +989,7 @@ class Enumerable3(object):
             return self
         return self.concat(enumerable).distinct(key)
 
-    def except_(self, enumerable, key=lambda x: x):
+    def except_(self, enumerable, key=identity):
         """
         Returns enumerable that subtracts given enumerable elements from self
         :param enumerable: enumerable object
@@ -1006,7 +1010,7 @@ class Enumerable3(object):
             )
         )
 
-    def contains(self, element, key=lambda x: x):
+    def contains(self, element, key=identity):
         """
         Returns True if element is found in enumerable, otherwise False
         :param element: the element being tested for membership in enumerable
