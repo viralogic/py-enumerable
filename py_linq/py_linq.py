@@ -6,7 +6,7 @@ from .exceptions import NoElementsError, NoMatchingElement, \
 
 
 class Enumerable(object):
-    def __init__(self, data=[]):
+    def __init__(self, data=None):
         """
         Constructor
         ** Note: no type checking of the data elements are performed during
@@ -14,6 +14,8 @@ class Enumerable(object):
         :param data: iterable object
         :return: None
         """
+        if data is None:
+            data = []
         if not hasattr(data, "__iter__"):
             raise TypeError(
                 u"Enumerable must be instantiated with an iterable object"
