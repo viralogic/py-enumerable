@@ -2,6 +2,8 @@
 History
 =======
 
+04-Dec-2017     Dev     Issue #13 - Empty list as default parameter
+
 19-Jul-2017     0.5     Fixed bug in last and last_or_default methods
                         Implemented then_by and then_by_descending for
                         subsequent sorts.
