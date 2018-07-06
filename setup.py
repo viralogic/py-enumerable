@@ -14,7 +14,7 @@ setup(
     name='py-linq',
     version='0.5.0',
     description='Linq for Python. Now supports Python 3',
-    long_description=(read('README.rst') + '\n\n' + read('HISTORY.rst') + '\n\n' + read('AUTHORS.rst') + '\n\n' + read('CONTRIBUTING.rst')),
+    long_description=(read('README.md') + '\n\n' + read('HISTORY.rst') + '\n\n' + read('AUTHORS.rst') + '\n\n' + read('CONTRIBUTING.rst')),
     url='https://github.com/viralogic/py-enumerable',
     license='MIT',
     author='Bruce Fenske',
