@@ -112,8 +112,7 @@ class Enumerable(object):
         result = self.order_by(func).select(func).to_list()
         length = len(result)
         i = int(length / 2)
-        return result[i] if length % 2 == 1 else (float(result[i - 1]) +
-                                                  float(result[i])) / float(2)
+        return result[i] if length % 2 == 1 else (float(result[i - 1]) + float(result[i])) / float(2)
 
     def element_at(self, n):
         """
@@ -620,8 +619,7 @@ class Enumerable3(object):
         result = self.order_by(func).select(func).to_list()
         length = len(result)
         i = int(length / 2)
-        return result[i] if length % 2 == 1 else (float(result[i - 1]) +
-                                                  float(result[i])) / float(2)
+        return result[i] if length % 2 == 1 else (float(result[i - 1]) + float(result[i])) / float(2)
 
     def element_at(self, n):
         """
