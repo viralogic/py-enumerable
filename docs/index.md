@@ -55,8 +55,8 @@ Once you have created an `Enumerable` instance, the LINQ methods will become ava
 24. [first_or_default](/py-enumerable/first-or-default)
 25. [last](/py-enumerable/last)
 26. [last_or_default](/py-enumerable/last-or-default)
-27. contains --uses any
-28. group_by -- due to grouped iterables having to be saved to memory when iterating through itertools.groupby result
-29. distinct -- uses group by in algorithm
-30. group_join -- uses group by in algorithm
-31. union -- uses distinct in algorithm
+27. [contains](/py-enumerable/contains)
+28. [group_by](/py-enumerable/group-by)
+29. [distinct](/py-enumerable/distinct)
+30. [group_join](/py-enumerable/group-join)
+31. [union](/py-enumerable/union) -- uses distinct in algorithm
