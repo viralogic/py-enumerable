@@ -48,13 +48,13 @@ Once you have created an `Enumerable` instance, the LINQ methods will become ava
 17. [max](/py-enumerable/max)
 18. [avg](/py-enumerable/avg)
 19. [median](/py-enumerable/median)
-20. any -- uses count in algorithm
-21. elementAt -- has to store data in list to allow resetting of iterator
-22. elemantAtOrDefault --uses elementAt
-23. first --uses elementAt
-24. first_or_default --uses first
-25. last --uses first after sorting
-26. last_or_default --uses last
+20. [any](/py-enumerable/any)
+21. [element_at](/py-enumerable/element-at)
+22. [element_at_or_default](/py-enumerable/element-at-or-default)
+23. [first](/py-enumerable/first)
+24. [first_or_default](/py-enumerable/first-or-default)
+25. [last](/py-enumerable/last)
+26. [last_or_default](/py-enumerable/last-or-default)
 27. contains --uses any
 28. group_by -- due to grouped iterables having to be saved to memory when iterating through itertools.groupby result
 29. distinct -- uses group by in algorithm
