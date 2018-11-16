@@ -5,20 +5,20 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
 
 # command to install dependencies
 install:
-  - "pip install -qq pytest"
-  - "pip install -qq pytest-cov"
-  - "pip install -qq flake8"
-  - "pip install coveralls --quiet"
-  - "pip install ."
+  - pip install -qq pytest
+  - pip install -qq "pytest-cov<2.6"
+  - pip install -qq pycodestyle
+  - pip install -qq python-coveralls
+  - pip install --upgrade pip
 
 # command to run tests
 script:
-  - py.test -s --cov=py_linq --cov-report xml:/tmp/cov-py_linq.xml --junitxml=/tmp/py_linq.xml
-#  - flake8 --version
-  - flake8 --ignore E501  py_linq tests
+  - py.test --cov=py_linq
+  - pycodestyle --ignore=E501 --max-line-length=88 py_linq tests
 
 after_success:
   - coveralls
