@@ -29,16 +29,16 @@ The methods encapsulated by the `Enumerable` class can be either _executing_ fun
 
 Once you have created an `Enumerable` instance, the LINQ methods will become available to you. The methods implemented at this point are:
 
-1. [select](/select)
-2. [order_by](/order-by)
-3. [order_by_descending](/order-by-descending)
-4. [skip](/skip)
-5. [take](/take)
-6. [where](/where)
-7. [select_many](/select-many)
-8. [add](/add)
-9. [concat](/concat)
-10. [join](/concat)
+1. [select](/py-enumerable/select)
+2. [order_by](/py-enumerable/order-by)
+3. [order_by_descending](/py-enumerable/order-by-descending)
+4. [skip](/py-enumerable/skip)
+5. [take](/py-enumerable/take)
+6. [where](/py-enumerable/where)
+7. [select_many](/py-enumerable/select-many)
+8. [add](/py-enumerable/add)
+9. [concat](/py-enumerable/concat)
+10. [join](//py-enumerable/join)
 11. intersect
 12. except_
 13. to_list
