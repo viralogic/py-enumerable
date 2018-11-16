@@ -6,7 +6,7 @@ Returns an `Enumerable` that is the result of an intersection between two `Enume
 
 **Parameters**
 
-__enumerable__ : an `Enumerable` instance to intersect with.
+__enumerable__ : an `Enumerable` instance to intersect with.<br>
 __key__ : `lambda` function used as the key selector for both sets
 
 **Returns**
