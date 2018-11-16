@@ -44,10 +44,10 @@ Once you have created an `Enumerable` instance, the LINQ methods will become ava
 13. [to_list](/py-enumerable/to-list)
 14. [count](/py-enumerable/count)
 15. [sum](/py-enumerable/sum)
-16. min
-17. max
-18. avg
-19. median
+16. [min](/py-enumerable/min)
+17. [max](/py-enumerable/max)
+18. [avg](/py-enumerable/avg)
+19. [median](/py-enumerable/median)
 20. any -- uses count in algorithm
 21. elementAt -- has to store data in list to allow resetting of iterator
 22. elemantAtOrDefault --uses elementAt
