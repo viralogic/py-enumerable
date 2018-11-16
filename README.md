@@ -21,4 +21,4 @@ To access the LINQ functions an iterable needs to be wrapped by the Enumerable
 
 ## Documentation ##
 
-Please visit the project [Wiki](https://github.com/viralogic/py-enumerable/wiki) for better documentation
+Please visit the project [site](https://viralogic.github.io/py-enumerable) for better documentation
