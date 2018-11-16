@@ -59,4 +59,4 @@ Once you have created an `Enumerable` instance, the LINQ methods will become ava
 28. [group_by](/py-enumerable/group-by)
 29. [distinct](/py-enumerable/distinct)
 30. [group_join](/py-enumerable/group-join)
-31. [union](/py-enumerable/union) -- uses distinct in algorithm
+31. [union](/py-enumerable/union)
