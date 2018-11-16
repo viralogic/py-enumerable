@@ -38,7 +38,7 @@ Once you have created an `Enumerable` instance, the LINQ methods will become ava
 7. [select_many](/py-enumerable/select-many)
 8. [add](/py-enumerable/add)
 9. [concat](/py-enumerable/concat)
-10. [join](//py-enumerable/join)
+10. [join](/py-enumerable/join)
 11. intersect
 12. except_
 13. to_list
