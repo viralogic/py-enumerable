@@ -563,6 +563,22 @@ class TestFunctions(TestCase):
             [{'value': 2}, {'value': 3}],
             "Should yield [{'value': 2}, 'value': 3]")
 
+    def test_marks_intersect(self):
+        marks1 = Enumerable([{'course': 'Chemistry', 'mark': 90}, {'course': 'Biology', 'mark':85}])
+        marks2 = Enumerable([{'course': 'Chemistry', 'mark': 65}, {'course': 'Computer Science', 'mark': 96}])
+        self.assertListEqual(
+            marks1.intersect(marks2, lambda c: c['course']).to_list(),
+            [{'course': 'Chemistry', 'mark': 90}]
+        )
+
+    def test_marks_except(self):
+        marks1 = Enumerable([{'course': 'Chemistry', 'mark': 90}, {'course': 'Biology', 'mark': 85}])
+        marks2 = Enumerable([{'course': 'Chemistry', 'mark': 65}, {'course': 'Computer Science', 'mark': 96}])
+        self.assertListEqual(
+            marks1.except_(marks2, lambda c: c['course']).to_list(),
+            [{'course': 'Biology', 'mark': 85}]
+        )
+
     def test_union(self):
         self.assertListEqual(
             self.empty.union(self.empty).to_list(),

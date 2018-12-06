@@ -493,10 +493,10 @@ class Enumerable(object):
         if not isinstance(enumerable, Enumerable):
             raise TypeError(
                 u"enumerable parameter must be an instance of Enumerable")
-        membership = (
-            0 if key(element) in enumerable.intersect(self).select(key) else 1
+        membership = [
+            0 if key(element) in enumerable.intersect(self, key).select(key) else 1
             for element in self
-        )
+        ]
         return Enumerable(itertools.compress(self, membership))
 
     def contains(self, element, key=lambda x: x):
@@ -996,7 +996,7 @@ class Enumerable3(object):
             raise TypeError(
                 u"enumerable parameter must be an instance of Enumerable")
         membership = (
-            0 if key(element) in enumerable.intersect(self).select(key) else 1
+            0 if key(element) in enumerable.intersect(self, key).select(key) else 1
             for element in self
         )
         return Enumerable3(
