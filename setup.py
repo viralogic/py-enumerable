@@ -1,6 +1,7 @@
 import os
 from setuptools import setup, find_packages
 
+
 def read(*paths):
     """
     Build a file path from * paths and return the contents
@@ -12,9 +13,9 @@ def read(*paths):
 
 setup(
     name='py-linq',
-    version='0.5.0',
+    version='0.6.0',
     description='Linq for Python. Now supports Python 3',
-    long_description=(read('README.md') + '\n\n' + read('HISTORY.rst') + '\n\n' + read('AUTHORS.rst') + '\n\n' + read('CONTRIBUTING.rst')),
+    long_description=(read('README.md') + '\n\n' + read('HISTORY.md') + '\n\n' + read('AUTHORS.md') + '\n\n' + read('CONTRIBUTING.md')),
     url='https://github.com/viralogic/py-enumerable',
     license='MIT',
     author='Bruce Fenske',
