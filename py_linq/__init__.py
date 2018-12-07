@@ -1,4 +1,6 @@
-__version__ = '0.4.0'
+""" Linq for Python. Now supports Python 3 """
+
+__version__ = '0.6.0'
 
 try:
     from py_linq import Enumerable  # noqa
