@@ -6,7 +6,8 @@ build-backend = "flit.buildapi"
 module = "py_linq"
 author = "Bruce Fenske"
 author-email = "bwfenske@ualberta.ca"
-home-page = "https://github.com/viralogic"
+home-page = "https://github.com/viralogic/py-enumerable"
+description-file="README.md"
 classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

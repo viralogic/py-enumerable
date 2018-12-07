@@ -1,2 +1,0 @@
-include *.rst
-recursive-include py_linq *.py
