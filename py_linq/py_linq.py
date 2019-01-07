@@ -862,7 +862,7 @@ class Enumerable3(object):
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
-        return Enumerable(self.group_by(key=key).select(lambda g: g.first()).to_list())
+        return Enumerable3(self.group_by(key=key).select(lambda g: g.first()).to_list())
 
     def join(
             self,

@@ -7,8 +7,8 @@ class IssueTests(TestCase):
     def test_issue19(self):
         foo = Enumerable([1])
         bar = Enumerable([1])
-        self.assertEquals(foo.intersect(bar).count(), 1)
+        self.assertEqual(foo.intersect(bar).count(), 1)
 
         foo = Enumerable([1])
         bar = Enumerable([1]).distinct()
-        self.assertEquals(foo.intersect(bar).count(), 1)
+        self.assertEqual(foo.intersect(bar).count(), 1)
