@@ -126,10 +126,6 @@ class Enumerable(object):
             raise NoElementsError(u"No element found at index {0}".format(n))
         return result[0]
 
-    @deprecated(u"Please use element_at instead")
-    def elementAt(self, n):
-        return self.element_at(n)
-
     def element_at_or_default(self, n):
         """
         Returns element at given index or None if no element found
@@ -142,10 +138,6 @@ class Enumerable(object):
             return self.element_at(n)
         except NoElementsError:
             return None
-
-    @deprecated(u"Please use element_at_or_default instead")
-    def elementAtOrDefault(self, n):
-        return self.element_at_or_default(n)
 
     def first(self):
         """
@@ -283,13 +275,6 @@ class Enumerable(object):
     def concat(self, enumerable):
         """
         Adds enumerable to an enumerable
-        ** NOTE **
-        This operation can be expensive depending on the size of the enumerable
-         to be concatenated. This is because
-        the concatenation algorithm performs type checking to ensure that the
-        same object types are being added. If the self enumerable has n
-        elements and the enumerable to be added has m elements then the type
-        checking takes O(mn) time.
         :param enumerable: An iterable object
         :return: new Enumerable object
         """
@@ -297,12 +282,6 @@ class Enumerable(object):
             raise TypeError(
                 u"enumerable argument must be an instance of Enumerable"
             )
-        for element in enumerable.data:
-            element_type = type(element)
-            if self.any(lambda x: type(x) != element_type):
-                raise TypeError(
-                    u"type mismatch between concatenated Enumerable objects"
-                )
         return Enumerable(itertools.chain(self._data, enumerable.data))
 
     def group_by(self, key_names=[], key=lambda x: x, result_func=lambda x: x):
