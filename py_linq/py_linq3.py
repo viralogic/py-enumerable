@@ -491,6 +491,34 @@ class Enumerable3(object):
         """
         return self.select(key).any(lambda x: x == key(element))
 
+    def aggregate(self, func, seed=None):
+        """
+        Perform a calculation over a given enumerable using the initial seed
+        value
+        :param func: calculation to perform over every the enumerable.
+        This function will ingest (aggregate_result, next element) as parameters
+        :param seed: initial seed value for the calculation. If None, then the
+        first element is used as the seed
+        :return: result of the calculation
+        """
+        if self.count() == 0:
+            raise NoElementsError("No elements perform aggregation")
+        result = seed if seed is not None else self.first()
+        for i, e in enumerate(self):
+            if i == 0 and seed is None:
+                continue
+            result = func(result, e)
+        return result
+
+    def all(self, predicate):
+        """
+        Determines whether all elements in an enumerable satisfy the given
+        predicate
+        :param predicate: the condition to test each element as lambda function
+        :return: boolean True or False
+        """
+        return self.where(predicate).count() == self.count()
+
 
 class Grouping3(Enumerable3):
     def __init__(self, key, data):

@@ -372,8 +372,6 @@ class TestFunctions(TestCase):
             u"Should yield simple enumerable with single list")
 
     def test_concat(self):
-        self.assertRaises(TypeError, self.simple.concat, _empty)
-        self.assertRaises(TypeError, self.simple.concat, self.complex)
         self.assertListEqual(
             self.empty.concat(self.empty).to_list(),
             [],
@@ -592,7 +590,6 @@ class TestFunctions(TestCase):
             self.simple.union(self.empty).to_list(),
             _simple,
             u"Union of simple and empty yield simple")
-        self.assertRaises(TypeError, self.complex.union, self.simple)
         self.assertListEqual(
             self.empty.union(self.complex).to_list(),
             _complex,
@@ -813,3 +810,30 @@ class TestFunctions(TestCase):
             ],
             u"then_by_descending ordering is not correct"
         )
+
+    def reverse(self, result, element):
+        return element + " " + result
+
+    def sum(self, result, element):
+        return result + element
+
+    def test_aggregate(self):
+        words = u"the quick brown fox jumps over the lazy dog".split(" ")
+        self.assertListEqual(words, ["the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"])
+        test = Enumerable(words).aggregate(self.reverse)
+        self.assertEqual(test, "dog lazy the over jumps fox brown quick the")
+
+        self.assertRaises(NoElementsError, Enumerable().aggregate, [lambda x: x[0] + x[1], 0])
+
+        test = self.simple.aggregate(self.sum, seed=0)
+        self.assertEqual(test, 6)
+
+    def test_all(self):
+        test = Enumerable([1, 1, 1]).all(lambda x: x == 1)
+        self.assertTrue(test)
+
+        test = Enumerable([]).all(lambda x: x == 1)
+        self.assertTrue(test)
+
+        test = self.simple.all(lambda x: x == 1)
+        self.assertFalse(test)
