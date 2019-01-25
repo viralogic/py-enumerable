@@ -5,21 +5,24 @@ from .exceptions import NoElementsError, NoMatchingElement, NullArgumentError, \
     MoreThanOneMatchingElement
 
 
-class Enumerable(object):
-    def __init__(self, data=None):
+class Enumerable3(object):
+    """
+    Could probably optimize code by inheriting from Enumerable and overwriting
+    only the methods that need refactoring to support python 3. Admittedly
+    code duplication here. Thought this would be OK design for separation of
+    concerns since Python 3 is a distinct codebase from Python 2.
+    """
+    def __init__(self, data=[]):
         """
         Constructor
         ** Note: no type checking of the data elements are performed during
-         instantiation. **
+        instantiation. **
         :param data: iterable object
         :return: None
         """
-        if data is None:
-            data = []
         if not hasattr(data, "__iter__"):
             raise TypeError(
-                u"Enumerable must be instantiated with an iterable object"
-            )
+                u"Enumerable must be instantiated with an iterable object")
         self._data = data
 
     @property
@@ -60,7 +63,7 @@ class Enumerable(object):
         :param func: lambda expression on how to perform transformation
         :return: new Enumerable object containing transformed data
         """
-        return Enumerable(itertools.imap(func, self))
+        return Enumerable3(map(func, self))
 
     def sum(self, func=lambda x: x):
         """
@@ -158,8 +161,8 @@ class Enumerable(object):
     def first_or_default(self):
         """
         Return the first element
-        :return: data element as object or None if transformed data contains no
-         elements
+        :return: data element as object or None if transformed data contains
+        no elements
         """
         return self.element_at_or_default(0)
 
@@ -169,15 +172,15 @@ class Enumerable(object):
         :return: data element as object or NoElementsError if transformed data
         contains no elements
         """
-        return self.element_at(self.count() - 1)
+        return Enumerable3(reversed(self.to_list())).first()
 
     def last_or_default(self):
         """
         Return the last element
         :return: data element as object or None if transformed data contains no
-         elements
+        elements
         """
-        return self.element_at_or_default(self.count() - 1)
+        return Enumerable3(reversed(self.to_list())).first_or_default()
 
     def order_by(self, key):
         """
@@ -188,7 +191,7 @@ class Enumerable(object):
         if key is None:
             raise NullArgumentError(u"No key for sorting given")
         kf = [OrderingDirection(key, reverse=False)]
-        return SortedEnumerable(key_funcs=kf, data=self._data)
+        return SortedEnumerable3(kf, self._data)
 
     def order_by_descending(self, key):
         """
@@ -199,7 +202,7 @@ class Enumerable(object):
         if key is None:
             raise NullArgumentError(u"No key for sorting given")
         kf = [OrderingDirection(key, reverse=True)]
-        return SortedEnumerable(key_funcs=kf, data=self._data)
+        return SortedEnumerable3(kf, self._data)
 
     def skip(self, n):
         """
@@ -207,7 +210,7 @@ class Enumerable(object):
         :param n: Number of elements to skip as int
         :return: new Enumerable object
         """
-        return Enumerable(itertools.islice(self, n, None, 1))
+        return Enumerable3(itertools.islice(self, n, None, 1))
 
     def take(self, n):
         """
@@ -215,7 +218,7 @@ class Enumerable(object):
         :param n: Number of elements to take
         :return: new Enumerable object
         """
-        return Enumerable(itertools.islice(self, 0, n, 1))
+        return Enumerable3(itertools.islice(self, 0, n, 1))
 
     def where(self, predicate):
         """
@@ -224,8 +227,8 @@ class Enumerable(object):
         :return: new Enumerable object
         """
         if predicate is None:
-            raise NullArgumentError("No predicate given for where clause")
-        return Enumerable(itertools.ifilter(predicate, self))
+            raise NullArgumentError(u"No predicate given for where clause")
+        return Enumerable3(filter(predicate, self))
 
     def single(self, predicate):
         """
@@ -240,11 +243,10 @@ class Enumerable(object):
         result = self.where(predicate).to_list()
         count = len(result)
         if count == 0:
-            raise NoMatchingElement("No matching element found")
+            raise NoMatchingElement(u"No matching element found")
         if count > 1:
             raise MoreThanOneMatchingElement(
-                "More than one matching element found. Use where instead"
-            )
+                u"More than one matching element found. Use where instead")
         return result[0]
 
     def single_or_default(self, predicate):
@@ -268,7 +270,7 @@ class Enumerable(object):
         :param func: selector as lambda expression
         :return: new Enumerable object
         """
-        return Enumerable(itertools.chain.from_iterable(self.select(func)))
+        return Enumerable3(itertools.chain.from_iterable(self.select(func)))
 
     def add(self, element):
         """
@@ -278,32 +280,30 @@ class Enumerable(object):
         """
         if element is None:
             return self
-        return self.concat(Enumerable([element]))
+        return self.concat(Enumerable3([element]))
 
     def concat(self, enumerable):
         """
         Adds enumerable to an enumerable
         ** NOTE **
         This operation can be expensive depending on the size of the enumerable
-         to be concatenated. This is because
-        the concatenation algorithm performs type checking to ensure that the
-        same object types are being added. If the self enumerable has n
-        elements and the enumerable to be added has m elements then the type
-        checking takes O(mn) time.
+        to be concatenated. This is because the concatenation algorithm
+        performs type checking to ensure that the same object types are being
+        added. If
+        the self enumerable has n elements and the enumerable to be added has
+        m elements then the type checking takes O(mn) time.
         :param enumerable: An iterable object
         :return: new Enumerable object
         """
-        if not isinstance(enumerable, Enumerable):
+        if not isinstance(enumerable, Enumerable3):
             raise TypeError(
-                u"enumerable argument must be an instance of Enumerable"
-            )
+                u"enumerable argument must be an instance of Enumerable")
         for element in enumerable.data:
             element_type = type(element)
             if self.any(lambda x: type(x) != element_type):
                 raise TypeError(
-                    u"type mismatch between concatenated Enumerable objects"
-                )
-        return Enumerable(itertools.chain(self._data, enumerable.data))
+                    u"type mismatch between concatenated enumerables")
+        return Enumerable3(itertools.chain(self._data, enumerable.data))
 
     def group_by(self, key_names=[], key=lambda x: x, result_func=lambda x: x):
         """
@@ -312,8 +312,7 @@ class Enumerable(object):
 
         Usage:
             Enumerable([1,2,3]).group_by(key_names=['id'], key=lambda x: x) _
-                .to_list() -->
-                Enumerable object [
+                .to_list() --> Enumerable object [
                     Grouping object {
                         key.id: 1,
                         _data: [1]
@@ -335,7 +334,8 @@ class Enumerable(object):
 
         :param key_names: list of key names
         :param key: key selector as lambda expression
-        :param result_func: transformation function as lambda expression
+        :param result_func: lambda function to transform group_join into
+        desired structure
         :return: Enumerable of grouping objects
         """
         result = []
@@ -348,17 +348,17 @@ class Enumerable(object):
             for i, prop in enumerate(key_names):
                 key_prop.setdefault(prop, k[i] if can_enumerate else k)
             key_object = Key(key_prop)
-            result.append(Grouping(key_object, list(g)))
-        return Enumerable(result).select(result_func)
+            result.append(Grouping3(key_object, list(g)))
+        return Enumerable3(result).select(result_func)
 
     def distinct(self, key=lambda x: x):
         """
-        Returns enumerable containing elements that are distinct based on
-        given key selector
+        Returns enumerable containing elements that are distinct based on given
+        key selector
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
-        return Enumerable(self.group_by(key=key).select(lambda g: g.first()).to_list())
+        return Enumerable3(self.group_by(key=key).select(lambda g: g.first()).to_list())
 
     def join(
             self,
@@ -375,29 +375,24 @@ class Enumerable(object):
         :param result_func: lambda expression to transform result of join
         :return: new Enumerable object
         """
-        if not isinstance(inner_enumerable, Enumerable):
+        if not isinstance(inner_enumerable, Enumerable3):
             raise TypeError(
                 u"inner_enumerable parameter must be an instance of Enumerable"
             )
-        return Enumerable(
+        return Enumerable3(
             itertools.product(
-                itertools.ifilter(
-                    lambda x: outer_key(x) in itertools.imap(
-                        inner_key,
-                        inner_enumerable
-                    ), self
+                filter(
+                    lambda x: outer_key(x) in map(inner_key, inner_enumerable),
+                    self
                 ),
-                itertools.ifilter(
-                    lambda y: inner_key(y) in itertools.imap(
-                        outer_key,
-                        self),
+                filter(
+                    lambda y: inner_key(y) in map(outer_key, self),
                     inner_enumerable
                 )
             )
         )\
-            .where(lambda x: outer_key(x[0]) == inner_key(x[1])) \
-            .select(
-            result_func)
+            .where(lambda x: outer_key(x[0]) == inner_key(x[1]))\
+            .select(result_func)
 
     def default_if_empty(self, value=None):
         """
@@ -406,7 +401,7 @@ class Enumerable(object):
         :return: an Enumerable object
         """
         if self.count() == 0:
-            return Enumerable([value])
+            return Enumerable3([value])
         return self
 
     def group_join(
@@ -425,11 +420,11 @@ class Enumerable(object):
         join
         :return: new Enumerable object
         """
-        if not isinstance(inner_enumerable, Enumerable):
+        if not isinstance(inner_enumerable, Enumerable3):
             raise TypeError(
                 u"inner enumerable parameter must be an instance of Enumerable"
             )
-        return Enumerable(
+        return Enumerable3(
             itertools.product(
                 self,
                 inner_enumerable.default_if_empty()
@@ -439,9 +434,8 @@ class Enumerable(object):
             key=lambda x: outer_key(x[0]),
             result_func=lambda g: (
                 g.first()[0],
-                g.where(
-                    lambda x: inner_key(x[1]) == g.key.id).select(
-                        lambda x: x[1]
+                g.where(lambda x: inner_key(x[1]) == g.key.id).select(
+                    lambda x: x[1]
                 )
             )
         ).select(result_func)
@@ -465,7 +459,7 @@ class Enumerable(object):
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
-        if not isinstance(enumerable, Enumerable):
+        if not isinstance(enumerable, Enumerable3):
             raise TypeError(
                 u"enumerable parameter must be an instance of Enumerable")
         return self.join(enumerable, key, key).select(lambda x: x[0])
@@ -478,9 +472,13 @@ class Enumerable(object):
         :param key: key selector used to determine uniqueness
         :return: new Enumerable object
         """
-        if not isinstance(enumerable, Enumerable):
+        if not isinstance(enumerable, Enumerable3):
             raise TypeError(
                 u"enumerable parameter must be an instance of Enumerable")
+        if self.count() == 0:
+            return enumerable
+        if enumerable.count() == 0:
+            return self
         return self.concat(enumerable).distinct(key)
 
     def except_(self, enumerable, key=lambda x: x):
@@ -490,14 +488,19 @@ class Enumerable(object):
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
-        if not isinstance(enumerable, Enumerable):
+        if not isinstance(enumerable, Enumerable3):
             raise TypeError(
                 u"enumerable parameter must be an instance of Enumerable")
-        membership = [
+        membership = (
             0 if key(element) in enumerable.intersect(self, key).select(key) else 1
             for element in self
-        ]
-        return Enumerable(itertools.compress(self, membership))
+        )
+        return Enumerable3(
+            itertools.compress(
+                self,
+                membership
+            )
+        )
 
     def contains(self, element, key=lambda x: x):
         """
@@ -509,7 +512,7 @@ class Enumerable(object):
         return self.select(key).any(lambda x: x == key(element))
 
 
-class Grouping(Enumerable):
+class Grouping3(Enumerable3):
     def __init__(self, key, data):
         """
         Constructor of Grouping class used for group by operations of
@@ -521,7 +524,7 @@ class Grouping(Enumerable):
         if not isinstance(key, Key):
             raise Exception("key argument should be a Key instance")
         self.key = key
-        super(Grouping, self).__init__(data)
+        super(Grouping3, self).__init__(data)
 
     def __repr__(self):
         return {
@@ -530,7 +533,7 @@ class Grouping(Enumerable):
         }.__repr__()
 
 
-class SortedEnumerable(Enumerable):
+class SortedEnumerable3(Enumerable3):
     def __init__(self, key_funcs, data):
         """
         Constructor
@@ -546,11 +549,12 @@ class SortedEnumerable(Enumerable):
         self._key_funcs = [
             f for f in key_funcs if isinstance(f, OrderingDirection)
         ]
-        super(SortedEnumerable, self).__init__(data)
+        super(SortedEnumerable3, self).__init__(data)
 
     def __iter__(self):
         for o in reversed(self._key_funcs):
-            self._data = sorted(self._data, key=o.key, reverse=o.descending)
+            self._data = sorted(self._data, key=o.key,
+                                reverse=o.descending)
         cache = []
         for d in self._data:
             cache.append(d)
@@ -564,9 +568,10 @@ class SortedEnumerable(Enumerable):
         :return: SortedEnumerable instance
         """
         if func is None:
-            raise NullArgumentError(u"then by requires a lambda function arg")
+            raise NullArgumentError(
+                u"then by requires a lambda function arg")
         self._key_funcs.append(OrderingDirection(key=func, reverse=False))
-        return SortedEnumerable(self._key_funcs, self._data)
+        return SortedEnumerable3(self._key_funcs, self._data)
 
     def then_by_descending(self, func):
         """
@@ -578,4 +583,4 @@ class SortedEnumerable(Enumerable):
             raise NullArgumentError(
                 u"then_by_descending requires a lambda function arg")
         self._key_funcs.append(OrderingDirection(key=func, reverse=True))
-        return SortedEnumerable(self._key_funcs, self._data)
+        return SortedEnumerable3(self._key_funcs, self._data)
