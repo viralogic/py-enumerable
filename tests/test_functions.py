@@ -837,3 +837,37 @@ class TestFunctions(TestCase):
 
         test = self.simple.all(lambda x: x == 1)
         self.assertFalse(test)
+
+    def test_append(self):
+        test = self.simple.append(4)
+        self.assertEqual(test.count(), 4)
+        self.assertEqual(test.element_at(3), 4)
+
+    def test_prepend(self):
+        test = self.simple.prepend(4)
+        self.assertEqual(test.count(), 4)
+        self.assertEqual(test.element_at(0), 4)
+
+    def test_empty(self):
+        test = Enumerable.empty()
+        self.assertIsInstance(test, Enumerable)
+        self.assertEqual(test.count(), 0)
+
+    def test_range(self):
+        test = Enumerable.range(1, 3)
+        self.assertEqual(test.count(), 3)
+        self.assertListEqual(self.simple.to_list(), test.to_list())
+
+    def test_repeat(self):
+        test = Enumerable.repeat(u'Z', 10)
+        self.assertEqual(test.count(), 10)
+        self.assertEqual(u"".join(test.to_list()), u'ZZZZZZZZZZ')
+
+    def test_reverse(self):
+        test = self.simple.reverse()
+        self.assertListEqual(test.to_list(), [3, 2, 1])
+
+        words = u"the quick brown fox jumps over the lazy dog".split(" ")
+        self.assertListEqual(words, ["the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"])
+        test = Enumerable(words).reverse()
+        self.assertEqual(u" ".join(test.to_list()), u"dog lazy the over jumps fox brown quick the")

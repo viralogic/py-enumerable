@@ -519,6 +519,57 @@ class Enumerable3(object):
         """
         return self.where(predicate).count() == self.count()
 
+    def append(self, element):
+        """
+        Appends an element to the end of an enumerable
+        :param element: the element to append to the enumerable
+        :return: Enumerable object with appended element
+        """
+        return self.concat(Enumerable3([element]))
+
+    def prepend(self, element):
+        """
+        Prepends an element to the beginning of an enumerable
+        :param element: the element to prepend to the enumerable
+        :return: Enumerable object with the prepended element
+        """
+        return Enumerable3([element]).concat(self)
+
+    @staticmethod
+    def empty():
+        """
+        Returns an empty enumerable
+        :return: Enumerable object that contains no elements
+        """
+        return Enumerable3()
+
+    @staticmethod
+    def range(start, length):
+        """
+        Generates a sequence of integers starting from start with length of length
+        :param start: the starting value of the sequence
+        :param length: the number of integers in the sequence
+        :return: Enumerable of the generated sequence
+        """
+        return Enumerable3(range(start, start + length, 1))
+
+    @staticmethod
+    def repeat(element, length):
+        """
+        Generates an enumerable containing an element repeated length times
+        :param element: the element to repeat
+        :param length: the number of times to repeat the element
+        :return: Enumerable of the repeated elements
+        """
+        return Enumerable3(itertools.repeat(element, length))
+
+    def reverse(self):
+        """
+        Inverts the order of the elements in a sequence
+        :return: Enumerable with elements in reversed order
+        """
+        return self.aggregate(lambda *args: args[0].prepend(args[1]), Enumerable3())
+
 
 class Grouping3(Enumerable3):
     def __init__(self, key, data):
