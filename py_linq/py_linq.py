@@ -566,6 +566,52 @@ class Enumerable(object):
         """
         return self.aggregate(lambda *args: args[0].prepend(args[1]), Enumerable())
 
+    def skip_last(self, n):
+        """
+        Skips the last n elements in a sequence
+        :param n: the number of elements to skip
+        :return: Enumerable with n last elements removed
+        """
+        return self.take(self.count() - n)
+
+    def skip_while(self, predicate):
+        """
+        Bypasses elements in a sequence while the predicate is True. After predicate fails
+        remaining elements in sequence are returned
+        :param predicate: a predicate as a lambda expression
+        :return: Enumerable
+        """
+        return Enumerable(itertools.dropwhile(predicate, self))
+
+    def take_last(self, n):
+        """
+        Takes the last n elements in a sequence
+        :param n: the number of elements to take
+        :return: Enumerable containing last n elements
+        """
+        return self.skip(self.count() - n)
+
+    def take_while(self, predicate):
+        """
+        Includes elements in a sequence while the predicate is True. After predicate fails
+        remaining elements in a sequence are removed
+        :param predicate: a predicate as a lambda expression
+        :return: Enumerable
+        """
+        return Enumerable(itertools.takewhile(predicate, self))
+
+    def zip(self, enumerable, func):
+        """
+        Merges 2 Enumerables using the given function. If the 2 collections are of unequal length, then
+        merging continues until the end of one of the collections is reached
+        :param enumerable: Enumerable collection to merge with
+        :param func: a function to perform the merging
+        :return: Enumerable
+        """
+        if not isinstance(enumerable, Enumerable):
+            raise TypeError()
+        return Enumerable(itertools.izip(self, enumerable)).select(lambda x: func(x))
+
 
 class Grouping(Enumerable):
     def __init__(self, key, data):

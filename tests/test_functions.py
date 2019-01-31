@@ -871,3 +871,35 @@ class TestFunctions(TestCase):
         self.assertListEqual(words, ["the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"])
         test = Enumerable(words).reverse()
         self.assertEqual(u" ".join(test.to_list()), u"dog lazy the over jumps fox brown quick the")
+
+    def test_skip_last(self):
+        test = Enumerable([1, 2, 3, 4, 5]).skip_last(2)
+        self.assertListEqual(test.to_list(), [1, 2, 3])
+
+        test = Enumerable(["one", "two", "three", "four", "five"]).skip(1).skip_last(1)
+        self.assertListEqual(test.to_list(), ["two", "three", "four"])
+
+    def test_skip_while(self):
+        test = Enumerable([1, 4, 6, 4, 1]).skip_while(lambda x: x < 5)
+        self.assertListEqual(test.to_list(), [6, 4, 1])
+
+        test = Enumerable([]).skip_while(lambda x: x < 5)
+        self.assertListEqual(test.to_list(), [])
+
+    def test_take_last(self):
+        test = Enumerable([1, 2, 3, 4, 5]).take_last(2)
+        self.assertListEqual(test.to_list(), [4, 5])
+
+        test = Enumerable(["one", "two", "three", "four", "five"]).take(3).take_last(1)
+        self.assertListEqual(test.to_list(), ["three"])
+
+    def test_take_while(self):
+        test = Enumerable([1, 4, 6, 4, 1]).take_while(lambda x: x < 5)
+        self.assertListEqual(test.to_list(), [1, 4])
+
+        test = Enumerable([]).skip_while(lambda x: x < 5)
+        self.assertListEqual(test.to_list(), [])
+
+    def test_zip(self):
+        test = Enumerable(["A", "B", "C", "D"]).zip(Enumerable(["x", "y"]), lambda t: "{0}{1}".format(t[0], t[1]))
+        self.assertListEqual(test.to_list(), ["Ax", "By"])
