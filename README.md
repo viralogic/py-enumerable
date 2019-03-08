@@ -45,6 +45,24 @@ Please visit the project [site](https://viralogic.github.io/py-enumerable) for b
     </thead>
     <tbody>
         <tr>
+            <td>07-Mar-2019</td>
+            <td style='text-align: right;'>1.0</td>
+            <td>
+                <ul>
+                    <li>Issue #17 - Added additional LINQ methods to complete the <code>Enumerable</code> API as per <a href="https://docs.microsoft.com/en-us/dotnet/api/system.linq.enumerable?view=netframework-4.7.2">MSDN</a></li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>06-Jan-2019</td>
+            <td style='text-align: right;'>0.7</td>
+            <td>
+                <ul>
+                    <li>Issue #19 - Distinct bug fix</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
             <td>06-Dec-2018</td>
             <td  style='text-align: right;'>0.6</td>
             <td>
