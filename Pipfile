@@ -1,0 +1,14 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "*"
+pep8 = "*"
+pytest-cov = "<2.6"
+
+[packages]
+
+[requires]
+python_version = "2.7"

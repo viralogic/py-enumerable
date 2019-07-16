@@ -139,37 +139,49 @@ class Enumerable(object):
         except NoElementsError:
             return None
 
-    def first(self):
+    def first(self, func=None):
         """
-        Returns the first element
+        Returns the first element in a collection
+        :func: predicate as lambda expression used to filter collection
         :return: data element as object or NoElementsError if transformed data
         contains no elements
         """
+        if func is not None:
+            return self.where(func).element_at(0)
         return self.element_at(0)
 
-    def first_or_default(self):
+    def first_or_default(self, func=None):
         """
-        Return the first element
+        Return the first element in a collection. If collection is empty, then returns None
+        :func: predicate as lambda expression used to filter collection
         :return: data element as object or None if transformed data contains no
          elements
         """
+        if func is not None:
+            return self.where(func).element_at_or_default(0)
         return self.element_at_or_default(0)
 
-    def last(self):
+    def last(self, func=None):
         """
-        Return the last element
+        Return the last element in a collection
+        :func: predicate as a lambda expression used to filter collection
         :return: data element as object or NoElementsError if transformed data
         contains no elements
         """
-        return self.element_at(self.count() - 1)
+        if func is not None:
+            return self.where(func).reverse().first()
+        return self.reverse().first()
 
-    def last_or_default(self):
+    def last_or_default(self, func=None):
         """
-        Return the last element
+        Return the last element in a collection or None if the collection is empty
+        :func: predicate as a lambda expression used to filter collection
         :return: data element as object or None if transformed data contains no
          elements
         """
-        return self.element_at_or_default(self.count() - 1)
+        if func is not None:
+            return self.where(func).reverse().first_or_default()
+        return self.reverse().first_or_default()
 
     def order_by(self, key):
         """
@@ -564,6 +576,8 @@ class Enumerable(object):
         Inverts the order of the elements in a sequence
         :return: Enumerable with elements in reversed order
         """
+        if self.count() == 0:
+            return self
         return self.aggregate(lambda *args: args[0].prepend(args[1]), Enumerable())
 
     def skip_last(self, n):

@@ -144,35 +144,47 @@ class Enumerable3(object):
 
     def first(self):
         """
-        Returns the first element
+        Returns the first element in a collection
+        :func: predicate as lambda expression used to filter collection
         :return: data element as object or NoElementsError if transformed data
         contains no elements
         """
+        if func is not None:
+            return self.where(func).element_at(0)
         return self.element_at(0)
 
     def first_or_default(self):
         """
-        Return the first element
-        :return: data element as object or None if transformed data contains
-        no elements
+        Return the first element in a collection. If collection is empty, then returns None
+        :func: predicate as lambda expression used to filter collection
+        :return: data element as object or None if transformed data contains no
+         elements
         """
+        if func is not None:
+            return self.where(func).element_at_or_default(0)
         return self.element_at_or_default(0)
 
-    def last(self):
+    def last(self, func=None):
         """
-        Return the last element
+        Return the last element in a collection
+        :func: predicate as a lambda expression used to filter collection
         :return: data element as object or NoElementsError if transformed data
         contains no elements
         """
-        return Enumerable3(reversed(self.to_list())).first()
+        if func is not None:
+            return self.where(func).reverse().first()
+        return self.reverse().first()
 
-    def last_or_default(self):
+    def last_or_default(self, func=None):
         """
-        Return the last element
+        Return the last element in a collection or None if the collection is empty
+        :func: predicate as a lambda expression used to filter collection
         :return: data element as object or None if transformed data contains no
-        elements
+         elements
         """
-        return Enumerable3(reversed(self.to_list())).first_or_default()
+        if func is not None:
+            return self.where(func).reverse().first_or_default()
+        return self.reverse().first_or_default()
 
     def order_by(self, key):
         """
