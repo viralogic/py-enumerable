@@ -45,6 +45,15 @@ Please visit the project [site](https://viralogic.github.io/py-enumerable) for b
     </thead>
     <tbody>
         <tr>
+            <td>16-Jul-2019</td>
+            <td style='text-align: right;'>1.0.1</td>
+            <td>
+                <ul>
+                    <li>Issue #21 - Support lambda predicates in first, first_or_default, last, and last_or_default methods</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
             <td>07-Mar-2019</td>
             <td style='text-align: right;'>1.0</td>
             <td>
