@@ -1,12 +1,12 @@
 ## last_or_default
 
-`last_or_default()`
+`last_or_default(predicate)`
 
-Returns the last element in an `Enumerable` collection. If the collection contains no elements then returns `None`. This is an executing function.
+Returns the last element in an `Enumerable` collection. If a `predicate` is given, then it is the first element in the collection that satisfies the condition. If the collection contains no elements then returns `None`. This is an executing function.
 
 **Parameters**
 
-None
+__predicate__ : condition to satisfy as a `lambda` function. Optional.
 
 **Returns**
 
