@@ -142,7 +142,7 @@ class Enumerable3(object):
         except NoElementsError:
             return None
 
-    def first(self):
+    def first(self, func=None):
         """
         Returns the first element in a collection
         :func: predicate as lambda expression used to filter collection
@@ -153,7 +153,7 @@ class Enumerable3(object):
             return self.where(func).element_at(0)
         return self.element_at(0)
 
-    def first_or_default(self):
+    def first_or_default(self, func=None):
         """
         Return the first element in a collection. If collection is empty, then returns None
         :func: predicate as lambda expression used to filter collection
@@ -513,8 +513,6 @@ class Enumerable3(object):
         first element is used as the seed
         :return: result of the calculation
         """
-        if self.count() == 0:
-            raise NoElementsError("No elements perform aggregation")
         result = seed if seed is not None else self.first()
         for i, e in enumerate(self):
             if i == 0 and seed is None:

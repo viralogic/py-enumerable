@@ -471,8 +471,6 @@ class Enumerable(object):
         first element is used as the seed
         :return: result of the calculation
         """
-        if self.count() == 0:
-            raise NoElementsError("No elements perform aggregation")
         result = seed if seed is not None else self.first()
         for i, e in enumerate(self):
             if i == 0 and seed is None:
