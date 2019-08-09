@@ -466,7 +466,6 @@ class TestFunctions(TestCase):
             u"Should yield complex list")
 
     def test_any(self):
-        self.assertRaises(NullArgumentError, self.simple.any, None)
         self.assertFalse(
             self.empty.any(lambda x: x == 1),
             u"Empty enumerable does not contain any elements that equal 1")

@@ -439,8 +439,7 @@ class Enumerable3(object):
         :return: boolean True or False
         """
         if predicate is None:
-            raise NullArgumentError(
-                u"predicate lambda expression is necessary")
+            return self.count() > 0
         return self.where(predicate).count() > 0
 
     def intersect(self, enumerable, key=lambda x: x):

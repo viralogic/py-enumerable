@@ -437,15 +437,14 @@ class Enumerable(object):
             )
         ).select(result_func)
 
-    def any(self, predicate):
+    def any(self, predicate=None):
         """
         Returns true if any elements that satisfy predicate are found
         :param predicate: condition to satisfy as lambda expression
         :return: boolean True or False
         """
         if predicate is None:
-            raise NullArgumentError(
-                u"predicate lambda expression is necessary")
+            return self.count() > 0
         return self.where(predicate).count() > 0
 
     def intersect(self, enumerable, key=lambda x: x):
