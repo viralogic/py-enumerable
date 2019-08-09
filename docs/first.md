@@ -1,6 +1,6 @@
 ## first
 
-`first(predicate)`
+`first(predicate=None)`
 
 Returns the first element in an `Enumerable` collection. If a `predicate` is given, then it is the first element in the collection that satisfies the condition. If the collection contains no elements then a _NoElementsError_ is raised. This is an executing function.
 

@@ -74,3 +74,5 @@ Once you have created an `Enumerable` instance, the LINQ methods will become ava
 43. [take_while](/py-enumerable/take_while)
 44. [zip](/py-enumerable/zip)
 45. [default_if_empty](/py-enumerable/default_if_empty)
+46. [single](/py-enumerable/single)
+47. [single_or_default](/py-enumerable/single-or-default)

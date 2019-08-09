@@ -275,73 +275,31 @@ class TestFunctions(TestCase):
             u"Should yield an empty list")
 
     def test_single_single_or_default(self):
-        self.assertRaises(NullArgumentError, self.empty.single, None)
+        self.assertRaises(NoMatchingElement, self.empty.single, lambda x: x == 0)
+        self.assertRaises(NoMatchingElement, self.empty.single, None)
 
-        self.assertRaises(
-            NoMatchingElement,
-            self.empty.single,
-            lambda x: x == 0)
-        self.assertRaises(
-            NoMatchingElement,
-            self.simple.single,
-            lambda x: x == 0)
-        self.assertRaises(
-            NoMatchingElement,
-            self.complex.single,
-            lambda x: x['value'] == 0)
-        self.assertRaises(
-            MoreThanOneMatchingElement,
-            self.simple.single,
-            lambda x: x > 0)
-        self.assertRaises(
-            MoreThanOneMatchingElement,
-            self.complex.single,
-            lambda x: x['value'] > 0)
-        self.assertRaises(
-            MoreThanOneMatchingElement,
-            self.simple.single_or_default,
-            lambda x: x > 0)
-        self.assertRaises(
-            MoreThanOneMatchingElement,
-            self.complex.single_or_default,
-            lambda x: x['value'] > 0)
+        self.assertRaises(NoMatchingElement, self.simple.single, lambda x: x == 0)
+        self.assertRaises(MoreThanOneMatchingElement, self.simple.single, None)
+
+        self.assertRaises(NoMatchingElement, self.complex.single, lambda x: x['value'] == 0)
+        self.assertRaises(MoreThanOneMatchingElement, self.complex.single, None)
+
+        self.assertRaises(MoreThanOneMatchingElement, self.simple.single, lambda x: x > 0)
+        self.assertRaises(MoreThanOneMatchingElement, self.complex.single, lambda x: x['value'] > 0)
+
+        self.assertRaises(MoreThanOneMatchingElement, self.simple.single_or_default, lambda x: x > 0)
+        self.assertIsNone(self.simple.single_or_default(lambda x: x > 3))
+
+        self.assertRaises(MoreThanOneMatchingElement, self.complex.single_or_default, lambda x: x['value'] > 0)
 
         simple_single = self.simple.single(lambda x: x == 2)
-        self.assertIsInstance(
-            simple_single,
-            int,
-            u"Should yield int")
-        self.assertEqual(
-            simple_single,
-            2,
-            u"Should yield 2")
+        self.assertIsInstance(simple_single, int)
+        self.assertEqual(simple_single, 2)
 
         complex_single = self.complex.single(lambda x: x['value'] == 2)
-        self.assertIsInstance(
-            complex_single,
-            dict,
-            "Should yield dict")
-        self.assertDictEqual(
-            complex_single,
-            {'value': 2},
-            u"Yield '{'value':2}'")
-        self.assertEqual(
-            simple_single,
-            self.complex.select(lambda x: x['value']).single(lambda x: x == 2),
-            u"Projection and single on complex should yield single on simple")
-
-        self.assertEqual(
-            self.empty.single_or_default(lambda x: x == 0),
-            None,
-            u"Single or default on empty list should yield None")
-        self.assertEqual(
-            self.simple.single_or_default(lambda x: x == 0),
-            None,
-            u"Should yield None")
-        self.assertEqual(
-            self.complex.single_or_default(lambda x: x['value'] == 0),
-            None,
-            u"Should yield None")
+        self.assertIsInstance(complex_single, dict)
+        self.assertDictEqual(complex_single, {'value': 2})
+        self.assertEqual(simple_single, self.complex.select(lambda x: x['value']).single(lambda x: x == 2))
 
     def test_select_many(self):
         empty = Enumerable([[], [], []])
@@ -856,6 +814,9 @@ class TestFunctions(TestCase):
         self.assertEqual(u"".join(test.to_list()), u'ZZZZZZZZZZ')
 
     def test_reverse(self):
+        test = self.empty.reverse()
+        self.assertListEqual(test.to_list(), [])
+
         test = self.simple.reverse()
         self.assertListEqual(test.to_list(), [3, 2, 1])
 

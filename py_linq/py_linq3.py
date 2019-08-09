@@ -81,7 +81,7 @@ class Enumerable3(object):
         :param func: lambda expression to transform data
         :return: minimum value
         """
-        if self.count() == 0:
+        if not self.any():
             raise NoElementsError(u"Iterable contains no elements")
         return min(self.select(func))
 
@@ -91,7 +91,7 @@ class Enumerable3(object):
         :param func: lambda expression to transform data
         :return: maximum value
         """
-        if self.count() == 0:
+        if not self.any():
             raise NoElementsError(u"Iterable contains no elements")
         return max(self.select(func))
 
@@ -101,10 +101,9 @@ class Enumerable3(object):
         :param func: lambda expression to transform data
         :return: average value as float object
         """
-        count = self.count()
-        if count == 0:
+        if not self.any():
             raise NoElementsError(u"Iterable contains no elements")
-        return float(self.sum(func)) / float(count)
+        return float(self.sum(func)) / float(self.count())
 
     def median(self, func=lambda x: x):
         """
@@ -112,7 +111,7 @@ class Enumerable3(object):
         :param func: lambda expression to project and sort data
         :return: median value
         """
-        if self.count() == 0:
+        if not self.any():
             raise NoElementsError(u"Iterable contains no elements")
         result = self.order_by(func).select(func).to_list()
         length = len(result)
@@ -236,7 +235,7 @@ class Enumerable3(object):
             raise NullArgumentError(u"No predicate given for where clause")
         return Enumerable3(filter(predicate, self))
 
-    def single(self, predicate):
+    def single(self, predicate=None):
         """
         Returns single element that matches given predicate.
         Raises:
@@ -246,16 +245,16 @@ class Enumerable3(object):
         :param predicate: predicate as a lambda expression
         :return: Matching element as object
         """
-        result = self.where(predicate).to_list()
-        count = len(result)
-        if count == 0:
-            raise NoMatchingElement(u"No matching element found")
-        if count > 1:
+        if not self.any(predicate):
+            raise NoMatchingElement("No matching element found")
+        result = self.where(predicate)
+        if result.count() > 1:
             raise MoreThanOneMatchingElement(
-                u"More than one matching element found. Use where instead")
-        return result[0]
+                "More than one matching element found. Use where instead"
+            )
+        return result.first()
 
-    def single_or_default(self, predicate):
+    def single_or_default(self, predicate=None):
         """
         Return single element that matches given predicate. If no matching
         element is found, returns None
@@ -265,10 +264,9 @@ class Enumerable3(object):
         :param predicate: predicate as a lambda expression
         :return: Matching element as object or None if no matches are found
         """
-        try:
-            return self.single(predicate)
-        except NoMatchingElement:
+        if not self.any(predicate):
             return None
+        return self.single(predicate)
 
     def select_many(self, func=lambda x: x):
         """
