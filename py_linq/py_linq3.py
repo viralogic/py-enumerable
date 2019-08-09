@@ -440,9 +440,7 @@ class Enumerable3(object):
         :param predicate: condition to satisfy as lambda expression
         :return: boolean True or False
         """
-        if predicate is None:
-            return self.count() > 0
-        return self.where(predicate).count() > 0
+        return self.first_or_default(predicate) is not None
 
     def intersect(self, enumerable, key=lambda x: x):
         """
