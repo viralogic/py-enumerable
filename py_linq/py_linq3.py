@@ -434,7 +434,7 @@ class Enumerable3(object):
             )
         ).select(result_func)
 
-    def any(self, predicate):
+    def any(self, predicate=None):
         """
         Returns true if any elements that satisfy predicate are found
         :param predicate: condition to satisfy as lambda expression
