@@ -40,18 +40,14 @@ class TestFunctions(TestCase):
             u"Sum of complex enumerable should be 6")
 
     def test_count(self):
-        self.assertEqual(
-            self.empty.count(),
-            0,
-            u"Empty enumerable has 0 elements")
-        self.assertEqual(
-            self.simple.count(),
-            3,
-            u"Simple enumerable has 3 elements")
-        self.assertEqual(
-            self.complex.count(),
-            3,
-            u"Complex enumerable has 3 elements")
+        self.assertEqual(self.empty.count(), 0)
+        self.assertEqual(self.empty.count(lambda x: x == 1), 0)
+
+        self.assertEqual(self.simple.count(), 3)
+        self.assertEqual(self.simple.count(lambda x: x == 1), 1)
+
+        self.assertEqual(self.complex.count(), 3)
+        self.assertEqual(self.complex.count(lambda x: x["value"] > 1), 2)
 
     def test_select(self):
         self.assertEqual(
@@ -466,18 +462,15 @@ class TestFunctions(TestCase):
             u"Should yield complex list")
 
     def test_any(self):
-        self.assertFalse(
-            self.empty.any(lambda x: x == 1),
-            u"Empty enumerable does not contain any elements that equal 1")
-        self.assertTrue(
-            self.simple.any(lambda x: x == 1),
-            u"Simple enumerable does contain elements that equal 1")
-        self.assertFalse(
-            self.complex.any(lambda x: x['value'] < 1),
-            u"Complex enumerable does not contain any elements with value < 1")
-        self.assertTrue(
-            self.complex.any(lambda x: x['value'] >= 1),
-            u"Complex enumerable does contain elements with value >= 1")
+        self.assertFalse(self.empty.any(lambda x: x == 1))
+        self.assertFalse(self.empty.any())
+
+        self.assertTrue(self.simple.any(lambda x: x == 1))
+        self.assertTrue(self.simple.any())
+
+        self.assertTrue(self.complex.any())
+        self.assertFalse(self.complex.any(lambda x: x['value'] < 1))
+        self.assertTrue(self.complex.any(lambda x: x['value'] >= 1))
 
     def test_contains(self):
         self.assertFalse(

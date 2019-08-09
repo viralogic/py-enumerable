@@ -50,11 +50,13 @@ class Enumerable3(object):
         """
         return list(element for element in self)
 
-    def count(self):
+    def count(self, predicate=None):
         """
         Returns the number of elements in iterable
         :return: integer object
         """
+        if predicate is not None:
+            return sum(1 for element in self.where(predicate))
         return sum(1 for element in self)
 
     def select(self, func=lambda x: x):
