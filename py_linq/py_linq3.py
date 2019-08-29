@@ -247,7 +247,7 @@ class Enumerable3(object):
         """
         if not self.any(predicate):
             raise NoMatchingElement("No matching element found")
-        result = self.where(predicate)
+        result = self.where(predicate) if predicate is not None else self
         if result.count() > 1:
             raise MoreThanOneMatchingElement(
                 "More than one matching element found. Use where instead"
