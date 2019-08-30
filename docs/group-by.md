@@ -2,7 +2,7 @@
 
 `group_by(key_names=[], key=lambda x: x, result_func=lambda x: x)`
 
-Groups an enumerable on given key selector and transforms the result. This is an executing function because it uses [itertools.groupby](https://docs.python.org/2/library/itertools.html#itertools.groupby) and the result of this function call is required to be saved to a `list` object for before being processed by the __result_func__ function.
+Groups an enumerable on given key selector and transforms the result. This is a non-executing function.
 
 **Parameters**
 

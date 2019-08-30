@@ -330,18 +330,7 @@ class Enumerable3(object):
         desired structure
         :return: Enumerable of grouping objects
         """
-        result = []
-        ordered = sorted(self, key=key)
-        grouped = itertools.groupby(ordered, key)
-        for k, g in grouped:
-            can_enumerate = isinstance(k, list) or isinstance(k, tuple) \
-                and len(k) > 0
-            key_prop = {}
-            for i, prop in enumerate(key_names):
-                key_prop.setdefault(prop, k[i] if can_enumerate else k)
-            key_object = Key(key_prop)
-            result.append(Grouping3(key_object, list(g)))
-        return Enumerable3(result).select(result_func)
+        return GroupedEnumerable3(itertools.groupby(sorted(self, key=key), key), key_names, result_func)
 
     def distinct(self, key=lambda x: x):
         """
@@ -624,6 +613,31 @@ class Enumerable3(object):
         return Enumerable3(itertools.zip_longest(self, enumerable)) \
             .where(lambda x: x[0] is not None and x[1] is not None) \
             .select(lambda x: func(x))
+
+
+class GroupedEnumerable3(Enumerable3):
+    def __init__(self, grouped_data, key_names, func=lambda x: x):
+        """
+        Constructor for GroupedEnumerable class
+        :param grouped_data: Iterable of grouped data
+        """
+        super(GroupedEnumerable3, self).__init__(grouped_data)
+        self.key_names = key_names
+        self.func = func
+
+    def __iter__(self):
+        cache = []
+        for d in self.data:
+            can_enumerate = isinstance(d[0], list) or isinstance(d[0], tuple) \
+                and len(d[0]) > 0
+            key_prop = {}
+            for i, prop in enumerate(self.key_names):
+                key_prop.setdefault(prop, d[0][i] if can_enumerate else d[0])
+            key_object = Key(key_prop)
+            grouped = list(d[1])
+            cache.append((d[0], grouped))
+            yield self.func(Grouping3(key_object, grouped))
+        self._data = cache
 
 
 class Grouping3(Enumerable3):

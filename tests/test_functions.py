@@ -341,46 +341,25 @@ class TestFunctions(TestCase):
 
     def test_group_by(self):
         simple_grouped = self.simple.group_by(key_names=['id'])
-        self.assertEqual(
-            simple_grouped.count(),
-            3,
-            u"Three grouped elements in simple grouped")
-        for g in simple_grouped:
-            self.assertEqual(
-                g.key.id,
-                g.first(),
-                u"Each id in simple grouped should match first value")
+        self.assertEqual(simple_grouped.count(), 3)
+        second = simple_grouped.single(lambda s: s.key.id == 2)
+        self.assertListEqual([2], second.to_list())
 
-        complex_grouped = self.complex.group_by(
-            key_names=['value'],
-            key=lambda x: x['value'])
-        self.assertEqual(
-            complex_grouped.count(),
-            3,
-            u"Three grouped elements in complex grouped")
+        complex_grouped = self.complex.group_by(key_names=['value'], key=lambda x: x['value'])
+        self.assertEqual(complex_grouped.count(), 3)
         for g in complex_grouped:
             self.assertEqual(
                 g.key.value,
                 g.select(lambda x: x['value']).first(),
                 u"Each value in complex grouped should mach first value")
 
-        locations_grouped = Enumerable(_locations) \
-            .group_by(
+        locations_grouped = Enumerable(_locations).group_by(
             key_names=['country', 'city'],
             key=lambda x: [x[0], x[1]])
-        self.assertEqual(
-            locations_grouped.count(),
-            7,
-            u"Seven grouped elements in locations grouped")
+        self.assertEqual(locations_grouped.count(), 7)
 
-        london = locations_grouped \
-            .single(
-                lambda c: c.key.city == 'London' and c.key.country == 'England'
-            )
-        self.assertEqual(
-            london.sum(lambda c: c[3]),
-            240000,
-            u"Sum of London, England location does not equal")
+        london = locations_grouped.single(lambda c: c.key.city == 'London' and c.key.country == 'England')
+        self.assertEqual(london.sum(lambda c: c[3]), 240000)
 
     def test_distinct(self):
         self.assertListEqual(
