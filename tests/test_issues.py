@@ -10,13 +10,19 @@ class IssueTests(TestCase):
         self.simple = Enumerable(_simple)
         self.complex = Enumerable(_complex)
 
-    def test_issue19(self):
+    def test_issue19_1(self):
         foo = Enumerable([1])
         bar = Enumerable([1])
         self.assertEqual(foo.intersect(bar).count(), 1)
 
+    def test_issue19_2(self):
         foo = Enumerable([1])
         bar = Enumerable([1]).distinct()
+        self.assertEqual(foo.intersect(bar).count(), 1)
+
+    def test_issue19_3(self):
+        foo = Enumerable([1]).distinct()
+        bar = Enumerable([1])
         self.assertEqual(foo.intersect(bar).count(), 1)
 
     # def test_first_last(self):

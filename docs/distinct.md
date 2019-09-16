@@ -2,7 +2,7 @@
 
 `distinct(key=lambda x: x)`
 
-Returns an `Enumerable` containing elements that are distinct based on a given key selector. This is an executing function.
+Returns an `Enumerable` containing elements that are distinct based on a given key selector. This is not an executing function.
 
 **Parameters**
 

@@ -362,27 +362,17 @@ class TestFunctions(TestCase):
         self.assertEqual(london.sum(lambda c: c[3]), 240000)
 
     def test_distinct(self):
-        self.assertListEqual(
-            self.empty.distinct().to_list(),
-            [],
-            u"Distinct empty enumerable yields empty list")
-        self.assertListEqual(
-            self.simple.concat(self.simple).distinct().to_list(),
-            _simple,
-            u"Distinct yields simple list")
+        self.assertListEqual(self.empty.distinct().to_list(), [])
+        self.assertListEqual(self.simple.concat(self.simple).distinct().to_list(), _simple)
+
         locations = Enumerable(_locations).distinct(lambda x: x[0])
-        self.assertEqual(
-            locations.count(),
-            3,
-            u"Three distinct countries in locations enumerable")
+        self.assertEqual(locations.count(), 3)
         self.assertListEqual(
-            locations.to_list(),
             [
                 ('England', 'London', 'Branch1', 90000),
                 ('Scotland', 'Edinburgh', 'Branch1', 20000),
                 ('Wales', 'Cardiff', 'Branch1', 29700)
-            ],
-            u"Distinct locations do not match")
+            ], locations.to_list())
 
     def test_default_if_empty(self):
         self.assertListEqual(
@@ -422,34 +412,13 @@ class TestFunctions(TestCase):
 
     def test_intersect(self):
         self.assertRaises(TypeError, self.empty.intersect, [])
-        self.assertListEqual(
-            self.empty.intersect(self.empty).to_list(),
-            [],
-            u"Intersect of two empty enumerables yield empty list")
-        self.assertListEqual(
-            self.empty.intersect(self.simple).to_list(),
-            [],
-            u"Intersect of empty and simple enumerables yields empty list")
-        self.assertListEqual(
-            self.simple.intersect(self.simple).to_list(),
-            _simple,
-            u"Intersect of two simple enumerables yields simple list")
-        self.assertListEqual(
-            self.simple.intersect(Enumerable([2])).to_list(),
-            [2],
-            u"Intersect of simple enumerable and [2] yields [2]")
-        self.assertListEqual(
-            self.simple.intersect(self.complex).to_list(),
-            [],
-            u"Intersect of simple and complex enumerable yields empty list")
-        self.assertListEqual(
-            self.complex.intersect(self.complex).to_list(),
-            _complex,
-            u"Intersect of two complex enumeraable yields complex list")
-        self.assertListEqual(
-            self.complex.intersect(Enumerable([{'value': 1}])).to_list(),
-            [{'value': 1}],
-            "Should yield {'value': 1}")
+        self.assertListEqual(self.empty.intersect(self.empty).to_list(), [])
+        self.assertListEqual(self.empty.intersect(self.simple).to_list(), [])
+        self.assertListEqual(self.simple.intersect(self.simple).to_list(), _simple)
+        self.assertListEqual(self.simple.intersect(Enumerable([2])).to_list(), [2])
+        self.assertListEqual(self.simple.intersect(self.complex).to_list(), [])
+        self.assertListEqual(self.complex.intersect(self.complex).to_list(), _complex)
+        self.assertListEqual(self.complex.intersect(Enumerable([{'value': 1}])).to_list(), [{'value': 1}])
 
     def test_except(self):
         self.assertRaises(TypeError, self.empty.except_, [])
@@ -507,51 +476,16 @@ class TestFunctions(TestCase):
         )
 
     def test_union(self):
-        self.assertListEqual(
-            self.empty.union(self.empty).to_list(),
-            [],
-            u"Union of two empty enumerables yields empty list")
-        self.assertListEqual(
-            self.empty.union(self.simple).to_list(),
-            _simple,
-            u"Union of empty and simple yield simple")
-        self.assertListEqual(
-            self.simple.union(self.empty).to_list(),
-            _simple,
-            u"Union of simple and empty yield simple")
-        self.assertListEqual(
-            self.empty.union(self.complex).to_list(),
-            _complex,
-            u"Union of empty and complex yield complex")
-        self.assertListEqual(
-            self.complex.union(self.empty).to_list(),
-            _complex,
-            u"Union of complex and empty yield complex")
+        self.assertListEqual([], self.empty.union(self.empty).to_list())
+        self.assertListEqual(_simple, self.empty.union(self.simple).to_list())
+        self.assertListEqual(_simple, self.simple.union(self.empty).to_list())
+        self.assertListEqual(_complex, self.empty.union(self.complex).to_list())
+        self.assertListEqual(_complex, self.complex.union(self.empty).to_list())
+        self.assertListEqual(_simple + [4, 5], self.simple.union(Enumerable([4, 5])).to_list())
+        self.assertListEqual(_simple + [4, 5], self.simple.union(Enumerable([1, 4, 5])).to_list())
 
-        simple_extended = _simple + [4, 5]
-        self.assertListEqual(
-            self.simple.union(Enumerable([4, 5])).to_list(),
-            simple_extended,
-            u"Union of simple and [4,5] yield simple + [4,5]")
-        self.assertListEqual(
-            self.simple.union(Enumerable([1, 4, 5]))
-                .order_by(lambda x: x).to_list(),
-            simple_extended,
-            u"Union of simple and [1,4,5] yield simple + [4,5]")
-
-        complex_extended = _complex + [{'value': 4}, {'value': 5}]
-        self.assertListEqual(
-            self.complex.union(
-                Enumerable([{'value': 4}, {'value': 5}]),
-                lambda x: x['value']).to_list(),
-            complex_extended,
-            u"Should yield complex + [{'value': 4}, {'value': 5}]")
-        self.assertListEqual(
-            self.complex.union(
-                Enumerable([{'value': 1}, {'value': 4}, {'value': 5}]),
-                lambda x: x['value']).order_by(lambda x: x['value']).to_list(),
-            complex_extended,
-            u"Should yield complex + [{'value': 4}, {'value': 5}]")
+        self.assertListEqual(_complex + [{'value': 4}, {'value': 5}], self.complex.union(Enumerable([{'value': 4}, {'value': 5}]), lambda x: x['value']).to_list())
+        self.assertListEqual(_complex + [{'value': 4}, {'value': 5}], self.complex.union(Enumerable([{'value': 1}, {'value': 4}, {'value': 5}]), lambda x: x['value']).order_by(lambda x: x['value']).to_list())
 
     def test_join(self):
         self.assertRaises(TypeError, self.empty.join, [])

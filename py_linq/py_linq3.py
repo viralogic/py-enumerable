@@ -339,7 +339,7 @@ class Enumerable3(object):
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
-        return Enumerable3(self.group_by(key=key).select(lambda g: g.first()).to_list())
+        return GroupedEnumerable3(itertools.groupby(sorted(self, key=key), key), key_names=['distinct']).select(lambda g: g.first())
 
     def join(
             self,
@@ -437,10 +437,10 @@ class Enumerable3(object):
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
-        if not isinstance(enumerable, Enumerable3):
+        if not isinstance(enumerable, Enumerable):
             raise TypeError(
                 u"enumerable parameter must be an instance of Enumerable")
-        return self.join(enumerable, key, key).select(lambda x: x[0])
+        return IntersectEnumerable3(self, enumerable, key)
 
     def union(self, enumerable, key=lambda x: x):
         """
@@ -513,7 +513,7 @@ class Enumerable3(object):
         :param predicate: the condition to test each element as lambda function
         :return: boolean True or False
         """
-        return self.where(predicate).count() == self.count()
+        return all(predicate(e) for e in self)
 
     def append(self, element):
         """
@@ -613,6 +613,22 @@ class Enumerable3(object):
         return Enumerable3(itertools.zip_longest(self, enumerable)) \
             .where(lambda x: x[0] is not None and x[1] is not None) \
             .select(lambda x: func(x))
+
+
+class IntersectEnumerable3(Enumerable3):
+    def __init__(self, enumerable1, enumerable2, key):
+        super(IntersectEnumerable3, self).__init__(enumerable1)
+        self.enumerable = enumerable2
+        self.key = key
+
+    def __iter__(self):
+        cache = []
+        for i in self.data:
+            k1 = self.key(i)
+            if any(self.key(i2) == k1 for i2 in self.enumerable):
+                cache.append(i)
+                yield i
+        self._data = cache
 
 
 class GroupedEnumerable3(Enumerable3):
