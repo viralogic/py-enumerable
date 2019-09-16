@@ -437,7 +437,7 @@ class Enumerable3(object):
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
-        if not isinstance(enumerable, Enumerable):
+        if not isinstance(enumerable, Enumerable3):
             raise TypeError(
                 u"enumerable parameter must be an instance of Enumerable")
         return IntersectEnumerable3(self, enumerable, key)
