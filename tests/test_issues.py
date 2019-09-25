@@ -61,7 +61,7 @@ class IssueTests(TestCase):
     #         u"Last values in simple and complex should equal")
 
     def test_first_with_lambda(self):
-        self.assertRaises(exceptions.NoElementsError, self.empty.first, lambda x: x == 0)
+        self.assertRaises(IndexError, self.empty.first, lambda x: x == 0)
         self.assertEqual(2, self.simple.first(lambda x: x == 2))
         self.assertDictEqual({'value': 2}, self.complex.first(lambda x: x['value'] == 2))
 
@@ -71,7 +71,7 @@ class IssueTests(TestCase):
         self.assertEqual(self.complex.first(lambda x: x['value'] == 2), self.complex.first_or_default(lambda x: x['value'] == 2))
 
     def test_last_with_lambda(self):
-        self.assertRaises(exceptions.NoElementsError, self.empty.last, lambda x: x == 0)
+        self.assertRaises(IndexError, self.empty.last, lambda x: x == 0)
         self.assertEqual(2, self.simple.last(lambda x: x == 2))
         self.assertDictEqual({'value': 2}, self.complex.last(lambda x: x['value'] == 2))
         self.assertEqual(self.simple.first(lambda x: x == 2), self.simple.last(lambda x: x == 2))

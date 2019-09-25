@@ -50,30 +50,15 @@ class TestFunctions(TestCase):
         self.assertEqual(self.complex.count(lambda x: x["value"] > 1), 2)
 
     def test_select(self):
-        self.assertEqual(
-            self.empty.select(lambda x: x['value']).count(),
-            0,
-            u"Empty enumerable should still have 0 elements")
+        self.assertEqual(self.empty.select(lambda x: x['value']).count(), 0)
 
         simple_select = self.simple.select(lambda x: {'value': x})
-        self.assertDictEqual(
-            simple_select.first(),
-            {'value': 1},
-            u"Transformed simple enumerable element is dictionary")
-        self.assertEqual(
-            simple_select.count(),
-            3,
-            u"Transformed simple enumerable has 3 elements")
+        self.assertDictEqual(simple_select.first(), {'value': 1})
+        self.assertEqual(simple_select.count(), 3)
 
         complex_select = self.complex.select(lambda x: x['value'])
-        self.assertEqual(
-            complex_select.count(),
-            3, u"Transformed complex enumerable has 3 elements")
-        self.assertIsInstance(
-            complex_select.first(),
-            int,
-            u"Transformed complex enumerable element is integer"
-        )
+        self.assertEqual(complex_select.count(), 3)
+        self.assertIsInstance(complex_select.first(), int)
 
     def test_max_min(self):
         self.assertRaises(NoElementsError, self.empty.min)
@@ -100,83 +85,30 @@ class TestFunctions(TestCase):
     def test_avg(self):
         avg = float(2)
         self.assertRaises(NoElementsError, self.empty.avg)
-        self.assertEqual(
-            self.simple.avg(),
-            avg,
-            u"Avg value of simple enumerable is {0:.5f}".format(avg))
-        self.assertEqual(
-            self.complex.avg(lambda x: x['value']),
-            avg,
-            u"Avg value of complex enumerable is {0:.5f}".format(avg))
+        self.assertEqual(self.simple.avg(), avg)
+        self.assertEqual(self.complex.avg(lambda x: x['value']), avg)
 
-    def test_first_last(self):
-        self.assertRaises(NoElementsError, self.empty.first)
-        self.assertEqual(
-            self.empty.first_or_default(),
-            None,
-            u"First or default should be None")
-        self.assertIsInstance(
-            self.simple.first(),
-            int,
-            u"First element in simple enumerable is int")
-        self.assertEqual(
-            self.simple.first(),
-            1,
-            u"First element in simple enumerable is 1")
-        self.assertEqual(
-            self.simple.first(),
-            self.simple.first_or_default(),
-            u"First and first or default should equal")
-        self.assertIsInstance(
-            self.complex.first(),
-            dict,
-            u"First element in complex enumerable is dict")
-        self.assertDictEqual(
-            self.complex.first(),
-            {'value': 1},
-            u"First element in complex enumerable is not correct dict")
-        self.assertDictEqual(
-            self.complex.first(),
-            self.complex.first_or_default(),
-            u"First and first or default should equal")
-        self.assertEqual(
-            self.simple.first(),
-            self.complex.select(lambda x: x['value']).first(),
-            u"First values in simple and complex should equal")
+    def test_first(self):
+        self.assertRaises(IndexError, self.empty.first)
+        self.assertEqual(self.empty.first_or_default(), None)
+        self.assertIsInstance(self.simple.first(), int)
+        self.assertEqual(self.simple.first(), 1)
+        self.assertEqual(self.simple.first(), self.simple.first_or_default())
+        self.assertIsInstance(self.complex.first(), dict)
+        self.assertDictEqual(self.complex.first(), {'value': 1})
+        self.assertDictEqual(self.complex.first(), self.complex.first_or_default())
+        self.assertEqual(self.simple.first(), self.complex.select(lambda x: x['value']).first())
 
-        self.assertRaises(NoElementsError, self.empty.last)
-        self.assertEqual(
-            self.empty.last_or_default(),
-            None,
-            u"Last or default should be None")
-        self.assertIsInstance(
-            self.simple.last(),
-            int,
-            u"Last element in simple enumerable is int")
-        self.assertEqual(
-            self.simple.last(),
-            3,
-            u"Last element in simple enumerable is 3")
-        self.assertEqual(
-            self.simple.last(),
-            self.simple.last_or_default(),
-            u"Last and last or default should equal")
-        self.assertIsInstance(
-            self.complex.last(),
-            dict,
-            u"Last element in complex enumerable is dict")
-        self.assertDictEqual(
-            self.complex.last(),
-            {'value': 3},
-            u"Last element in complex enumerable is not correct dict")
-        self.assertDictEqual(
-            self.complex.last(),
-            self.complex.last_or_default(),
-            u"Last and last or default should equal")
-        self.assertEqual(
-            self.simple.last(),
-            self.complex.select(lambda x: x['value']).last(),
-            u"Last values in simple and complex should equal")
+    def test_last(self):
+        self.assertRaises(IndexError, self.empty.last)
+        self.assertEqual(self.empty.last_or_default(), None)
+        self.assertIsInstance(self.simple.last(), int)
+        self.assertEqual(self.simple.last(), 3)
+        self.assertEqual(self.simple.last(), self.simple.last_or_default())
+        self.assertIsInstance(self.complex.last(), dict)
+        self.assertDictEqual(self.complex.last(), {'value': 3})
+        self.assertDictEqual(self.complex.last(), self.complex.last_or_default())
+        self.assertEqual(self.simple.last(), self.complex.select(lambda x: x['value']).last())
 
     def test_sort(self):
         self.assertRaises(NullArgumentError, self.simple.order_by, None)
@@ -274,7 +206,7 @@ class TestFunctions(TestCase):
             self.empty.to_list(),
             u"Should yield an empty list")
 
-    def test_single_single_or_default(self):
+    def test_single(self):
         self.assertRaises(NoMatchingElement, self.empty.single, lambda x: x == 0)
         self.assertRaises(NoMatchingElement, self.empty.single, None)
 
@@ -287,6 +219,7 @@ class TestFunctions(TestCase):
         self.assertRaises(MoreThanOneMatchingElement, self.simple.single, lambda x: x > 0)
         self.assertRaises(MoreThanOneMatchingElement, self.complex.single, lambda x: x['value'] > 0)
 
+    def test_single_or_default(self):
         self.assertRaises(MoreThanOneMatchingElement, self.simple.single_or_default, lambda x: x > 0)
         self.assertIsNone(self.simple.single_or_default(lambda x: x > 3))
 
@@ -299,7 +232,8 @@ class TestFunctions(TestCase):
         complex_single = self.complex.single(lambda x: x['value'] == 2)
         self.assertIsInstance(complex_single, dict)
         self.assertDictEqual(complex_single, {'value': 2})
-        self.assertEqual(simple_single, self.complex.select(lambda x: x['value']).single(lambda x: x == 2))
+        select_single = self.complex.select(lambda x: x['value']).single(lambda x: x == 2)
+        self.assertEqual(simple_single, select_single)
 
     def test_select_many(self):
         empty = Enumerable([[], [], []])
@@ -686,7 +620,7 @@ class TestFunctions(TestCase):
         test = Enumerable(words).aggregate(self.reverse)
         self.assertEqual(test, "dog lazy the over jumps fox brown quick the")
 
-        self.assertRaises(NoElementsError, Enumerable().aggregate, [lambda x: x[0] + x[1], 0])
+        self.assertRaises(IndexError, Enumerable().aggregate, [lambda x: x[0] + x[1], 0])
 
         test = self.simple.aggregate(self.sum, seed=0)
         self.assertEqual(test, 6)

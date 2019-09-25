@@ -40,6 +40,22 @@ class Enumerable3(object):
             yield element
         self._data = cache
 
+    def __getitem__(self, n):
+        """
+        Gets item in iterable at specified zero-based index
+        :param n: the index of the item to get
+        :returns the element at the specified index.
+        :raises IndexError if n > number of elements in the iterable
+        """
+        if n < 0:
+            raise IndexError
+        lh, rh = itertools.tee(self._data)
+        lhl = list(itertools.islice(lh, 0, n + 1))
+        self._data = rh
+        if len(lhl) == 0:
+            raise IndexError
+        return lhl[n]
+
     def __repr__(self):
         return self._data.__repr__()
 
@@ -125,10 +141,12 @@ class Enumerable3(object):
         :param n: index as int object
         :return: Element at given index
         """
-        result = list(itertools.islice(self.to_list(), max(0, n), n + 1, 1))
-        if len(result) == 0:
-            raise NoElementsError(u"No element found at index {0}".format(n))
-        return result[0]
+        if not isinstance(n, int):
+            raise TypeError("Must be an integer")
+        result = self[n]
+        if result is None:
+            raise IndexError
+        return result
 
     def element_at_or_default(self, n):
         """
@@ -140,7 +158,7 @@ class Enumerable3(object):
         """
         try:
             return self.element_at(n)
-        except NoElementsError:
+        except IndexError:
             return None
 
     def first(self, func=None):
@@ -245,14 +263,14 @@ class Enumerable3(object):
         :param predicate: predicate as a lambda expression
         :return: Matching element as object
         """
-        if not self.any(predicate):
+        result = self.where(predicate).to_list() if predicate is not None else self.to_list()
+        if len(result) == 0:
             raise NoMatchingElement("No matching element found")
-        result = self.where(predicate) if predicate is not None else self
-        if result.count() > 1:
+        if len(result) > 1:
             raise MoreThanOneMatchingElement(
                 "More than one matching element found. Use where instead"
             )
-        return result.first()
+        return result[0]
 
     def single_or_default(self, predicate=None):
         """
@@ -264,9 +282,10 @@ class Enumerable3(object):
         :param predicate: predicate as a lambda expression
         :return: Matching element as object or None if no matches are found
         """
-        if not self.any(predicate):
+        try:
+            return self.single(predicate)
+        except NoMatchingElement:
             return None
-        return self.single(predicate)
 
     def select_many(self, func=lambda x: x):
         """
