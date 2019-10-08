@@ -45,6 +45,22 @@ Please visit the project [site](https://viralogic.github.io/py-enumerable) for b
     </thead>
     <tbody>
         <tr>
+            <td>7-Oct-2019</td>
+            <td style='text-align: right;'>1.1.0</td>
+            <td>
+                <ul>
+                    <li>Issue # 23 - Any accepts a None predicate</li>
+                    <li>Issue #24 - Performance improvement where any returns on first matching element</li>
+                    <li>Issue #25 - Use of any to check for elements in an Enumerable</li>
+                    <li>Issue #26 - Performance improvement where element_at only iterates until the n-th element</li>
+                    <li>Issue #29 - Performance improvement where distinct method is no longer immediately executing.</li>
+                    <li>Issue #30 - Performance improvement where all function is no longer iterating through collection more than once</li>
+                    <li>Issue #31 - Performance improvement where reverse function is no longer immediately executing</li>
+                    <li>Issue #32 - Count function now accepts a lambda predicate to filter collection</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
             <td>16-Jul-2019</td>
             <td style='text-align: right;'>1.0.1</td>
             <td>
