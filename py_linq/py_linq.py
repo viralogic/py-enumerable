@@ -53,6 +53,12 @@ class Enumerable(object):
             raise IndexError
         return lhl[n]
 
+    def __len__(self):
+        """
+        Gets the number of elements in the collection
+        """
+        return self.count()
+
     def __repr__(self):
         return self._data.__repr__()
 
@@ -578,7 +584,7 @@ class Enumerable(object):
         Inverts the order of the elements in a sequence
         :return: Enumerable with elements in reversed order
         """
-        return self.aggregate(lambda *args: args[0].prepend(args[1]), Enumerable())
+        return Enumerable(reversed(self))
 
     def skip_last(self, n):
         """
@@ -738,3 +744,4 @@ class SortedEnumerable(Enumerable):
                 u"then_by_descending requires a lambda function arg")
         self._key_funcs.append(OrderingDirection(key=func, reverse=True))
         return SortedEnumerable(self._key_funcs, self._data)
+

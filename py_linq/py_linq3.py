@@ -59,6 +59,12 @@ class Enumerable3(object):
     def __repr__(self):
         return self._data.__repr__()
 
+    def __len__(self):
+        """
+        The number of elements in the collection
+        """
+        return self.count()
+
     def to_list(self):
         """
         Converts the iterable into a list
@@ -583,7 +589,7 @@ class Enumerable3(object):
         Inverts the order of the elements in a sequence
         :return: Enumerable with elements in reversed order
         """
-        return self.aggregate(lambda *args: args[0].prepend(args[1]), Enumerable3())
+        return Enumerable3(reversed(self))
 
     def skip_last(self, n):
         """
