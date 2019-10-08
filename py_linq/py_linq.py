@@ -744,4 +744,3 @@ class SortedEnumerable(Enumerable):
                 u"then_by_descending requires a lambda function arg")
         self._key_funcs.append(OrderingDirection(key=func, reverse=True))
         return SortedEnumerable(self._key_funcs, self._data)
-
