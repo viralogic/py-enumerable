@@ -25,40 +25,28 @@ class IssueTests(TestCase):
         bar = Enumerable([1])
         self.assertEqual(foo.intersect(bar).count(), 1)
 
-    # def test_first_last(self):
-    #     self.assertRaises(NoElementsError, self.empty.last)
-    #     self.assertEqual(
-    #         self.empty.last_or_default(),
-    #         None,
-    #         u"Last or default should be None")
-    #     self.assertIsInstance(
-    #         self.simple.last(),
-    #         int,
-    #         u"Last element in simple enumerable is int")
-    #     self.assertEqual(
-    #         self.simple.last(),
-    #         3,
-    #         u"Last element in simple enumerable is 3")
-    #     self.assertEqual(
-    #         self.simple.last(),
-    #         self.simple.last_or_default(),
-    #         u"Last and last or default should equal")
-    #     self.assertIsInstance(
-    #         self.complex.last(),
-    #         dict,
-    #         u"Last element in complex enumerable is dict")
-    #     self.assertDictEqual(
-    #         self.complex.last(),
-    #         {'value': 3},
-    #         u"Last element in complex enumerable is not correct dict")
-    #     self.assertDictEqual(
-    #         self.complex.last(),
-    #         self.complex.last_or_default(),
-    #         u"Last and last or default should equal")
-    #     self.assertEqual(
-    #         self.simple.last(),
-    #         self.complex.select(lambda x: x['value']).last(),
-    #         u"Last values in simple and complex should equal")
+    def test_issue22(self):
+        def my_iter():
+            for i in range(10):
+                yield i
+
+        def low_iter():
+            for i in range(5):
+                yield i
+
+        def high_iter():
+            for k in range(5):
+                yield k + 5
+
+        data = my_iter()
+        a = Enumerable(data)
+
+        low = a.where(lambda x: x < 5)
+        high = a.where(lambda x: x >= 5)
+
+        self.assertItemsEqual(low_iter(), low)
+        self.assertItemsEqual(high_iter(), high)
+        self.assertItemsEqual(my_iter(), a)
 
     def test_first_with_lambda(self):
         self.assertRaises(IndexError, self.empty.first, lambda x: x == 0)
