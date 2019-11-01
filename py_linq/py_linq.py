@@ -383,19 +383,21 @@ class Enumerable(object):
             raise TypeError(
                 u"inner_enumerable parameter must be an instance of Enumerable"
             )
+        outer1, outer2 = itertools.tee(self.data, 2)
+        inner1, inner2 = itertools.tee(inner_enumerable.data, 2)
         return Enumerable(
             itertools.product(
                 itertools.ifilter(
                     lambda x: outer_key(x) in itertools.imap(
                         inner_key,
-                        inner_enumerable
-                    ), self
+                        inner1
+                    ), outer1
                 ),
                 itertools.ifilter(
                     lambda y: inner_key(y) in itertools.imap(
                         outer_key,
-                        self),
-                    inner_enumerable
+                        outer2),
+                    inner2
                 )
             )
         )\

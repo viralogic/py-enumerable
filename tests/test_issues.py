@@ -58,17 +58,17 @@ class IssueTests(TestCase):
                 return "VAL {0}: {1}".format(self.number, self.power)
 
         def powers_of_2():
-            for i in range(10):
+            for i in range(2):
                 yield Val(i, 2 ** i)
 
         def powers_of_10():
-            for i in range(10):
+            for i in range(2):
                 yield Val(i, 10 ** i)
 
         en2 = Enumerable(powers_of_2())
         en10 = Enumerable(powers_of_10())
-        joined = en2.join(en10, lambda x: x.number, lambda y: y.number)
-        truth = zip([2 ** i for i in range(10)], [10 ** i for i in range(10)])
+        joined = en2.join(en10, lambda x: x.number, lambda y: y.number, lambda r: (r[0].power, r[1].power))
+        truth = zip([2 ** i for i in range(2)], [10 ** y for y in range(2)])
         self.assertItemsEqual(truth, joined)
 
     def test_first_with_lambda(self):
