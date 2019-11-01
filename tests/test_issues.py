@@ -48,6 +48,29 @@ class IssueTests(TestCase):
         self.assertItemsEqual(high_iter(), high)
         self.assertItemsEqual(my_iter(), a)
 
+    def test_issue22_join(self):
+        class Val(object):
+            def __init__(self, number, power):
+                self.number = number
+                self.power = power
+
+            def __str__(self):
+                return "VAL {0}: {1}".format(self.number, self.power)
+
+        def powers_of_2():
+            for i in range(10):
+                yield Val(i, 2 ** i)
+
+        def powers_of_10():
+            for i in range(10):
+                yield Val(i, 10 ** i)
+
+        en2 = Enumerable(powers_of_2())
+        en10 = Enumerable(powers_of_10())
+        joined = en2.join(en10, lambda x: x.number, lambda y: y.number)
+        truth = zip([2 ** i for i in range(10)], [10 ** i for i in range(10)])
+        self.assertItemsEqual(truth, joined)
+
     def test_first_with_lambda(self):
         self.assertRaises(IndexError, self.empty.first, lambda x: x == 0)
         self.assertEqual(2, self.simple.first(lambda x: x == 2))
