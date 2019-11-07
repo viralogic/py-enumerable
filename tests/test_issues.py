@@ -44,9 +44,9 @@ class IssueTests(TestCase):
         low = a.where(lambda x: x < 5)
         high = a.where(lambda x: x >= 5)
 
-        self.assertItemsEqual(low_iter(), low)
-        self.assertItemsEqual(high_iter(), high)
-        self.assertItemsEqual(my_iter(), a)
+        self.assertListEqual(list(low_iter()), low.to_list())
+        self.assertListEqual(list(high_iter()), high.to_list())
+        self.assertListEqual(list(my_iter()), a.to_list())
 
     def test_issue22_join(self):
         class Val(object):
@@ -69,7 +69,7 @@ class IssueTests(TestCase):
         en10 = Enumerable(powers_of_10())
         joined = en2.join(en10, lambda x: x.number, lambda y: y.number, lambda r: (r[0].power, r[1].power))
         truth = zip([2 ** i for i in range(2)], [10 ** y for y in range(2)])
-        self.assertItemsEqual(truth, joined)
+        self.assertListEqual(list(truth), joined.to_list())
 
     def test_first_with_lambda(self):
         self.assertRaises(IndexError, self.empty.first, lambda x: x == 0)
