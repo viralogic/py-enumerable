@@ -622,7 +622,7 @@ class Enumerable(object):
         """
         return Enumerable(itertools.takewhile(predicate, self))
 
-    def zip(self, enumerable, func):
+    def zip(self, enumerable, func=lambda x: x):
         """
         Merges 2 Enumerables using the given function. If the 2 collections are of unequal length, then
         merging continues until the end of one of the collections is reached

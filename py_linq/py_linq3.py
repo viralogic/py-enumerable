@@ -257,7 +257,7 @@ class Enumerable3(object):
         """
         if predicate is None:
             raise NullArgumentError(u"No predicate given for where clause")
-        return Enumerable3(filter(predicate, self))
+        return Enumerable3([x for x in self if predicate(x)])
 
     def single(self, predicate=None):
         """
@@ -627,7 +627,7 @@ class Enumerable3(object):
         """
         return Enumerable3(itertools.takewhile(predicate, self))
 
-    def zip(self, enumerable, func):
+    def zip(self, enumerable, func=lambda x: x):
         """
         Merges 2 Enumerables using the given function. If the 2 collections are of unequal length, then
         merging continues until the end of one of the collections is reached

@@ -50,6 +50,14 @@ class IssueTests(TestCase):
             (2, 7),
             (3, 8),
             (4, 9)
+        ], low.zip(high).to_list())
+
+        self.assertListEqual([
+            (0, 5),
+            (1, 6),
+            (2, 7),
+            (3, 8),
+            (4, 9)
         ], list(zip(low, high)))
 
     def test_issue22_join(self):
