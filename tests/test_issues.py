@@ -44,9 +44,13 @@ class IssueTests(TestCase):
         low = a.where(lambda x: x < 5)
         high = a.where(lambda x: x >= 5)
 
-        self.assertListEqual(list(low_iter()), low.to_list())
-        self.assertListEqual(list(high_iter()), high.to_list())
-        self.assertListEqual(list(my_iter()), a.to_list())
+        self.assertListEqual([
+            (0, 5),
+            (1, 6),
+            (2, 7),
+            (3, 8),
+            (4, 9)
+        ], list(zip(low, high)))
 
     def test_issue22_join(self):
         class Val(object):
