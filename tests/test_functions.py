@@ -11,19 +11,20 @@ class TestFunctions(TestCase):
         self.simple = Enumerable(_simple)
         self.complex = Enumerable(_complex)
 
+    def test_iter(self):
+        self.assertListEqual(_simple, list(iter(self.simple)))
+        self.assertListEqual(_simple, list(iter(self.simple)))
+        self.assertListEqual(_empty, list(iter(self.empty)))
+        self.assertListEqual(_complex, list(iter(self.complex)))
+
+    def test_len(self):
+        self.assertEqual(0, len(self.empty))
+        self.assertEqual(3, len(self.simple))
+
     def test_to_list(self):
-        self.assertListEqual(
-            self.empty.to_list(),
-            _empty,
-            u"Empty to_list not correct")
-        self.assertListEqual(
-            self.simple.to_list(),
-            _simple,
-            u"Simple to_list not correct")
-        self.assertListEqual(
-            self.complex.to_list(),
-            _complex,
-            u"Complex to_list not correct")
+        self.assertListEqual(_empty, self.empty.to_list())
+        self.assertListEqual(_simple, self.simple.to_list())
+        self.assertListEqual(_complex, self.complex.to_list())
 
     def test_sum(self):
         self.assertEqual(
@@ -50,15 +51,10 @@ class TestFunctions(TestCase):
         self.assertEqual(self.complex.count(lambda x: x["value"] > 1), 2)
 
     def test_select(self):
-        self.assertEqual(self.empty.select(lambda x: x['value']).count(), 0)
-
-        simple_select = self.simple.select(lambda x: {'value': x})
-        self.assertDictEqual(simple_select.first(), {'value': 1})
-        self.assertEqual(simple_select.count(), 3)
-
-        complex_select = self.complex.select(lambda x: x['value'])
-        self.assertEqual(complex_select.count(), 3)
-        self.assertIsInstance(complex_select.first(), int)
+        self.assertListEqual([], self.empty.select(lambda x: x['value']).to_list())
+        print self.simple.select(lambda x: {'value': x}).to_list()
+        self.assertListEqual([{'value': 1}, {'value': 2}, {'value': 3}], self.simple.select(lambda x: {'value': x}).to_list())
+        self.assertIsInstance([1, 2, 3], self.complex.select(lambda x: x['value']).to_list())
 
     def test_max_min(self):
         self.assertRaises(NoElementsError, self.empty.min)

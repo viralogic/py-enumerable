@@ -21,6 +21,7 @@ class Enumerable(object):
                 u"Enumerable must be instantiated with an iterable object"
             )
         self._data = data
+        self._cycle = itertools.cycle(self._data)
 
     @property
     def data(self):
@@ -31,11 +32,10 @@ class Enumerable(object):
         return self._data
 
     def __iter__(self):
-        cache = []
-        for element in self._data:
-            cache.append(element)
-            yield element
-        self._data = cache
+        i = 0
+        while i < len(self):
+            yield next(self._cycle)
+            i += 1
 
     def __getitem__(self, n):
         """
@@ -57,7 +57,7 @@ class Enumerable(object):
         """
         Gets the number of elements in the collection
         """
-        return self.count()
+        return sum(1 for i in enumerate(self._data))
 
     def __repr__(self):
         return self._data.__repr__()
@@ -67,7 +67,7 @@ class Enumerable(object):
         Converts the iterable into a list
         :return: list object
         """
-        return list(element for element in self)
+        return list(self)
 
     def count(self, predicate=None):
         """
@@ -84,7 +84,8 @@ class Enumerable(object):
         :param func: lambda expression on how to perform transformation
         :return: new Enumerable object containing transformed data
         """
-        return Enumerable(itertools.imap(func, self))
+        map = itertools.imap(func, self)
+        return Enumerable(map)
 
     def sum(self, func=lambda x: x):
         """
