@@ -13,13 +13,32 @@ class TestFunctions(TestCase):
 
     def test_iter(self):
         self.assertListEqual(_simple, list(iter(self.simple)))
-        self.assertListEqual(_simple, list(iter(self.simple)))
         self.assertListEqual(_empty, list(iter(self.empty)))
         self.assertListEqual(_complex, list(iter(self.complex)))
+
+    def test_iter_select(self):
+        self.assertListEqual(_empty, list(iter(self.empty.select(lambda x: x))))
+        self.assertListEqual(_simple, list(iter(self.simple.select(lambda x: x))))
+        self.assertListEqual(_simple, list(iter(self.complex.select(lambda x: x['value']))))
+
+    def test_iter_where(self):
+        self.assertListEqual(_empty, list(iter(self.empty.where(lambda x: x == 2))))
+        self.assertListEqual([2], list(iter(self.simple.where(lambda x: x == 2))))
+        self.assertListEqual([{'value': 2}], list(iter(self.complex.where(lambda x: x['value'] == 2))))
 
     def test_len(self):
         self.assertEqual(0, len(self.empty))
         self.assertEqual(3, len(self.simple))
+
+    def test_get_item(self):
+        self.assertIsNone(self.empty[0])
+        self.assertEqual(2, self.simple[1])
+        self.assertDictEqual({'value': 2}, self.complex[1])
+
+    def test_get_item_select(self):
+        self.assertIsNone(self.empty.select(lambda x: x['value'])[0])
+        self.assertEqual(2, self.complex.select(lambda x: x['value'])[1])
+        self.assertEqual({'value': 2}, self.simple.select(lambda x: {'value': x})[1])
 
     def test_to_list(self):
         self.assertListEqual(_empty, self.empty.to_list())
@@ -27,56 +46,36 @@ class TestFunctions(TestCase):
         self.assertListEqual(_complex, self.complex.to_list())
 
     def test_sum(self):
-        self.assertEqual(
-            self.empty.sum(),
-            0,
-            u"Sum of empty enumerable should be 0")
-        self.assertEqual(
-            self.simple.sum(),
-            6,
-            u"Sum of simple enumerable should be 6")
-        self.assertEqual(
-            self.complex.sum(lambda x: x['value']),
-            6,
-            u"Sum of complex enumerable should be 6")
+        self.assertEqual(0, self.empty.sum())
+        self.assertEqual(6, self.simple.sum())
+
+    def test_sum_with_filter(self):
+        self.assertEqual(6, self.complex.sum(lambda x: x['value']))
 
     def test_count(self):
         self.assertEqual(self.empty.count(), 0)
-        self.assertEqual(self.empty.count(lambda x: x == 1), 0)
-
         self.assertEqual(self.simple.count(), 3)
-        self.assertEqual(self.simple.count(lambda x: x == 1), 1)
-
         self.assertEqual(self.complex.count(), 3)
+
+    def test_count_with_filter(self):
+        self.assertEqual(self.empty.count(lambda x: x == 1), 0)
+        self.assertEqual(self.simple.count(lambda x: x == 1), 1)
         self.assertEqual(self.complex.count(lambda x: x["value"] > 1), 2)
 
     def test_select(self):
         self.assertListEqual([], self.empty.select(lambda x: x['value']).to_list())
-        print self.simple.select(lambda x: {'value': x}).to_list()
         self.assertListEqual([{'value': 1}, {'value': 2}, {'value': 3}], self.simple.select(lambda x: {'value': x}).to_list())
-        self.assertIsInstance([1, 2, 3], self.complex.select(lambda x: x['value']).to_list())
+        self.assertListEqual([1, 2, 3], self.complex.select(lambda x: x['value']).to_list())
 
-    def test_max_min(self):
+    def test_min(self):
         self.assertRaises(NoElementsError, self.empty.min)
-        self.assertEqual(
-            self.simple.min(),
-            1,
-            u"Minimum value of simple enumerable is 1")
-        self.assertEqual(
-            self.complex.min(lambda x: x['value']),
-            1,
-            u"Min value of complex enumerable is 1"
-        )
+        self.assertEqual(1, self.simple.min())
+        self.assertEqual(1, self.complex.min(lambda x: x['value']))
 
+    def test_max(self):
         self.assertRaises(NoElementsError, self.empty.max)
-        self.assertEqual(
-            self.simple.max(),
-            3,
-            u"Max value of simple enumerable is 3")
-        self.assertEqual(
-            self.complex.max(lambda x: x['value']),
-            3,
-            u"Max value of complex enumerable is 3")
+        self.assertEqual(3, self.simple.max())
+        self.assertEqual(3, self.complex.max(lambda x: x['value']))
 
     def test_avg(self):
         avg = float(2)
@@ -84,123 +83,89 @@ class TestFunctions(TestCase):
         self.assertEqual(self.simple.avg(), avg)
         self.assertEqual(self.complex.avg(lambda x: x['value']), avg)
 
+    def test_element_at(self):
+        self.assertRaises(IndexError, self.empty.element_at, 0)
+        self.assertEqual(2, self.simple.element_at(1))
+        self.assertDictEqual({'value': 2}, self.complex.element_at(1))
+
     def test_first(self):
         self.assertRaises(IndexError, self.empty.first)
-        self.assertEqual(self.empty.first_or_default(), None)
         self.assertIsInstance(self.simple.first(), int)
-        self.assertEqual(self.simple.first(), 1)
-        self.assertEqual(self.simple.first(), self.simple.first_or_default())
+        self.assertEqual(1, self.simple.first())
         self.assertIsInstance(self.complex.first(), dict)
         self.assertDictEqual(self.complex.first(), {'value': 1})
-        self.assertDictEqual(self.complex.first(), self.complex.first_or_default())
         self.assertEqual(self.simple.first(), self.complex.select(lambda x: x['value']).first())
+
+    def test_first_or_default(self):
+        self.assertIsNone(self.empty.first_or_default())
+        self.assertIsInstance(self.simple.first_or_default(), int)
+        self.assertDictEqual({'value': 1}, self.complex.first_or_default())
 
     def test_last(self):
         self.assertRaises(IndexError, self.empty.last)
-        self.assertEqual(self.empty.last_or_default(), None)
         self.assertIsInstance(self.simple.last(), int)
-        self.assertEqual(self.simple.last(), 3)
-        self.assertEqual(self.simple.last(), self.simple.last_or_default())
+        self.assertEqual(3, self.simple.last())
         self.assertIsInstance(self.complex.last(), dict)
         self.assertDictEqual(self.complex.last(), {'value': 3})
         self.assertDictEqual(self.complex.last(), self.complex.last_or_default())
         self.assertEqual(self.simple.last(), self.complex.select(lambda x: x['value']).last())
 
-    def test_sort(self):
+    def test_last_or_default(self):
+        self.assertIsNone(self.empty.last_or_default())
+        self.assertEqual(3, self.simple.last_or_default())
+        self.assertIsInstance(self.complex.last_or_default(), dict)
+        self.assertDictEqual({'value': 3}, self.complex.last_or_default())
+
+    def test_order_by(self):
         self.assertRaises(NullArgumentError, self.simple.order_by, None)
-        self.assertRaises(
-            NullArgumentError,
-            self.simple.order_by_descending,
-            None)
+        self.assertListEqual(_simple, self.simple.order_by(lambda x: x).to_list())
+        self.assertListEqual(_complex, self.complex.order_by(lambda x: x['value']).to_list())
 
-        self.assertListEqual(
-            self.simple.order_by(lambda x: x).to_list(),
-            self.simple.to_list(),
-            u"Simple enumerable sort ascending should yield same list")
-        self.assertListEqual(
-            self.simple.order_by_descending(lambda x: x).to_list(),
-            sorted(self.simple, key=lambda x: x, reverse=True),
-            u"Simple enumerable sort descending should yield reverse list")
+    def test_order_by_descending(self):
+        self.assertRaises(NullArgumentError, self.simple.order_by_descending, None)
+        self.assertListEqual([3, 2, 1], self.simple.order_by_descending(lambda x: x).to_list())
+        self.assertListEqual([{'value': 3}, {'value': 2}, {'value': 1}], self.complex.order_by_descending(lambda x: x['value']).to_list())
 
-        self.assertListEqual(
-            self.complex.order_by(lambda x: x['value']).to_list(),
-            self.complex.to_list(),
-            u"Complex enumerable sort ascending should yield same list")
-        self.assertListEqual(
-            self.complex.order_by_descending(lambda x: x['value']).to_list(),
-            sorted(self.complex, key=lambda x: x['value'], reverse=True),
-            u"Complex enumerable sort descending should yield reverse list")
+    def test_order_by_with_select(self):
+        self.assertListEqual(_simple, self.complex.select(lambda x: x['value']).order_by(lambda x: x).to_list())
 
-        self.assertListEqual(
-            self.simple.order_by(lambda x: x).to_list(),
-            self.complex.select(
-                lambda x: x['value']
-            ).order_by(lambda x: x).to_list(),
-            u"Projection and sort ascending of complex should yield simple")
+    def test_order_by_descending_with_select(self):
+        self.assertListEqual([3, 2, 1], self.complex.select(lambda x: x['value']).order_by_descending(lambda x: x).to_list())
+
+    def test_order_by_with_where(self):
+        self.assertListEqual([2, 3], self.simple.where(lambda x: x >= 2).order_by(lambda x: x).to_list())
+
+    def test_order_by_descending_with_where(self):
+        self.assertListEqual([3, 2], self.simple.where(lambda x: x >= 2).order_by_descending(lambda x: x).to_list())
 
     def test_median(self):
         self.assertRaises(NoElementsError, self.empty.median)
-
         median = float(2)
-        self.assertEqual(
-            self.simple.median(),
-            median,
-            u"Median of simple enumerable should be {0:.5f}".format(median))
-        self.assertEqual(
-            self.complex.median(lambda x: x['value']),
-            median,
-            u"Median of complex enumerable should be {0:.5f}".format(median))
+        self.assertEqual(median, self.simple.median())
+        self.assertEqual(median, self.complex.median(lambda x: x['value']))
 
-    def test_skip_take(self):
-        self.assertListEqual(
-            self.empty.skip(2).to_list(),
-            [],
-            u"Skip 2 of empty list should yield empty list")
-        self.assertListEqual(
-            self.empty.take(2).to_list(),
-            [],
-            u"Take 2 of empty list should yield empty list")
-        self.assertListEqual(
-            self.simple.skip(3).to_list(),
-            [],
-            u"Skip 3 of simple enumerable should yield empty list")
-        self.assertListEqual(
-            self.simple.take(4).to_list(),
-            _simple,
-            u"Take 4 of simple enumerable should yield simple list")
+    def test_skip(self):
+        self.assertListEqual([], self.empty.skip(2).to_list())
+        self.assertListEqual([], self.simple.skip(3).to_list())
+        self.assertListEqual([2, 3], self.simple.skip(1).to_list())
 
-        self.assertEqual(
-            self.simple.skip(1).take(1).first(),
-            2,
-            u"Skip 1 and take 1 of simple should yield 2")
-        self.assertEqual(
-            self.complex.select(lambda x: x['value']).skip(1).take(1).first(),
-            2,
-            u"Skip 1 and take 1 of complex with projection should yield 2")
+    def test_take(self):
+        self.assertListEqual(_simple, self.simple.take(4).to_list())
+
+    def test_skip_with_take(self):
+        self.assertListEqual([2], self.simple.skip(1).take(1))
+
+    def test_skip_take_with_select(self):
+        self.assertEqual([2], self.complex.select(lambda x: x['value']).skip(1).take(1))
 
     def test_filter(self):
-        self.assertListEqual(
-            self.empty.where(lambda x: x == 0).to_list(),
-            [],
-            u"Filter on empty list should yield empty list")
-        self.assertListEqual(
-            self.simple.where(lambda x: x == 2).to_list(),
-            [2],
-            u"Filter where element equals 2 should yield list with 1 element")
-        self.assertListEqual(
-            self.complex.where(lambda x: x['value'] == 2).to_list(),
-            [{'value': 2}],
-            u"Filter where element value is 2 should give list with 1 element")
-        self.assertListEqual(
-            self.complex.where(lambda x: x['value'] == 2)
-                .select(lambda x: x['value'])
-                .to_list(),
-            self.simple.where(lambda x: x == 2).to_list(),
-            u"Should equal filter of simple enumerable")
-        self.assertListEqual(
-            self.simple.where(lambda x: x == 0).to_list(),
-            self.empty.to_list(),
-            u"Should yield an empty list")
+        self.assertListEqual([], self.empty.where(lambda x: x == 0).to_list())
+        self.assertListEqual([2], self.simple.where(lambda x: x == 2).to_list())
+        self.assertListEqual([{'value': 2}], self.complex.where(lambda x: x['value'] == 2).to_list())
+        self.assertListEqual([], self.simple.where(lambda x: x == 0).to_list())
+
+    def test_select_with_filter(self):
+        self.assertListEqual([2], self.complex.where(lambda x: x['value'] == 2).select(lambda x: x['value']).to_list())
 
     def test_single(self):
         self.assertRaises(NoMatchingElement, self.empty.single, lambda x: x == 0)

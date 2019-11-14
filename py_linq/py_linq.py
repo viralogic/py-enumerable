@@ -37,6 +37,9 @@ class Enumerable(object):
             yield next(self._cycle)
             i += 1
 
+    def next(self):
+        return next(self._cycle)
+
     def __getitem__(self, n):
         """
         Gets item in iterable at specified zero-based index
@@ -46,12 +49,13 @@ class Enumerable(object):
         """
         if n < 0:
             raise IndexError
-        lh, rh = itertools.tee(self._data)
-        lhl = list(itertools.islice(lh, 0, n + 1))
-        self._data = rh
-        if len(lhl) == 0:
-            raise IndexError
-        return lhl[n]
+        result = None
+        if len(self) == 0:
+            return result
+        for index, element in enumerate(self, 0):
+            if index == n:
+                result = element
+        return result
 
     def __len__(self):
         """
@@ -67,7 +71,7 @@ class Enumerable(object):
         Converts the iterable into a list
         :return: list object
         """
-        return list(self)
+        return [x for x in self]
 
     def count(self, predicate=None):
         """
@@ -84,8 +88,7 @@ class Enumerable(object):
         :param func: lambda expression on how to perform transformation
         :return: new Enumerable object containing transformed data
         """
-        map = itertools.imap(func, self)
-        return Enumerable(map)
+        return SelectEnumerable(self, func)
 
     def sum(self, func=lambda x: x):
         """
@@ -103,7 +106,7 @@ class Enumerable(object):
         """
         if not self.any():
             raise NoElementsError(u"Iterable contains no elements")
-        return min(self.select(func))
+        return func(min(self, key=func))
 
     def max(self, func=lambda x: x):
         """
@@ -113,7 +116,7 @@ class Enumerable(object):
         """
         if not self.any():
             raise NoElementsError(u"Iterable contains no elements")
-        return max(self.select(func))
+        return func(max(self, key=func))
 
     def avg(self, func=lambda x: x):
         """
@@ -141,7 +144,7 @@ class Enumerable(object):
     def element_at(self, n):
         """
         Returns element at given index.
-            * Raises NoElementsError if no element found at specified position
+            * Raises IndexError if no element found at specified position
         :param n: index as int object
         :return: Element at given index
         """
@@ -218,7 +221,7 @@ class Enumerable(object):
         if key is None:
             raise NullArgumentError(u"No key for sorting given")
         kf = [OrderingDirection(key, reverse=False)]
-        return SortedEnumerable(key_funcs=kf, data=self._data)
+        return SortedEnumerable(self, key_funcs=kf)
 
     def order_by_descending(self, key):
         """
@@ -229,7 +232,7 @@ class Enumerable(object):
         if key is None:
             raise NullArgumentError(u"No key for sorting given")
         kf = [OrderingDirection(key, reverse=True)]
-        return SortedEnumerable(key_funcs=kf, data=self._data)
+        return SortedEnumerable(self, key_funcs=kf)
 
     def skip(self, n):
         """
@@ -237,7 +240,7 @@ class Enumerable(object):
         :param n: Number of elements to skip as int
         :return: new Enumerable object
         """
-        return Enumerable(itertools.islice(self, n, None, 1))
+        return SkipEnumerable(self, n)
 
     def take(self, n):
         """
@@ -255,7 +258,7 @@ class Enumerable(object):
         """
         if predicate is None:
             raise NullArgumentError("No predicate given for where clause")
-        return Enumerable(itertools.ifilter(predicate, self))
+        return WhereEnumerable(self, predicate)
 
     def single(self, predicate=None):
         """
@@ -587,7 +590,7 @@ class Enumerable(object):
         Inverts the order of the elements in a sequence
         :return: Enumerable with elements in reversed order
         """
-        return Enumerable(reversed(self))
+        return ReversedEnumerable(self)
 
     def skip_last(self, n):
         """
@@ -634,6 +637,73 @@ class Enumerable(object):
         if not isinstance(enumerable, Enumerable):
             raise TypeError()
         return Enumerable(itertools.izip(self, enumerable)).select(lambda x: func(x))
+
+
+class SelectEnumerable(Enumerable):
+    """
+    Class to hold state for projection of elements in a collection
+    """
+    def __init__(self, enumerable, func):
+        super(SelectEnumerable, self).__init__(enumerable)
+        self.func = func
+
+    def __iter__(self):
+        for e in self.data:
+            yield self.func(e)
+
+    def next(self):
+        return self.func(next(self.data))
+
+    def __repr__(self):
+        return list(iter(self)).__repr__()
+
+
+class WhereEnumerable(Enumerable):
+    """
+    Class to hold state for filtering elements in a collection
+    """
+    def __init__(self, enumerable, predicate):
+        super(WhereEnumerable, self).__init__(enumerable._data)
+        self.predicate = predicate
+
+    def __iter__(self):
+        i = 0
+        while i < len(self):
+            element = next(self._cycle)
+            if self.predicate(element):
+                yield element
+            i += 1
+
+    def next(self):
+        element = next(self._cycle)
+        if self.predicate(v):
+            return element
+
+    def __repr__(self):
+        return list(iter(self)).__repr__()
+
+
+class SkipEnumerable(Enumerable):
+    """
+    Class to hold state for skipping elements in a collection
+    """
+    def __init__(self, enumerable, n):
+        super(SkipEnumerable, self).__init__(enumerable)
+        self.n = n
+        self._cycle = itertools.cycle(itertools.islice(self.data, n))
+
+    def __iter__(self):
+        for e in itertools.islice(self.data, n):
+            yield element
+
+
+class ReversedEnumerable(Enumerable):
+    """
+    Class to hold state for reversing elements in a collection
+    """
+    def __init__(self, enumerable):
+        super(ReversedEnumerable, self).__init__(enumerable)
+        self._cycle = itertools.cycle(reversed(self.data))
 
 
 class IntersectEnumerable(Enumerable):
@@ -699,7 +769,7 @@ class Grouping(Enumerable):
 
 
 class SortedEnumerable(Enumerable):
-    def __init__(self, key_funcs, data):
+    def __init__(self, enumerable, key_funcs):
         """
         Constructor
         :param key_funcs: list of OrderingDirection instances in order of
@@ -714,16 +784,10 @@ class SortedEnumerable(Enumerable):
         self._key_funcs = [
             f for f in key_funcs if isinstance(f, OrderingDirection)
         ]
-        super(SortedEnumerable, self).__init__(data)
-
-    def __iter__(self):
+        self._data = None
         for o in reversed(self._key_funcs):
-            self._data = sorted(self._data, key=o.key, reverse=o.descending)
-        cache = []
-        for d in self._data:
-            cache.append(d)
-            yield d
-        self._data = cache
+            self._data = sorted(enumerable, key=o.key, reverse=o.descending)
+        self._cycle = itertools.cycle(self._data)
 
     def then_by(self, func):
         """
@@ -734,7 +798,7 @@ class SortedEnumerable(Enumerable):
         if func is None:
             raise NullArgumentError(u"then by requires a lambda function arg")
         self._key_funcs.append(OrderingDirection(key=func, reverse=False))
-        return SortedEnumerable(self._key_funcs, self._data)
+        return SortedEnumerable(self, self._key_funcs)
 
     def then_by_descending(self, func):
         """
@@ -746,4 +810,4 @@ class SortedEnumerable(Enumerable):
             raise NullArgumentError(
                 u"then_by_descending requires a lambda function arg")
         self._key_funcs.append(OrderingDirection(key=func, reverse=True))
-        return SortedEnumerable(self._key_funcs, self._data)
+        return SortedEnumerable(self, self._key_funcs)
