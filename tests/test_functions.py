@@ -153,10 +153,10 @@ class TestFunctions(TestCase):
         self.assertListEqual(_simple, self.simple.take(4).to_list())
 
     def test_skip_with_take(self):
-        self.assertListEqual([2], self.simple.skip(1).take(1))
+        self.assertListEqual([2], self.simple.skip(1).take(1).to_list())
 
     def test_skip_take_with_select(self):
-        self.assertEqual([2], self.complex.select(lambda x: x['value']).skip(1).take(1))
+        self.assertListEqual([2], self.complex.select(lambda x: x['value']).skip(1).take(1).to_list())
 
     def test_filter(self):
         self.assertListEqual([], self.empty.where(lambda x: x == 0).to_list())
@@ -180,21 +180,22 @@ class TestFunctions(TestCase):
         self.assertRaises(MoreThanOneMatchingElement, self.simple.single, lambda x: x > 0)
         self.assertRaises(MoreThanOneMatchingElement, self.complex.single, lambda x: x['value'] > 0)
 
-    def test_single_or_default(self):
-        self.assertRaises(MoreThanOneMatchingElement, self.simple.single_or_default, lambda x: x > 0)
-        self.assertIsNone(self.simple.single_or_default(lambda x: x > 3))
-
-        self.assertRaises(MoreThanOneMatchingElement, self.complex.single_or_default, lambda x: x['value'] > 0)
-
+    def test_single(self):
         simple_single = self.simple.single(lambda x: x == 2)
         self.assertIsInstance(simple_single, int)
-        self.assertEqual(simple_single, 2)
+        self.assertEqual(2, simple_single)
 
         complex_single = self.complex.single(lambda x: x['value'] == 2)
         self.assertIsInstance(complex_single, dict)
-        self.assertDictEqual(complex_single, {'value': 2})
+        self.assertDictEqual({'value': 2}, complex_single)
+
         select_single = self.complex.select(lambda x: x['value']).single(lambda x: x == 2)
-        self.assertEqual(simple_single, select_single)
+        self.assertEqual(2, select_single)
+
+    def test_single_or_default(self):
+        self.assertRaises(MoreThanOneMatchingElement, self.simple.single_or_default, lambda x: x > 0)
+        self.assertIsNone(self.simple.single_or_default(lambda x: x > 3))
+        self.assertRaises(MoreThanOneMatchingElement, self.complex.single_or_default, lambda x: x['value'] > 0)
 
     def test_select_many(self):
         empty = Enumerable([[], [], []])
@@ -207,18 +208,9 @@ class TestFunctions(TestCase):
             ]
         )
 
-        self.assertListEqual(
-            empty.select_many().to_list(),
-            [],
-            u"Should yield empty list")
-        self.assertListEqual(
-            simple.select_many().to_list(),
-            [1, 2, 3, 4, 5, 6, 7, 8, 9],
-            u"Should yield simple enumerable with single list")
-        self.assertListEqual(
-            __complex.select_many(lambda x: x['values']).to_list(),
-            simple.select_many().to_list(),
-            u"Should yield simple enumerable with single list")
+        self.assertListEqual([], empty.select_many().to_list())
+        self.assertListEqual([1, 2, 3, 4, 5, 6, 7, 8, 9], simple.select_many().to_list())
+        self.assertListEqual([1, 2, 3, 4, 5, 6, 7, 8, 9], __complex.select_many(lambda x: x['values']).to_list())
 
     def test_concat(self):
         self.assertListEqual(

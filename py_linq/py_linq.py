@@ -64,7 +64,7 @@ class Enumerable(object):
         return sum(1 for i in enumerate(self._data))
 
     def __repr__(self):
-        return self._data.__repr__()
+        return list(iter(self)).__repr__()
 
     def to_list(self):
         """
@@ -248,7 +248,7 @@ class Enumerable(object):
         :param n: Number of elements to take
         :return: new Enumerable object
         """
-        return Enumerable(itertools.islice(self, 0, n, 1))
+        return TakeEnumerable(self, n)
 
     def where(self, predicate):
         """
@@ -270,14 +270,13 @@ class Enumerable(object):
         :param predicate: predicate as a lambda expression
         :return: Matching element as object
         """
-        result = self.where(predicate).to_list() if predicate is not None else self.to_list()
-        if len(result) == 0:
-            raise NoMatchingElement("No matching element found")
-        if len(result) > 1:
-            raise MoreThanOneMatchingElement(
-                "More than one matching element found. Use where instead"
-            )
-        return result[0]
+        result = self.where(predicate) if predicate is not None else self
+        print result.to_list()
+        if not result.any():
+            raise NoMatchingElement("No matching elements are found")
+        if result.count() > 1:
+            raise MoreThanOneMatchingElement("More than one matching element is found")
+        return result.first()
 
     def single_or_default(self, predicate=None):
         """
@@ -300,7 +299,7 @@ class Enumerable(object):
         :param func: selector as lambda expression
         :return: new Enumerable object
         """
-        return Enumerable(itertools.chain.from_iterable(self.select(func)))
+        return SelectManyEnumerable(self, func)
 
     def add(self, element):
         """
@@ -654,16 +653,13 @@ class SelectEnumerable(Enumerable):
     def next(self):
         return self.func(next(self.data))
 
-    def __repr__(self):
-        return list(iter(self)).__repr__()
-
 
 class WhereEnumerable(Enumerable):
     """
     Class to hold state for filtering elements in a collection
     """
     def __init__(self, enumerable, predicate):
-        super(WhereEnumerable, self).__init__(enumerable._data)
+        super(WhereEnumerable, self).__init__(enumerable)
         self.predicate = predicate
 
     def __iter__(self):
@@ -679,8 +675,21 @@ class WhereEnumerable(Enumerable):
         if self.predicate(v):
             return element
 
-    def __repr__(self):
-        return list(iter(self)).__repr__()
+
+class SelectManyEnumerable(Enumerable):
+    """
+    Class to hold state for flattening nested collections within a collection
+    """
+    def __init__(self, enumerable, selector):
+        super(SelectManyEnumerable, self).__init__(enumerable)
+        self.selector = selector
+        self._cycle = itertools.chain.from_iterable(self.selector(l) for l in self.data)
+
+    def __iter__(self):
+        for element in self.data:
+            collection = self.selector(element)
+            for subelement in collection:
+                yield subelement
 
 
 class SkipEnumerable(Enumerable):
@@ -693,8 +702,24 @@ class SkipEnumerable(Enumerable):
         self._cycle = itertools.cycle(itertools.islice(self.data, n))
 
     def __iter__(self):
-        for e in itertools.islice(self.data, n):
-            yield element
+        for index, element in enumerate(self.data):
+            if index >= self.n:
+                yield element
+
+
+class TakeEnumerable(Enumerable):
+    """
+    Class to hold state for taking subset of consecutive elements in a collection
+    """
+    def __init__(self, enumerable, n):
+        super(TakeEnumerable, self).__init__(enumerable)
+        self.n = n
+        self._cycle = itertools.cycle(itertools.islice(self.data, 0, n))
+
+    def __iter__(self):
+        for index, element in enumerate(self.data):
+            if index < self.n:
+                yield element
 
 
 class ReversedEnumerable(Enumerable):
