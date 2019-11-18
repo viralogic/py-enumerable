@@ -321,7 +321,7 @@ class Enumerable(object):
             raise TypeError(
                 u"enumerable argument must be an instance of Enumerable"
             )
-        return Enumerable(itertools.chain(self._data, enumerable.data))
+        return ConcatenateEnumerable(self, enumerable)
 
     def group_by(self, key_names=[], key=lambda x: x, result_func=lambda x: x):
         """
@@ -729,6 +729,19 @@ class ReversedEnumerable(Enumerable):
     def __init__(self, enumerable):
         super(ReversedEnumerable, self).__init__(enumerable)
         self._cycle = itertools.cycle(reversed(self.data))
+
+
+class ConcatenateEnumerable(Enumerable):
+    """
+    Class to hold state for concatenating Enumerable collections
+    """
+    def __init__(self, enumerable1, enumerable2):
+        super(ConcatenateEnumerable, self).__init__(enumerable1)
+        self.enumerable = enumerable2
+        self._cycle = itertools.cycle(itertools.chain(self.data, self.enumerable))
+
+    def __len__(self):
+        return len(self.data) + len(self.enumerable)
 
 
 class IntersectEnumerable(Enumerable):

@@ -213,18 +213,11 @@ class TestFunctions(TestCase):
         self.assertListEqual([1, 2, 3, 4, 5, 6, 7, 8, 9], __complex.select_many(lambda x: x['values']).to_list())
 
     def test_concat(self):
-        self.assertListEqual(
-            self.empty.concat(self.empty).to_list(),
-            [],
-            u"Concatenation of 2 empty lists gives empty list")
-        self.assertListEqual(
-            self.empty.concat(self.simple).to_list(),
-            _simple,
-            u"Concatenation of empty to simple yields simple")
-        self.assertListEqual(
-            self.simple.concat(self.empty).to_list(),
-            _simple,
-            u"Concatenation of simple to empty yields simple")
+        self.assertListEqual([], self.empty.concat(self.empty).to_list())
+        self.assertListEqual(_simple, self.empty.concat(self.simple).to_list())
+        self.assertListEqual(_simple, self.simple.concat(self.empty).to_list())
+        self.assertListEqual([1, 2, 3, 1, 2, 3], self.simple.concat(self.complex.select(lambda c: c['value'])).to_list())
+        self.assertListEqual([1, 2, 3, {'value': 1}, {'value': 2}, {'value': 3}], self.simple.concat(self.complex).to_list())
 
     def test_group_by(self):
         simple_grouped = self.simple.group_by(key_names=['id'])
@@ -309,42 +302,15 @@ class TestFunctions(TestCase):
 
     def test_except(self):
         self.assertRaises(TypeError, self.empty.except_, [])
-        self.assertListEqual(
-            self.empty.except_(self.empty).to_list(),
-            [],
-            u"Complement of two empty enumerables yields empty list")
-        self.assertListEqual(
-            self.empty.except_(self.simple).to_list(),
-            [],
-            u"Complement of empty and simple enumerables yields empty list")
-        self.assertListEqual(
-            self.simple.except_(self.empty).to_list(),
-            _simple,
-            u"Complement of simple and empty enumerables yields simple list")
-        self.assertListEqual(
-            self.simple.except_(self.simple).to_list(),
-            [],
-            u"Complement of simple and simple enumerables yields empty list")
-        self.assertListEqual(
-            self.simple.except_(Enumerable([2])).to_list(),
-            [1, 3],
-            u"Complement of simple and [2] yields [1,3]")
-        self.assertListEqual(
-            self.simple.except_(self.complex).to_list(),
-            _simple,
-            u"Complement of simple and complex yields simple")
-        self.assertListEqual(
-            self.complex.except_(self.simple).to_list(),
-            _complex,
-            u"Complement of complex and simple yields complex")
-        self.assertListEqual(
-            self.complex.except_(self.complex).to_list(),
-            [],
-            u"Complement of complex and complex yields empty")
-        self.assertListEqual(
-            self.complex.except_(Enumerable([{'value': 1}])).to_list(),
-            [{'value': 2}, {'value': 3}],
-            "Should yield [{'value': 2}, 'value': 3]")
+        self.assertListEqual([], self.empty.except_(self.empty).to_list())
+        self.assertListEqual([], self.empty.except_(self.simple).to_list())
+        self.assertListEqual(_simple, self.simple.except_(self.empty).to_list())
+        self.assertListEqual([], self.simple.except_(self.simple).to_list())
+        self.assertListEqual([1, 3], self.simple.except_(Enumerable([2])).to_list())
+        self.assertListEqual(_simple, self.simple.except_(self.complex).to_list())
+        self.assertListEqual(_complex, self.complex.except_(self.simple).to_list())
+        self.assertListEqual([], self.complex.except_(self.complex).to_list())
+        self.assertListEqual([{'value': 2}, {'value': 3}], self.complex.except_(Enumerable([{'value': 1}])).to_list())
 
     def test_marks_intersect(self):
         marks1 = Enumerable([{'course': 'Chemistry', 'mark': 90}, {'course': 'Biology', 'mark': 85}])
