@@ -514,13 +514,8 @@ class Enumerable(object):
         :return: new Enumerable object
         """
         if not isinstance(enumerable, Enumerable):
-            raise TypeError(
-                u"enumerable parameter must be an instance of Enumerable")
-        membership = [
-            0 if key(element) in enumerable.intersect(self, key).select(key) else 1
-            for element in self
-        ]
-        return Enumerable(itertools.compress(self, membership))
+            raise TypeError(u"enumerable parameter must be an instance of Enumerable")
+        return ExceptEnumerable(self, enumerable, key)
 
     def contains(self, element, key=lambda x: x):
         """
@@ -745,19 +740,33 @@ class ConcatenateEnumerable(Enumerable):
 
 
 class IntersectEnumerable(Enumerable):
+    """
+    Class to hold state for determining the intersection between two sets
+    """
     def __init__(self, enumerable1, enumerable2, key):
         super(IntersectEnumerable, self).__init__(enumerable1)
         self.enumerable = enumerable2
         self.key = key
 
     def __iter__(self):
-        cache = []
         for i in self.data:
             k1 = self.key(i)
             if any(self.key(i2) == k1 for i2 in self.enumerable):
-                cache.append(i)
                 yield i
-        self._data = cache
+
+
+class ExceptEnumerable(IntersectEnumerable):
+    """
+    Class to hold state for determining the set minus of collection given another collection
+    """
+    def __init__(self, enumerable1, enumerable2, key):
+        super(ExceptEnumerable, self).__init__(enumerable1, enumerable2, key)
+
+    def __iter__(self):
+        for i in self.data:
+            k1 = self.key(i)
+            if not any(self.key(i2) == k1 for i2 in self.enumerable):
+                yield i
 
 
 class GroupedEnumerable(Enumerable):

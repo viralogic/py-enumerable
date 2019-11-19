@@ -255,18 +255,9 @@ class TestFunctions(TestCase):
             ], locations.to_list())
 
     def test_default_if_empty(self):
-        self.assertListEqual(
-            self.empty.default_if_empty().to_list(),
-            [None],
-            u"Should yield None singleton")
-        self.assertListEqual(
-            self.simple.default_if_empty().to_list(),
-            _simple,
-            u"Default if empty of simple enumerable should yield simple list")
-        self.assertListEqual(
-            self.complex.default_if_empty().to_list(),
-            _complex,
-            u"Should yield complex list")
+        self.assertListEqual([None], self.empty.default_if_empty().to_list())
+        self.assertListEqual(_simple, self.simple.default_if_empty().to_list())
+        self.assertListEqual(_complex, self.complex.default_if_empty().to_list())
 
     def test_any(self):
         self.assertFalse(self.empty.any(lambda x: x == 1))
@@ -280,15 +271,9 @@ class TestFunctions(TestCase):
         self.assertTrue(self.complex.any(lambda x: x['value'] >= 1))
 
     def test_contains(self):
-        self.assertFalse(
-            self.empty.contains(1),
-            u"Empty enumerable should not contain 1 as element")
-        self.assertTrue(
-            self.simple.contains(1),
-            u"Simple enumerable should contain 1 as element")
-        self.assertTrue(
-            self.complex.select(lambda x: x['value']).contains(1),
-            u"Complex enumerable should contain 1 as an element value")
+        self.assertFalse(self.empty.contains(1))
+        self.assertTrue(self.simple.contains(1))
+        self.assertTrue(self.complex.select(lambda x: x['value']).contains(1))
 
     def test_intersect(self):
         self.assertRaises(TypeError, self.empty.intersect, [])
@@ -315,18 +300,12 @@ class TestFunctions(TestCase):
     def test_marks_intersect(self):
         marks1 = Enumerable([{'course': 'Chemistry', 'mark': 90}, {'course': 'Biology', 'mark': 85}])
         marks2 = Enumerable([{'course': 'Chemistry', 'mark': 65}, {'course': 'Computer Science', 'mark': 96}])
-        self.assertListEqual(
-            marks1.intersect(marks2, lambda c: c['course']).to_list(),
-            [{'course': 'Chemistry', 'mark': 90}]
-        )
+        self.assertListEqual([{'course': 'Chemistry', 'mark': 90}], marks1.intersect(marks2, lambda c: c['course']).to_list())
 
     def test_marks_except(self):
         marks1 = Enumerable([{'course': 'Chemistry', 'mark': 90}, {'course': 'Biology', 'mark': 85}])
         marks2 = Enumerable([{'course': 'Chemistry', 'mark': 65}, {'course': 'Computer Science', 'mark': 96}])
-        self.assertListEqual(
-            marks1.except_(marks2, lambda c: c['course']).to_list(),
-            [{'course': 'Biology', 'mark': 85}]
-        )
+        self.assertListEqual([{'course': 'Biology', 'mark': 85}], marks1.except_(marks2, lambda c: c['course']).to_list())
 
     def test_union(self):
         self.assertListEqual([], self.empty.union(self.empty).to_list())
@@ -336,51 +315,20 @@ class TestFunctions(TestCase):
         self.assertListEqual(_complex, self.complex.union(self.empty).to_list())
         self.assertListEqual(_simple + [4, 5], self.simple.union(Enumerable([4, 5])).to_list())
         self.assertListEqual(_simple + [4, 5], self.simple.union(Enumerable([1, 4, 5])).to_list())
-
         self.assertListEqual(_complex + [{'value': 4}, {'value': 5}], self.complex.union(Enumerable([{'value': 4}, {'value': 5}]), lambda x: x['value']).to_list())
         self.assertListEqual(_complex + [{'value': 4}, {'value': 5}], self.complex.union(Enumerable([{'value': 1}, {'value': 4}, {'value': 5}]), lambda x: x['value']).order_by(lambda x: x['value']).to_list())
 
     def test_join(self):
         self.assertRaises(TypeError, self.empty.join, [])
-        self.assertListEqual(
-            self.empty.join(self.empty).to_list(),
-            [],
-            u"Joining 2 empty lists should yield empty list")
-        self.assertListEqual(
-            self.empty.join(self.simple).to_list(),
-            [],
-            u"Joining empty to simple yields empty list")
-        self.assertListEqual(
-            self.empty.join(self.complex).to_list(),
-            [],
-            u"Joining complex to simple yields empty list")
+        self.assertListEqual([], self.empty.join(self.empty).to_list())
+        self.assertListEqual([], self.empty.join(self.simple).to_list())
+        self.assertListEqual([], self.empty.join(self.complex).to_list())
 
-        self.assertListEqual(
-            self.simple.join(self.empty).to_list(),
-            [],
-            u"Joining simple to empty yields empty list")
-        self.assertListEqual(
-            self.simple.join(self.simple)
-                .order_by(lambda x: (x[0], x[1])).to_list(),
-            [(1, 1), (2, 2), (3, 3)],
-            u"Joining simple to simple yields [(1,1), (2,2), (3,3)]")
-        self.assertListEqual(
-            self.simple.join(
-                self.complex,
-                inner_key=lambda x: x['value'],
-                result_func=lambda x: (x[0], x[1]['value'])).order_by(
-                lambda x: (x[0], x[1])
-            ).to_list(),
-            [(1, 1), (2, 2), (3, 3)],
-            u"Should yield [(1,1), (2,2), (3,3)]")
+        self.assertListEqual([], self.simple.join(self.empty).to_list())
+        self.assertListEqual([(1, 1), (2, 2), (3, 3)], self.simple.join(self.simple).order_by(lambda x: (x[0], x[1])).to_list())
+        self.assertListEqual([(1, 1), (2, 2), (3, 3)], self.simple.join(self.complex, inner_key=lambda x: x['value'], result_func=lambda x: (x[0], x[1]['value'])).order_by(lambda x: (x[0], x[1])).to_list())
 
-        self.assertListEqual(
-            self.complex.join(
-                self.complex,
-                result_func=lambda x: (x[0]['value'], x[1]['value'])).order_by(
-                    lambda x: (x[0], x[1])).to_list(),
-            [(1, 1), (2, 2), (3, 3)],
-            u"Should yield [(1,1), (2,2), (3,3)]")
+        self.assertListEqual([(1, 1), (2, 2), (3, 3)], self.complex.join(self.complex, result_func=lambda x: (x[0]['value'], x[1]['value'])).order_by(lambda x: (x[0], x[1])).to_list())
 
     def test_group_join(self):
         self.assertRaises(TypeError, self.empty.group_join, [])
