@@ -20,7 +20,8 @@ class Enumerable(object):
             raise TypeError(
                 u"Enumerable must be instantiated with an iterable object"
             )
-        self._data = data
+        is_generator = hasattr(data, 'gi_running')
+        self._data = data if not is_generator else [i for i in data]
         self._cycle = itertools.cycle(self._data)
 
     @property
@@ -64,7 +65,7 @@ class Enumerable(object):
         return sum(1 for i in enumerate(self._data))
 
     def __repr__(self):
-        return list(iter(self)).__repr__()
+        return list(self).__repr__()
 
     def to_list(self):
         """
@@ -271,7 +272,6 @@ class Enumerable(object):
         :return: Matching element as object
         """
         result = self.where(predicate) if predicate is not None else self
-        print result.to_list()
         if not result.any():
             raise NoMatchingElement("No matching elements are found")
         if result.count() > 1:
@@ -365,7 +365,8 @@ class Enumerable(object):
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
-        return GroupedEnumerable(itertools.groupby(sorted(self, key=key), key), key_names=['distinct']).select(lambda g: g.first())
+        return DistinctEnumerable(self, key)
+        #return GroupedEnumerable(itertools.groupby(sorted(self, key=key), key), key_names=['distinct']).select(lambda g: g.first())
 
     def join(
             self,
@@ -386,27 +387,7 @@ class Enumerable(object):
             raise TypeError(
                 u"inner_enumerable parameter must be an instance of Enumerable"
             )
-        outer1, outer2 = itertools.tee(self.data, 2)
-        inner1, inner2 = itertools.tee(inner_enumerable.data, 2)
-        return Enumerable(
-            itertools.product(
-                itertools.ifilter(
-                    lambda x: outer_key(x) in itertools.imap(
-                        inner_key,
-                        inner1
-                    ), outer1
-                ),
-                itertools.ifilter(
-                    lambda y: inner_key(y) in itertools.imap(
-                        outer_key,
-                        outer2),
-                    inner2
-                )
-            )
-        )\
-            .where(lambda x: outer_key(x[0]) == inner_key(x[1])) \
-            .select(
-            result_func)
+        return JoinEnumerable(self, inner_enumerable, outer_key, inner_key, result_func)
 
     def default_if_empty(self, value=None):
         """
@@ -630,7 +611,7 @@ class Enumerable(object):
         """
         if not isinstance(enumerable, Enumerable):
             raise TypeError()
-        return Enumerable(itertools.izip(self, enumerable)).select(lambda x: func(x))
+        return ZipEnumerable(self, enumerable, func)
 
 
 class SelectEnumerable(Enumerable):
@@ -659,7 +640,7 @@ class WhereEnumerable(Enumerable):
 
     def __iter__(self):
         i = 0
-        while i < len(self):
+        while i < len(self.data):
             element = next(self._cycle)
             if self.predicate(element):
                 yield element
@@ -669,6 +650,9 @@ class WhereEnumerable(Enumerable):
         element = next(self._cycle)
         if self.predicate(v):
             return element
+
+    def __len__(self):
+        return len([element for element in self.data if self.predicate(element)])
 
 
 class SelectManyEnumerable(Enumerable):
@@ -780,7 +764,6 @@ class GroupedEnumerable(Enumerable):
         self.func = func
 
     def __iter__(self):
-        cache = []
         for d in self.data:
             can_enumerate = isinstance(d[0], list) or isinstance(d[0], tuple) \
                 and len(d[0]) > 0
@@ -789,9 +772,7 @@ class GroupedEnumerable(Enumerable):
                 key_prop.setdefault(prop, d[0][i] if can_enumerate else d[0])
             key_object = Key(key_prop)
             grouped = list(d[1])
-            cache.append((d[0], grouped))
             yield self.func(Grouping(key_object, grouped))
-        self._data = cache
 
 
 class Grouping(Enumerable):
@@ -858,3 +839,99 @@ class SortedEnumerable(Enumerable):
                 u"then_by_descending requires a lambda function arg")
         self._key_funcs.append(OrderingDirection(key=func, reverse=True))
         return SortedEnumerable(self, self._key_funcs)
+
+
+class ZipEnumerable(Enumerable):
+    """
+    Class to hold state for zipping 2 collections together
+    """
+    def __init__(self, enumerable1, enumerable2, result_func):
+        super(ZipEnumerable, self).__init__(enumerable1)
+        self.enumerable = enumerable2
+        self.result_func = result_func
+        self._cycle = itertools.cycle(
+            itertools.imap(
+                lambda r: self.result_func(r),
+                itertools.izip(self.data, self.enumerable)
+            )
+        )
+
+    def __iter__(self):
+        i = 0
+        while i < len(self):
+            yield self.result_func((self.data[i], self.enumerable[i]))
+            i += 1
+
+    def __len__(self):
+        length = min(len(self.data), len(self.enumerable))
+        return length
+
+
+class DistinctEnumerable(Enumerable):
+    """
+    Class to hold state for performing distinct iteration
+    """
+    def __init__(self, enumerable, distinct_key):
+        super(DistinctEnumerable, self).__init__(enumerable)
+        self.key = distinct_key
+        self.set = set()
+        self._cycle = itertools.cycle(iter(self.set))
+
+    def __iter__(self):
+        for element in self.data:
+            member = self.key(element)
+            self.set.add(member)
+            yield member
+
+    def __len__(self):
+        return len(self.set)
+
+
+class JoinEnumerable(Enumerable):
+    """
+    Class to hold state for performing inner join of 2 enumerables
+    """
+    def __init__(self, outer_enumerable, inner_enumerable, outer_key, inner_key, result_func):
+        """
+        Constructor
+        :param outer_enumerable -> the outer collection to join against
+        :param inner_enumerable -> the inner collection to join to outer enumerable
+        :param outer_key -> lambda function for selecting the outer enumerable key
+        :param inner_key -> lambda function for selecting the inner enumerable key
+        :param result_func -> lambda function for transforming the result
+        """
+        super(JoinEnumerable, self).__init__(outer_enumerable)
+        self.inner_enumerable = inner_enumerable
+        self.outer_key = outer_key
+        self.inner_key = inner_key
+        self.result_func = result_func
+        self._cycle = itertools.cycle(
+            itertools.imap(
+                lambda e: self.result_func(e),
+                itertools.ifilter(
+                    lambda x: self.outer_key(x[0]) == self.inner_key(x[1]),
+                    itertools.product(
+                        itertools.ifilter(
+                            lambda x: self.outer_key(x) in itertools.imap(
+                                self.inner_key,
+                                self.inner_enumerable
+                            ), self.data
+                        ),
+                        itertools.ifilter(
+                            lambda y: self.inner_key(y) in itertools.imap(
+                                self.outer_key,
+                                self.data),
+                            self.inner_enumerable
+                        )
+                    )
+                )
+            )
+        )
+
+        def __iter__(self):
+            for o in self.data:
+                ok = self.outer_key(o)
+                for i in self.inner_enumerable:
+                    ik = self.inner_key(i)
+                    if ok == ik:
+                        yield self.result_func((o, i))

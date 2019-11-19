@@ -60,6 +60,16 @@ class IssueTests(TestCase):
             (4, 9)
         ], list(zip(low, high)))
 
+    def test_generator_to_Enumerable(self):
+        def first_3():
+            for i in range(3):
+                yield i
+        p2 = Enumerable(first_3())
+        self.assertListEqual([0, 1, 2], p2.to_list())
+
+        p3 = Enumerable((i for i in first_3()))
+        self.assertListEqual([0, 1, 2], p3.to_list())
+
     def test_issue22_join(self):
         class Val(object):
             def __init__(self, number, power):

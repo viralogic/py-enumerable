@@ -9,6 +9,7 @@ pep8 = "*"
 pytest-cov = "<2.6"
 
 [packages]
+pytest = "*"
 
 [requires]
 python_version = "2.7"

@@ -242,8 +242,8 @@ class TestFunctions(TestCase):
         self.assertEqual(london.sum(lambda c: c[3]), 240000)
 
     def test_distinct(self):
-        self.assertListEqual(self.empty.distinct().to_list(), [])
-        self.assertListEqual(self.simple.concat(self.simple).distinct().to_list(), _simple)
+        self.assertListEqual([], self.empty.distinct().to_list())
+        self.assertListEqual(_simple, self.simple.concat(self.simple).distinct().to_list())
 
         locations = Enumerable(_locations).distinct(lambda x: x[0])
         self.assertEqual(locations.count(), 3)
