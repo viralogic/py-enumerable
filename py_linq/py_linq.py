@@ -557,7 +557,7 @@ class Enumerable(object):
         :param length: the number of times to repeat the element
         :return: Enumerable of the repeated elements
         """
-        return Enumerable(itertools.repeat(element, length))
+        return RepeatEnumerable(element, length)
 
     def reverse(self):
         """
@@ -683,6 +683,16 @@ class SkipEnumerable(Enumerable):
         for index, element in enumerate(self.data):
             if index >= self.n:
                 yield element
+
+
+class SkipWhileEnumerable(Enumerable):
+    """
+    Class to hold state for skipping elements while a given predicate is true
+    """
+    def __init__(self, enumerable, predicate):
+        super(SkipWhileEnumerable, self).__init__(enumerable)
+        self.predicate = predicate
+        self._cycle = itertools.cycle(itertools.dropwhile(self.predicate, self.data))
 
 
 class TakeEnumerable(Enumerable):
@@ -868,6 +878,25 @@ class ZipEnumerable(Enumerable):
     def __len__(self):
         length = min(len(self.data), len(self.enumerable))
         return length
+
+
+class RepeatEnumerable(Enumerable):
+    """
+    Class to hold state for creating an Enumerable of a repeated element
+    """
+    def __init__(self, element, length):
+        self.element = element
+        self.length = length
+        self._cycle = itertools.repeat(self.element)
+
+    def __iter__(self):
+        i = 0
+        while i < self.length:
+            yield next(self._cycle)
+            i += 1
+
+    def __len__(self):
+        return self.length
 
 
 class DistinctEnumerable(Enumerable):

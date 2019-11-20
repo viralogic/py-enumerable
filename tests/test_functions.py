@@ -524,8 +524,8 @@ class TestFunctions(TestCase):
 
     def test_repeat(self):
         test = Enumerable.repeat(u'Z', 10)
-        self.assertEqual(test.count(), 10)
-        self.assertEqual(u"".join(test.to_list()), u'ZZZZZZZZZZ')
+        self.assertEqual(10, test.count())
+        self.assertEqual(u'ZZZZZZZZZZ', u"".join(test.to_list()))
 
     def test_reverse(self):
         test = self.empty.reverse()
@@ -548,10 +548,10 @@ class TestFunctions(TestCase):
 
     def test_skip_while(self):
         test = Enumerable([1, 4, 6, 4, 1]).skip_while(lambda x: x < 5)
-        self.assertListEqual(test.to_list(), [6, 4, 1])
+        self.assertListEqual([6, 4, 1], test.to_list())
 
         test = Enumerable([]).skip_while(lambda x: x < 5)
-        self.assertListEqual(test.to_list(), [])
+        self.assertListEqual([], test.to_list())
 
     def test_take_last(self):
         test = Enumerable([1, 2, 3, 4, 5]).take_last(2)
