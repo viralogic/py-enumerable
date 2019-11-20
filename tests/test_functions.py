@@ -221,7 +221,7 @@ class TestFunctions(TestCase):
 
     def test_group_by(self):
         simple_grouped = self.simple.group_by(key_names=['id'])
-        self.assertEqual(simple_grouped.count(), 3)
+        self.assertEqual(3, simple_grouped.count())
         second = simple_grouped.single(lambda s: s.key.id == 2)
         self.assertListEqual([2], second.to_list())
 

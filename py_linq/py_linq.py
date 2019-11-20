@@ -356,7 +356,7 @@ class Enumerable(object):
         :param result_func: transformation function as lambda expression
         :return: Enumerable of grouping objects
         """
-        return GroupedEnumerable(itertools.groupby(sorted(self, key=key), key), key_names, result_func)
+        return GroupedEnumerable(self, key, key_names, result_func)
 
     def distinct(self, key=lambda x: x):
         """
@@ -366,7 +366,6 @@ class Enumerable(object):
         :return: new Enumerable object
         """
         return DistinctEnumerable(self, key)
-        #return GroupedEnumerable(itertools.groupby(sorted(self, key=key), key), key_names=['distinct']).select(lambda g: g.first())
 
     def join(
             self,
@@ -754,25 +753,29 @@ class ExceptEnumerable(IntersectEnumerable):
 
 
 class GroupedEnumerable(Enumerable):
-    def __init__(self, grouped_data, key_names, func=lambda x: x):
+    def __init__(self, enumerable, key, key_names, func=lambda x: x):
         """
         Constructor for GroupedEnumerable class
         :param grouped_data: Iterable of grouped data
         """
-        super(GroupedEnumerable, self).__init__(grouped_data)
+        super(GroupedEnumerable, self).__init__(enumerable)
+        self.key = key
         self.key_names = key_names
         self.func = func
+        self.grouping = [(g[0], list(g[1])) for g in itertools.groupby(sorted(self.data, key=self.key), self.key)]
 
     def __iter__(self):
-        for d in self.data:
+        for d in self.grouping:
             can_enumerate = isinstance(d[0], list) or isinstance(d[0], tuple) \
                 and len(d[0]) > 0
             key_prop = {}
             for i, prop in enumerate(self.key_names):
                 key_prop.setdefault(prop, d[0][i] if can_enumerate else d[0])
             key_object = Key(key_prop)
-            grouped = list(d[1])
-            yield self.func(Grouping(key_object, grouped))
+            yield self.func(Grouping(key_object, d[1]))
+
+    def __len__(self):
+        return len(self.grouping)
 
 
 class Grouping(Enumerable):
@@ -874,22 +877,15 @@ class DistinctEnumerable(Enumerable):
     def __init__(self, enumerable, distinct_key):
         super(DistinctEnumerable, self).__init__(enumerable)
         self.key = distinct_key
-        self.set = self.add_members()
+        self.set = dict()
         self._cycle = itertools.cycle(self)
 
-    def add_members(self):
-        s = dict()
-        for element in self.data:
-            if not self.key(element) in s:
-                s[self.key(element)] = element
-        return s
-
     def __iter__(self):
+        for element in self.data:
+            if not self.key(element) in self.set:
+                self.set[self.key(element)] = element
         for k in self.set:
             yield self.set[k]
-
-    def __len__(self):
-        return len(self.set.keys)
 
 
 class JoinEnumerable(Enumerable):
