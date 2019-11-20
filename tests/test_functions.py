@@ -252,7 +252,7 @@ class TestFunctions(TestCase):
                 ('England', 'London', 'Branch1', 90000),
                 ('Scotland', 'Edinburgh', 'Branch1', 20000),
                 ('Wales', 'Cardiff', 'Branch1', 29700)
-            ], locations.to_list())
+            ], locations.order_by(lambda l: l[0]).to_list())
 
     def test_default_if_empty(self):
         self.assertListEqual([None], self.empty.default_if_empty().to_list())

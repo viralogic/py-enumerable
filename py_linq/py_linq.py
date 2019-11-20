@@ -874,17 +874,22 @@ class DistinctEnumerable(Enumerable):
     def __init__(self, enumerable, distinct_key):
         super(DistinctEnumerable, self).__init__(enumerable)
         self.key = distinct_key
-        self.set = set()
-        self._cycle = itertools.cycle(iter(self.set))
+        self.set = self.add_members()
+        self._cycle = itertools.cycle(self)
+
+    def add_members(self):
+        s = dict()
+        for element in self.data:
+            if not self.key(element) in s:
+                s[self.key(element)] = element
+        return s
 
     def __iter__(self):
-        for element in self.data:
-            member = self.key(element)
-            self.set.add(member)
-            yield member
+        for k in self.set:
+            yield self.set[k]
 
     def __len__(self):
-        return len(self.set)
+        return len(self.set.keys)
 
 
 class JoinEnumerable(Enumerable):
