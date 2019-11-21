@@ -581,7 +581,7 @@ class Enumerable(object):
         :param predicate: a predicate as a lambda expression
         :return: Enumerable
         """
-        return Enumerable(itertools.dropwhile(predicate, self))
+        return SkipWhileEnumerable(self, predicate)
 
     def take_last(self, n):
         """
@@ -598,7 +598,7 @@ class Enumerable(object):
         :param predicate: a predicate as a lambda expression
         :return: Enumerable
         """
-        return Enumerable(itertools.takewhile(predicate, self))
+        return TakeWhileEnumerable(self, predicate)
 
     def zip(self, enumerable, func=lambda x: x):
         """
@@ -692,7 +692,24 @@ class SkipWhileEnumerable(Enumerable):
     def __init__(self, enumerable, predicate):
         super(SkipWhileEnumerable, self).__init__(enumerable)
         self.predicate = predicate
-        self._cycle = itertools.cycle(itertools.dropwhile(self.predicate, self.data))
+        self._cycle = itertools.cycle(self.data)
+
+    def __iter__(self):
+        i = 1
+        e = next(self._cycle)
+        skip = self.predicate(e)
+        while skip:
+            e = next(self._cycle)
+            skip = self.predicate(e)
+            if skip:
+                i += 1
+        while i < len(self.data):
+            yield e
+            i += 1
+            e = next(self._cycle)
+
+    def __len__(self):
+        return sum(1 for e in self)
 
 
 class TakeEnumerable(Enumerable):
@@ -708,6 +725,32 @@ class TakeEnumerable(Enumerable):
         for index, element in enumerate(self.data):
             if index < self.n:
                 yield element
+
+
+class TakeWhileEnumerable(Enumerable):
+    """
+    Class to hold state for taking elements while a given predicate is true
+    """
+    def __init__(self, enumerable, predicate):
+        super(TakeWhileEnumerable, self).__init__(enumerable)
+        self.predicate = predicate
+        self._cycle = itertools.cycle(self.data)
+
+    def __iter__(self):
+        i = 1
+        e = next(self._cycle)
+        take = self.predicate(e)
+        while take:
+            yield e
+            e = next(self._cycle)
+            take = self.predicate(e)
+            i += 1
+        while i < len(self.data):
+            next(self._cycle)
+            i += 1
+
+    def __len__(self):
+        return sum(1 for e in self)
 
 
 class ReversedEnumerable(Enumerable):
@@ -813,21 +856,19 @@ class SortedEnumerable(Enumerable):
     def __init__(self, enumerable, key_funcs):
         """
         Constructor
-        :param key_funcs: list of OrderingDirection instances in order of
-        primary key
-        --> less important keys
+        :param key_funcs: list of OrderingDirection instances in order of primary key --> less important keys
         :param data: data as iterable
         """
         if key_funcs is None:
             raise NullArgumentError(u"key_funcs argument cannot be None")
         if not isinstance(key_funcs, list):
             raise TypeError(u"key_funcs should be a list instance")
+        super(SortedEnumerable, self).__init__(enumerable)
         self._key_funcs = [
             f for f in key_funcs if isinstance(f, OrderingDirection)
         ]
-        self._data = None
         for o in reversed(self._key_funcs):
-            self._data = sorted(enumerable, key=o.key, reverse=o.descending)
+            self._data = sorted(self._data, key=o.key, reverse=o.descending)
         self._cycle = itertools.cycle(self._data)
 
     def then_by(self, func):
