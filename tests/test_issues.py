@@ -114,3 +114,25 @@ class IssueTests(TestCase):
         self.assertEqual(self.simple.last(lambda x: x == 2), self.simple.last_or_default(lambda x: x == 2))
         self.assertEqual(self.complex.last(lambda x: x['value'] == 2), self.complex.last_or_default(lambda x: x['value'] == 2))
         self.assertEqual(self.simple.first_or_default(lambda x: x == 2), self.simple.last_or_default(lambda x: x == 2))
+
+    def test_issue_34(self):
+        class Obj(object):
+            def __init__(self, n, v):
+                self.n = n
+                self.v = v
+
+        foo = Enumerable([Obj('foo', 1), Obj('bar', 2)])
+        self.assertTrue(foo.any(lambda x: x.n == 'foo'))
+        self.assertTrue(foo.any(lambda x: x.n == 'foo'))
+        filtered_foo = foo.where(lambda x: x.n == 'foo')
+        self.assertIsNotNone(filtered_foo.first())
+        self.assertEqual('foo', filtered_foo.first().n)
+        self.assertTrue(filtered_foo.any(lambda x: x.v == 1))
+        self.assertTrue(filtered_foo.any(lambda x: x.v == 1))
+
+    def test_issue_35(self):
+        a = Enumerable([9, 8, -7, 6, 5])
+        b = a.order_by(lambda x: x)
+        self.assertEqual(-7, b.first())
+        self.assertEqual(-7, list(b)[0])
+        self.assertEqual(-7, b.first())
