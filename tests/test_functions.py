@@ -332,92 +332,18 @@ class TestFunctions(TestCase):
 
     def test_group_join(self):
         self.assertRaises(TypeError, self.empty.group_join, [])
-        self.assertListEqual(
-            self.empty.group_join(self.empty).to_list(),
-            [],
-            u"Group join 2 empty yields empty")
+        self.assertListEqual([], self.empty.group_join(self.empty).to_list())
 
         simple_empty_gj = self.simple.group_join(self.empty)
-        self.assertEqual(
-            simple_empty_gj.count(),
-            3,
-            u"Should have 3 elements")
-        for i, e in enumerate(simple_empty_gj):
-            self.assertEqual(
-                e[0],
-                i + 1,
-                u"number property should be {0}".format(i + 1))
-            self.assertEqual(
-                e[1].count(),
-                0,
-                u"Should have 0 elements")
-            self.assertEqual(
-                e[1].first_or_default(),
-                None,
-                u"Value of first element should be None")
+        self.assertEqual(3, simple_empty_gj.count())
+        self.assertListEqual([(1, []), (2, []), (3, [])], simple_empty_gj.select(lambda g: (g[0], g[1].to_list())).to_list())
 
-        simple_gj = self.simple.group_join(
-            self.simple,
-            result_func=lambda x: {
-                'number': x[0],
-                'collection': x[1]
-            })
-        for i, e in enumerate(simple_gj):
-            self.assertEqual(
-                e['number'],
-                i + 1,
-                u"number property should be {0}".format(i + 1))
-            self.assertEqual(
-                e['collection'].count(),
-                1,
-                u"Should only have one element")
-            self.assertEqual(
-                e['collection'].first(),
-                i + 1,
-                u"Value of first element should equal {0}".format(i + 1))
+        complex_simple_gj = self.complex.group_join(self.simple, outer_key=lambda x: x['value'])
+        self.assertListEqual([({'value': 1}, [1]), ({'value': 2}, [2]), ({'value': 3}, [3])], complex_simple_gj.select(lambda g: (g[0], g[1].to_list())).to_list())
 
-        complex_simple_gj = self.complex.group_join(
-            self.simple,
-            outer_key=lambda x: x['value'])
-        for i, e in enumerate(complex_simple_gj):
-            self.assertEqual(
-                e[0]['value'],
-                i + 1,
-                u"value property of each element should be {0}".format(i + 1))
-            self.assertEqual(
-                e[1].count(),
-                1,
-                u"Should only have one element")
-            self.assertEqual(
-                e[1].first(),
-                i + 1,
-                u"Value of first element should equal {0}".format(i + 1))
-
-        simple_gj = self.simple.group_join(
-            Enumerable([2, 3]),
-            result_func=lambda x: {
-                'number': x[0],
-                'collection': x[1]
-            }).to_list()
-        self.assertEqual(
-            len(simple_gj),
-            3,
-            u"Should be 3 elements")
-        for i, e in enumerate(simple_gj):
-            self.assertEqual(
-                e['number'],
-                i + 1,
-                u"number property should be {0}".format(i + 1))
-            self.assertEqual(
-                e['collection'].count(),
-                0 if i == 0 else 1,
-                u"should have {0} element(s)".format(0 if i == 0 else 1))
-            self.assertListEqual(
-                e['collection'].to_list(),
-                [] if i == 0 else [i + 1],
-                u"Collection should equal {0}".format(
-                    [] if i == 0 else [i + 1])
-            )
+        simple_gj = self.simple.group_join(Enumerable([2, 3]), result_func=lambda x: {'number': x[0], 'collection': x[1].to_list()})
+        self.assertEqual(3, simple_gj.count())
+        self.assertListEqual([{'number': 1, 'collection': []}, {'number': 2, 'collection': [2]}, {'number': 3, 'collection': [3]}], simple_gj.to_list())
 
     def test_then_by(self):
         locations = Enumerable(_locations)

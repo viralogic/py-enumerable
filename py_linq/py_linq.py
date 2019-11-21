@@ -418,22 +418,7 @@ class Enumerable(object):
             raise TypeError(
                 u"inner enumerable parameter must be an instance of Enumerable"
             )
-        return Enumerable(
-            itertools.product(
-                self,
-                inner_enumerable.default_if_empty()
-            )
-        ).group_by(
-            key_names=['id'],
-            key=lambda x: outer_key(x[0]),
-            result_func=lambda g: (
-                g.first()[0],
-                g.where(
-                    lambda x: inner_key(x[1]) == g.key.id).select(
-                        lambda x: x[1]
-                )
-            )
-        ).select(result_func)
+        return GroupJoinEnumerable(self, inner_enumerable, outer_key, inner_key, result_func)
 
     def any(self, predicate=None):
         """
@@ -484,7 +469,7 @@ class Enumerable(object):
         if not isinstance(enumerable, Enumerable):
             raise TypeError(
                 u"enumerable parameter must be an instance of Enumerable")
-        return self.concat(enumerable).distinct(key)
+        return UnionEnumerable(self, enumerable, key)
 
     def except_(self, enumerable, key=lambda x: x):
         """
@@ -805,6 +790,26 @@ class ExceptEnumerable(IntersectEnumerable):
                 yield i
 
 
+class UnionEnumerable(IntersectEnumerable):
+    """
+    Class to hold state for determining the set union of a collection with another collection
+    """
+    def __init__(self, enumerable1, enumerable2, key):
+        super(UnionEnumerable, self).__init__(enumerable1, enumerable2, key)
+        self.set = self.data.concat(self.enumerable).group_by(key_names=['value'], key=self.key, result_func=lambda g: g.first())
+        self._cycle = itertools.cycle(self.set)
+
+    def __iter__(self):
+        i = 0
+        while i < len(self):
+            g = next(self._cycle)
+            yield g
+            i += 1
+
+    def __len__(self):
+        return len(self.set)
+
+
 class GroupedEnumerable(Enumerable):
     def __init__(self, enumerable, key, key_names, func=lambda x: x):
         """
@@ -1006,3 +1011,22 @@ class JoinEnumerable(Enumerable):
                     ik = self.inner_key(i)
                     if ok == ik:
                         yield self.result_func((o, i))
+
+
+class GroupJoinEnumerable(Enumerable):
+    """
+    Class to hold state for performing group join
+    """
+    def __init__(self, outer_enumerable, inner_enumerable, outer_key, inner_key, result_func):
+        super(GroupJoinEnumerable, self).__init__(outer_enumerable)
+        self.inner_enumerable = inner_enumerable
+        self.outer_key = outer_key
+        self.inner_key = inner_key
+        self.result_func = result_func
+        self._cycle = itertools.cycle(self)
+
+    def __iter__(self):
+        for o in self.data:
+            ok = self.outer_key(o)
+            result = self.result_func((o, Grouping(Key({'id': ok}), self.inner_enumerable.where(lambda i: self.inner_key(i) == ok))))
+            yield result
