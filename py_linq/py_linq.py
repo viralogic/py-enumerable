@@ -1,4 +1,13 @@
 import itertools
+
+# python 2 to 3 compatibility imports
+try:
+    from itertools import imap as map
+    from itertools import ifilter as filter
+    from itertools import izip as zip
+except ImportError:
+    pass
+from builtins import range
 from .core import Key, OrderingDirection
 from .decorators import deprecated
 from .exceptions import NoElementsError, NoMatchingElement, NullArgumentError, \
@@ -532,7 +541,7 @@ class Enumerable(object):
         :param length: the number of integers in the sequence
         :return: Enumerable of the generated sequence
         """
-        return Enumerable(xrange(start, start + length, 1))
+        return Enumerable(range(start, start + length, 1))
 
     @staticmethod
     def repeat(element, length):
@@ -909,9 +918,9 @@ class ZipEnumerable(Enumerable):
         self.enumerable = enumerable2
         self.result_func = result_func
         self._cycle = itertools.cycle(
-            itertools.imap(
+            map(
                 lambda r: self.result_func(r),
-                itertools.izip(self.data, self.enumerable)
+                zip(self.data, self.enumerable)
             )
         )
 
@@ -982,19 +991,19 @@ class JoinEnumerable(Enumerable):
         self.inner_key = inner_key
         self.result_func = result_func
         self._cycle = itertools.cycle(
-            itertools.imap(
+            map(
                 lambda e: self.result_func(e),
-                itertools.ifilter(
+                filter(
                     lambda x: self.outer_key(x[0]) == self.inner_key(x[1]),
                     itertools.product(
-                        itertools.ifilter(
-                            lambda x: self.outer_key(x) in itertools.imap(
+                        filter(
+                            lambda x: self.outer_key(x) in map(
                                 self.inner_key,
                                 self.inner_enumerable
                             ), self.data
                         ),
-                        itertools.ifilter(
-                            lambda y: self.inner_key(y) in itertools.imap(
+                        filter(
+                            lambda y: self.inner_key(y) in map(
                                 self.outer_key,
                                 self.data),
                             self.inner_enumerable

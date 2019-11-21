@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "9833ace1c0cc508160c350a0629fd18977b867e89f2904b85887906692f99e25"
+            "sha256": "0adced384ac2145f7e258898b00ebb73c4f0fe93b9c98357b14ac70f1929f8b1"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -62,6 +62,13 @@
             "markers": "python_version < '3.0'",
             "version": "==1.0.2"
         },
+        "future": {
+            "hashes": [
+                "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"
+            ],
+            "index": "pypi",
+            "version": "==0.18.2"
+        },
         "importlib-metadata": {
             "hashes": [
                 "sha256:aa18d7378b00b40847790e7c27e11673d7fed219354109d0e7b9e5b25dc3ad26",
@@ -91,15 +98,15 @@
                 "sha256:0ec8205a157c80d7acc301c0b18fbd5d44fe655968f5d947b6ecef5290fc35db",
                 "sha256:6cd9a47b597b37cc57de1c05e56fb1a1c9cc9fab04fe78c29acd090418529868"
             ],
-            "markers": "python_version == '3.4.*' or python_version < '3'",
+            "markers": "python_version < '3.6'",
             "version": "==2.3.5"
         },
         "pluggy": {
             "hashes": [
-                "sha256:0db4b7601aae1d35b4a033282da476845aa19185c1e6964b25cf324b5e4ec3e6",
-                "sha256:fa5fa1622fa6dd5c030e9cad086fa19ef6a0cf6d7a2d12318e10cb49d6d68f34"
+                "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0",
+                "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"
             ],
-            "version": "==0.13.0"
+            "version": "==0.13.1"
         },
         "py": {
             "hashes": [
@@ -275,7 +282,7 @@
                 "sha256:0ec8205a157c80d7acc301c0b18fbd5d44fe655968f5d947b6ecef5290fc35db",
                 "sha256:6cd9a47b597b37cc57de1c05e56fb1a1c9cc9fab04fe78c29acd090418529868"
             ],
-            "markers": "python_version == '3.4.*' or python_version < '3'",
+            "markers": "python_version < '3.6'",
             "version": "==2.3.5"
         },
         "pep8": {
@@ -288,10 +295,10 @@
         },
         "pluggy": {
             "hashes": [
-                "sha256:0db4b7601aae1d35b4a033282da476845aa19185c1e6964b25cf324b5e4ec3e6",
-                "sha256:fa5fa1622fa6dd5c030e9cad086fa19ef6a0cf6d7a2d12318e10cb49d6d68f34"
+                "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0",
+                "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"
             ],
-            "version": "==0.13.0"
+            "version": "==0.13.1"
         },
         "py": {
             "hashes": [
