@@ -2,7 +2,7 @@
 
 `group_by(self, inner_enumerable, outer_key=lambda x: x, inner_key=lambda x: x, result_func=lambda x: x)`
 
-Correlates the elements of two `Enumerable` collections based on key equality and groups the results. This is an executing function.
+Correlates the elements of two `Enumerable` collections based on key equality and groups the results. This is not an executing function.
 
 **Parameters**
 

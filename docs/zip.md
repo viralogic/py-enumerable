@@ -2,7 +2,7 @@
 
 `zip(enumerable)`
 
-Merges elements from two `Enumerable` collections into a single collection
+Merges elements from two `Enumerable` collections into a single collection. This is not an executing function.
 
 **Parameters**
 

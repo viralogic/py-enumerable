@@ -2,7 +2,7 @@
 
 `skip_while(predicate)`
 
-Bypasses elements in an input `Enumerable` as long as a specified condition is true and then returns the remaining elements.
+Bypasses elements in an input `Enumerable` as long as a specified condition is true and then returns the remaining elements. This is not an executing function.
 
 **Parameters**
 

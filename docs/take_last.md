@@ -2,7 +2,7 @@
 
 `take_last(n)`
 
-Takes the last `n` elements in an `Enumerable` collection
+Takes the last `n` elements in an `Enumerable` collection. This is not an executing function.
 
 **Parameters**
 

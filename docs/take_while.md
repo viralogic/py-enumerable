@@ -2,7 +2,7 @@
 
 `take_while(predicate)`
 
-Returns elements from an `Enumerable` as long as a specified condition is true, and then skips the remaining elements.
+Returns elements from an `Enumerable` as long as a specified condition is true, and then skips the remaining elements. This is not an executing function.
 
 **Parameters**
 

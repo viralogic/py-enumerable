@@ -2,7 +2,7 @@
 
 `select_many(func=lambda x: x)`
 
-Projects each element of a sequence to an IEnumerable<T> and flattens the resulting sequences into one sequence.
+Projects each element of a sequence to an IEnumerable<T> and flattens the resulting sequences into one sequence. This is not an executing function.
 
 **Parameters:**
 
