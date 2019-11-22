@@ -690,8 +690,11 @@ class SkipWhileEnumerable(Enumerable):
 
     def __iter__(self):
         i = 1
-        e = next(self._cycle)
-        skip = self.predicate(e)
+        try:
+            e = next(self._cycle)
+        except StopIteration:
+            e = None
+        skip = False if e is None else self.predicate(e)
         while skip:
             e = next(self._cycle)
             skip = self.predicate(e)
@@ -732,8 +735,11 @@ class TakeWhileEnumerable(Enumerable):
 
     def __iter__(self):
         i = 1
-        e = next(self._cycle)
-        take = self.predicate(e)
+        try:
+            e = next(self._cycle)
+        except StopIteration:
+            e = None
+        take = False if e is None else self.predicate(e)
         while take:
             yield e
             e = next(self._cycle)
@@ -990,36 +996,23 @@ class JoinEnumerable(Enumerable):
         self.outer_key = outer_key
         self.inner_key = inner_key
         self.result_func = result_func
-        self._cycle = itertools.cycle(
-            map(
-                lambda e: self.result_func(e),
-                filter(
-                    lambda x: self.outer_key(x[0]) == self.inner_key(x[1]),
-                    itertools.product(
-                        filter(
-                            lambda x: self.outer_key(x) in map(
-                                self.inner_key,
-                                self.inner_enumerable
-                            ), self.data
-                        ),
-                        filter(
-                            lambda y: self.inner_key(y) in map(
-                                self.outer_key,
-                                self.data),
-                            self.inner_enumerable
-                        )
-                    )
-                )
-            )
-        )
+        self.data_cycle = itertools.cycle(self.data)
+        self.enumerable_cycle = itertools.cycle(self.inner_enumerable)
+        self._cycle = itertools.cycle(self)
 
-        def __iter__(self):
-            for o in self.data:
-                ok = self.outer_key(o)
-                for i in self.inner_enumerable:
-                    ik = self.inner_key(i)
-                    if ok == ik:
-                        yield self.result_func((o, i))
+    def __iter__(self):
+        i = 0
+        while i < len(self.data):
+            o = next(self.data_cycle)
+            ok = self.outer_key(o)
+            j = 0
+            while j < len(self.inner_enumerable):
+                inner = next(self.enumerable_cycle)
+                ik = self.inner_key(inner)
+                if ok == ik:
+                    yield self.result_func((o, inner))
+                j += 1
+            i += 1
 
 
 class GroupJoinEnumerable(Enumerable):
