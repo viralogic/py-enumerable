@@ -8,6 +8,7 @@ author = "Bruce Fenske"
 author-email = "bwfenske@ualberta.ca"
 home-page = "https://github.com/viralogic/py-enumerable"
 description-file="README.md"
+requires="future"
 classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
