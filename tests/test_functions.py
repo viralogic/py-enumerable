@@ -227,19 +227,13 @@ class TestFunctions(TestCase):
 
         complex_grouped = self.complex.group_by(key_names=['value'], key=lambda x: x['value'])
         self.assertEqual(complex_grouped.count(), 3)
-        for g in complex_grouped:
-            self.assertEqual(
-                g.key.value,
-                g.select(lambda x: x['value']).first(),
-                u"Each value in complex grouped should mach first value")
+        self.assertListEqual([1, 2, 3], complex_grouped.select(lambda x: x.key.value).order_by(lambda x: x).to_list())
 
-        locations_grouped = Enumerable(_locations).group_by(
-            key_names=['country', 'city'],
-            key=lambda x: [x[0], x[1]])
+        locations_grouped = Enumerable(_locations).group_by(key_names=['country', 'city'], key=lambda x: [x[0], x[1]])
         self.assertEqual(locations_grouped.count(), 7)
 
         london = locations_grouped.single(lambda c: c.key.city == 'London' and c.key.country == 'England')
-        self.assertEqual(london.sum(lambda c: c[3]), 240000)
+        self.assertEqual(240000, london.sum(lambda c: c[3]))
 
     def test_distinct(self):
         self.assertListEqual([], self.empty.distinct().to_list())
@@ -309,14 +303,14 @@ class TestFunctions(TestCase):
 
     def test_union(self):
         self.assertListEqual([], self.empty.union(self.empty).to_list())
-        self.assertListEqual(_simple, self.empty.union(self.simple).to_list())
-        self.assertListEqual(_simple, self.simple.union(self.empty).to_list())
-        self.assertListEqual(_complex, self.empty.union(self.complex).to_list())
-        self.assertListEqual(_complex, self.complex.union(self.empty).to_list())
-        self.assertListEqual(_simple + [4, 5], self.simple.union(Enumerable([4, 5])).to_list())
-        self.assertListEqual(_simple + [4, 5], self.simple.union(Enumerable([1, 4, 5])).to_list())
-        self.assertListEqual(_complex + [{'value': 4}, {'value': 5}], self.complex.union(Enumerable([{'value': 4}, {'value': 5}]), lambda x: x['value']).to_list())
-        self.assertListEqual(_complex + [{'value': 4}, {'value': 5}], self.complex.union(Enumerable([{'value': 1}, {'value': 4}, {'value': 5}]), lambda x: x['value']).order_by(lambda x: x['value']).to_list())
+        self.assertListEqual(_simple, self.empty.union(self.simple).order_by(lambda x: x).to_list())
+        self.assertListEqual(_simple, self.simple.union(self.empty).order_by(lambda x: x).to_list())
+        self.assertListEqual(_complex, self.empty.union(self.complex).order_by(lambda x: x['value']).to_list())
+        self.assertListEqual(_complex, self.complex.union(self.empty).order_by(lambda x: x['value']).to_list())
+        self.assertListEqual(_simple + [4, 5], self.simple.union(Enumerable([4, 5])).order_by(lambda x: x).to_list())
+        self.assertListEqual(_simple + [4, 5], self.simple.union(Enumerable([1, 4, 5])).order_by(lambda x: x).to_list())
+        self.assertListEqual(_complex + [{'value': 4}, {'value': 5}], self.complex.union(Enumerable([{'value': 4}, {'value': 5}]), lambda x: x['value']).order_by(lambda x: x['value']).to_list())
+        self.assertListEqual(_complex + [{'value': 4}, {'value': 5}], self.complex.union(Enumerable([{'value': 1}, {'value': 4}, {'value': 5}]), lambda x: x['value']).order_by(lambda x: x['value']).order_by(lambda x: x['value']).to_list())
 
     def test_join(self):
         self.assertRaises(TypeError, self.empty.join, [])

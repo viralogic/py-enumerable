@@ -1,5 +1,5 @@
 import itertools
-
+import json
 # python 2 to 3 compatibility imports
 try:
     from itertools import imap as map
@@ -106,7 +106,7 @@ class Enumerable(object):
         :param func: lambda expression to transform data
         :return: sum of selected elements
         """
-        return sum(self.select(func))
+        return sum(func(x) for x in self)
 
     def min(self, func=lambda x: x):
         """
@@ -805,24 +805,34 @@ class ExceptEnumerable(IntersectEnumerable):
                 yield i
 
 
-class UnionEnumerable(IntersectEnumerable):
+class UnionEnumerable(Enumerable):
     """
     Class to hold state for determining the set union of a collection with another collection
     """
     def __init__(self, enumerable1, enumerable2, key):
-        super(UnionEnumerable, self).__init__(enumerable1, enumerable2, key)
-        self.set = self.data.concat(self.enumerable).group_by(key_names=['value'], key=self.key, result_func=lambda g: g.first())
-        self._cycle = itertools.cycle(self.set)
+        super(UnionEnumerable, self).__init__(enumerable1)
+        self.enumerable = enumerable2
+        self.key = key
+        self.union = dict()
+        self._load_data()
+        self._cycle = itertools.cycle((k for k in self.union))
+
+    def _load_data(self):
+        for i in self.data.concat(self.enumerable):
+            key = self.key(i)
+            key_hash = hash(json.dumps(key))
+            if key_hash not in self.union:
+                self.union[key_hash] = i
 
     def __iter__(self):
         i = 0
         while i < len(self):
-            g = next(self._cycle)
-            yield g
+            k = next(self._cycle)
+            yield self.union[k]
             i += 1
 
     def __len__(self):
-        return len(self.set)
+        return len(self.union)
 
 
 class GroupedEnumerable(Enumerable):
@@ -835,17 +845,34 @@ class GroupedEnumerable(Enumerable):
         self.key = key
         self.key_names = key_names
         self.func = func
-        self.grouping = [(g[0], list(g[1])) for g in itertools.groupby(sorted(self.data, key=self.key), self.key)]
+        self.grouping = dict()
+        self._load_data()
+        self._cycle = itertools.cycle((k for k in self.grouping))
+
+    def _load_data(self):
+        for d in self.data:
+            key_value = self.key(d)
+            kv_hash = self._create_key_hash(key_value)
+            if kv_hash not in self.grouping:
+                key_prop = {}
+                for i, prop in enumerate(self.key_names):
+                    key_prop[prop] = key_value[i] if self._can_enumerate(key_value) else key_value
+                self.grouping[kv_hash] = Grouping(Key(key_prop), [d])
+            else:
+                self.grouping[kv_hash].data.append(d)
+
+    def _can_enumerate(self, key_value):
+        return hasattr(key_value, '__len__') and len(key_value) > 0
+
+    def _create_key_hash(self, key_value):
+        return hash(json.dumps(key_value))
 
     def __iter__(self):
-        for d in self.grouping:
-            can_enumerate = isinstance(d[0], list) or isinstance(d[0], tuple) \
-                and len(d[0]) > 0
-            key_prop = {}
-            for i, prop in enumerate(self.key_names):
-                key_prop.setdefault(prop, d[0][i] if can_enumerate else d[0])
-            key_object = Key(key_prop)
-            yield self.func(Grouping(key_object, d[1]))
+        i = 0
+        while i < len(self):
+            k = next(self._cycle)
+            yield self.func(self.grouping[k])
+            i += 1
 
     def __len__(self):
         return len(self.grouping)
