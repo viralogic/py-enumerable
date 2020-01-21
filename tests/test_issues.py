@@ -1,3 +1,4 @@
+import os
 from unittest import TestCase
 from py_linq import Enumerable
 from tests import _empty, _simple, _complex
@@ -136,3 +137,19 @@ class IssueTests(TestCase):
         self.assertEqual(-7, b.first())
         self.assertEqual(-7, list(b)[0])
         self.assertEqual(-7, b.first())
+
+    def test_issue_36(self):
+        def append_to_list(lst, element):
+            lst.append(element)
+
+        filepath = os.path.join(os.getcwd(), "tests", "files", "test_file1.txt")
+        result = []
+        with open(filepath) as f:
+            lines = Enumerable(f) \
+                .skip(1) \
+                .where(lambda l: not l.startswith('#')) \
+                .aggregate(append_to_list, result)
+        self.assertEqual(1, len(result))
+        self.assertEqual("This line should be counted", result[0])
+
+

@@ -1,0 +1,3 @@
+This is test_file1. This line should be skipped.
+# This is a comment
+This line should be counted

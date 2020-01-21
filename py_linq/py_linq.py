@@ -1,5 +1,6 @@
 import itertools
 import json
+import io
 # python 2 to 3 compatibility imports
 try:
     from itertools import imap as map
@@ -29,7 +30,7 @@ class Enumerable(object):
             raise TypeError(
                 u"Enumerable must be instantiated with an iterable object"
             )
-        is_generator = hasattr(data, 'gi_running')
+        is_generator = hasattr(data, 'gi_running') or isinstance(data, io.TextIOBase)
         self._data = data if not is_generator else [i for i in data]
         self._cycle = itertools.cycle(self._data)
 
