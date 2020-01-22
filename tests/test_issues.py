@@ -1,4 +1,5 @@
 import os
+import io
 from unittest import TestCase
 from py_linq import Enumerable
 from tests import _empty, _simple, _complex
@@ -144,7 +145,7 @@ class IssueTests(TestCase):
 
         filepath = os.path.join(os.getcwd(), "tests", "files", "test_file1.txt")
         result = []
-        with open(filepath) as f:
+        with io.open(filepath) as f:
             lines = Enumerable(f) \
                 .skip(1) \
                 .where(lambda l: not l.startswith('#')) \
