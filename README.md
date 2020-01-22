@@ -32,6 +32,7 @@ Please visit the project [site](https://viralogic.github.io/py-enumerable) for b
 
 1. [Oleg Shilo](https://github.com/oleg-shilo)
 2. [Sebastien Celles](https://github.com/scls19fr)
+3. [Daniel Goltz](https://github.com/dagoltz)
 
 ## History ##
 
@@ -45,11 +46,32 @@ Please visit the project [site](https://viralogic.github.io/py-enumerable) for b
     </thead>
     <tbody>
         <tr>
+            <td>TBD</td>
+            <td style='text-align: right;'>1.2.1</td>
+            <td>
+                <ul>
+                    <li>Issue #36 - Fixed iterating over files</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>24-Nov-2019</td>
+            <td style='text-align: right;'>1.2.0</td>
+            <td>
+                <ul>
+                    <li>Memory consumption improvements by removal of data caching when collection is iterated over</li>
+                    <li>Issue #22 - Unexpected behaviour when using iterator as input data</li>
+                    <li>Issue #34 - Data loss when using any function</li>
+                    <li>Issue #35 - Unexpected result when using first function<li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
             <td>7-Oct-2019</td>
             <td style='text-align: right;'>1.1.0</td>
             <td>
                 <ul>
-                    <li>Issue # 23 - Any accepts a None predicate</li>
+                    <li>Issue #23 - Any accepts a None predicate</li>
                     <li>Issue #24 - Performance improvement where any returns on first matching element</li>
                     <li>Issue #25 - Use of any to check for elements in an Enumerable</li>
                     <li>Issue #26 - Performance improvement where element_at only iterates until the n-th element</li>

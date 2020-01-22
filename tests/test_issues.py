@@ -151,5 +151,3 @@ class IssueTests(TestCase):
                 .aggregate(append_to_list, result)
         self.assertEqual(1, len(result))
         self.assertEqual("This line should be counted", result[0])
-
-
