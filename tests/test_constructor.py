@@ -11,18 +11,14 @@ class TestConstructor(TestCase):
 
     def test_constructor(self):
         self.assertIsInstance(
-            self.empty,
-            Enumerable,
-            u"TypeError: empty py_linq is not Enumerable type"
+            self.empty, Enumerable, u"TypeError: empty py_linq is not Enumerable type"
         )
         self.assertIsInstance(
-            self.simple,
-            Enumerable,
-            u"TypeError: simple py_linq is not Enumerable type"
+            self.simple, Enumerable, u"TypeError: simple py_linq is not Enumerable type"
         )
         self.assertIsInstance(
             self.complex,
             Enumerable,
-            u"TypeError: complex py_linq is not Enumerable type"
+            u"TypeError: complex py_linq is not Enumerable type",
         )
         self.assertRaises(TypeError, Enumerable, 1)
