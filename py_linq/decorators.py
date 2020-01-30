@@ -9,14 +9,18 @@ def deprecated(reason):
     :param reason: a reason as a string
     :return: decorated function
     """
+
     def deprecated_decorator(func):
         @functools.wraps(func)
         def new_func(*args, **kwargs):
-            warnings.simplefilter('always', DeprecationWarning)
+            warnings.simplefilter("always", DeprecationWarning)
             warnings.warn(
                 u"{0} is deprecated. {1}".format(func.__name__, reason),
-                category=DeprecationWarning, stacklevel=2
+                category=DeprecationWarning,
+                stacklevel=2,
             )
             return func(*args, **kwargs)
+
         return new_func
+
     return deprecated_decorator

@@ -1,6 +1,7 @@
 import itertools
 import json
 import io
+
 # python 2 to 3 compatibility imports
 try:
     from itertools import imap as map
@@ -11,8 +12,12 @@ except ImportError:
 from builtins import range
 from .core import Key, OrderingDirection
 from .decorators import deprecated
-from .exceptions import NoElementsError, NoMatchingElement, NullArgumentError, \
-    MoreThanOneMatchingElement
+from .exceptions import (
+    NoElementsError,
+    NoMatchingElement,
+    NullArgumentError,
+    MoreThanOneMatchingElement,
+)
 
 
 class Enumerable(object):
@@ -27,10 +32,8 @@ class Enumerable(object):
         if data is None:
             data = []
         if not hasattr(data, "__iter__"):
-            raise TypeError(
-                u"Enumerable must be instantiated with an iterable object"
-            )
-        is_generator = hasattr(data, 'gi_running') or isinstance(data, io.TextIOBase)
+            raise TypeError(u"Enumerable must be instantiated with an iterable object")
+        is_generator = hasattr(data, "gi_running") or isinstance(data, io.TextIOBase)
         self._data = data if not is_generator else [i for i in data]
         self._cycle = itertools.cycle(self._data)
 
@@ -150,7 +153,11 @@ class Enumerable(object):
         result = self.order_by(func).select(func).to_list()
         length = len(result)
         i = int(length / 2)
-        return result[i] if length % 2 == 1 else (float(result[i - 1]) + float(result[i])) / float(2)
+        return (
+            result[i]
+            if length % 2 == 1
+            else (float(result[i - 1]) + float(result[i])) / float(2)
+        )
 
     def element_at(self, n):
         """
@@ -328,9 +335,7 @@ class Enumerable(object):
         :return: new Enumerable object
         """
         if not isinstance(enumerable, Enumerable):
-            raise TypeError(
-                u"enumerable argument must be an instance of Enumerable"
-            )
+            raise TypeError(u"enumerable argument must be an instance of Enumerable")
         return ConcatenateEnumerable(self, enumerable)
 
     def group_by(self, key_names=[], key=lambda x: x, result_func=lambda x: x):
@@ -378,11 +383,11 @@ class Enumerable(object):
         return DistinctEnumerable(self, key)
 
     def join(
-            self,
-            inner_enumerable,
-            outer_key=lambda x: x,
-            inner_key=lambda x: x,
-            result_func=lambda x: x
+        self,
+        inner_enumerable,
+        outer_key=lambda x: x,
+        inner_key=lambda x: x,
+        result_func=lambda x: x,
     ):
         """
         Return enumerable of inner equi-join between two enumerables
@@ -409,11 +414,11 @@ class Enumerable(object):
         return self
 
     def group_join(
-            self,
-            inner_enumerable,
-            outer_key=lambda x: x,
-            inner_key=lambda x: x,
-            result_func=lambda x: x
+        self,
+        inner_enumerable,
+        outer_key=lambda x: x,
+        inner_key=lambda x: x,
+        result_func=lambda x: x,
     ):
         """
         Return enumerable of group join between two enumerables
@@ -428,7 +433,9 @@ class Enumerable(object):
             raise TypeError(
                 u"inner enumerable parameter must be an instance of Enumerable"
             )
-        return GroupJoinEnumerable(self, inner_enumerable, outer_key, inner_key, result_func)
+        return GroupJoinEnumerable(
+            self, inner_enumerable, outer_key, inner_key, result_func
+        )
 
     def any(self, predicate=None):
         """
@@ -447,8 +454,7 @@ class Enumerable(object):
         :return: new Enumerable object
         """
         if not isinstance(enumerable, Enumerable):
-            raise TypeError(
-                u"enumerable parameter must be an instance of Enumerable")
+            raise TypeError(u"enumerable parameter must be an instance of Enumerable")
         return IntersectEnumerable(self, enumerable, key)
 
     def aggregate(self, func, seed=None):
@@ -477,8 +483,7 @@ class Enumerable(object):
         :return: new Enumerable object
         """
         if not isinstance(enumerable, Enumerable):
-            raise TypeError(
-                u"enumerable parameter must be an instance of Enumerable")
+            raise TypeError(u"enumerable parameter must be an instance of Enumerable")
         return UnionEnumerable(self, enumerable, key)
 
     def except_(self, enumerable, key=lambda x: x):
@@ -612,6 +617,7 @@ class SelectEnumerable(Enumerable):
     """
     Class to hold state for projection of elements in a collection
     """
+
     def __init__(self, enumerable, func):
         super(SelectEnumerable, self).__init__(enumerable)
         self.func = func
@@ -628,6 +634,7 @@ class WhereEnumerable(Enumerable):
     """
     Class to hold state for filtering elements in a collection
     """
+
     def __init__(self, enumerable, predicate):
         super(WhereEnumerable, self).__init__(enumerable)
         self.predicate = predicate
@@ -653,6 +660,7 @@ class SelectManyEnumerable(Enumerable):
     """
     Class to hold state for flattening nested collections within a collection
     """
+
     def __init__(self, enumerable, selector):
         super(SelectManyEnumerable, self).__init__(enumerable)
         self.selector = selector
@@ -669,6 +677,7 @@ class SkipEnumerable(Enumerable):
     """
     Class to hold state for skipping elements in a collection
     """
+
     def __init__(self, enumerable, n):
         super(SkipEnumerable, self).__init__(enumerable)
         self.n = n
@@ -684,6 +693,7 @@ class SkipWhileEnumerable(Enumerable):
     """
     Class to hold state for skipping elements while a given predicate is true
     """
+
     def __init__(self, enumerable, predicate):
         super(SkipWhileEnumerable, self).__init__(enumerable)
         self.predicate = predicate
@@ -714,6 +724,7 @@ class TakeEnumerable(Enumerable):
     """
     Class to hold state for taking subset of consecutive elements in a collection
     """
+
     def __init__(self, enumerable, n):
         super(TakeEnumerable, self).__init__(enumerable)
         self.n = n
@@ -729,6 +740,7 @@ class TakeWhileEnumerable(Enumerable):
     """
     Class to hold state for taking elements while a given predicate is true
     """
+
     def __init__(self, enumerable, predicate):
         super(TakeWhileEnumerable, self).__init__(enumerable)
         self.predicate = predicate
@@ -758,6 +770,7 @@ class ReversedEnumerable(Enumerable):
     """
     Class to hold state for reversing elements in a collection
     """
+
     def __init__(self, enumerable):
         super(ReversedEnumerable, self).__init__(enumerable)
         self._cycle = itertools.cycle(reversed(self.data))
@@ -767,6 +780,7 @@ class ConcatenateEnumerable(Enumerable):
     """
     Class to hold state for concatenating Enumerable collections
     """
+
     def __init__(self, enumerable1, enumerable2):
         super(ConcatenateEnumerable, self).__init__(enumerable1)
         self.enumerable = enumerable2
@@ -780,6 +794,7 @@ class IntersectEnumerable(Enumerable):
     """
     Class to hold state for determining the intersection between two sets
     """
+
     def __init__(self, enumerable1, enumerable2, key):
         super(IntersectEnumerable, self).__init__(enumerable1)
         self.enumerable = enumerable2
@@ -796,6 +811,7 @@ class ExceptEnumerable(IntersectEnumerable):
     """
     Class to hold state for determining the set minus of collection given another collection
     """
+
     def __init__(self, enumerable1, enumerable2, key):
         super(ExceptEnumerable, self).__init__(enumerable1, enumerable2, key)
 
@@ -810,6 +826,7 @@ class UnionEnumerable(Enumerable):
     """
     Class to hold state for determining the set union of a collection with another collection
     """
+
     def __init__(self, enumerable1, enumerable2, key):
         super(UnionEnumerable, self).__init__(enumerable1)
         self.enumerable = enumerable2
@@ -857,13 +874,15 @@ class GroupedEnumerable(Enumerable):
             if kv_hash not in self.grouping:
                 key_prop = {}
                 for i, prop in enumerate(self.key_names):
-                    key_prop[prop] = key_value[i] if self._can_enumerate(key_value) else key_value
+                    key_prop[prop] = (
+                        key_value[i] if self._can_enumerate(key_value) else key_value
+                    )
                 self.grouping[kv_hash] = Grouping(Key(key_prop), [d])
             else:
                 self.grouping[kv_hash].data.append(d)
 
     def _can_enumerate(self, key_value):
-        return hasattr(key_value, '__len__') and len(key_value) > 0
+        return hasattr(key_value, "__len__") and len(key_value) > 0
 
     def _create_key_hash(self, key_value):
         return hash(json.dumps(key_value))
@@ -895,8 +914,8 @@ class Grouping(Enumerable):
 
     def __repr__(self):
         return {
-            'key': self.key.__repr__(),
-            'enumerable': self._data.__repr__()
+            "key": self.key.__repr__(),
+            "enumerable": self._data.__repr__(),
         }.__repr__()
 
 
@@ -912,9 +931,7 @@ class SortedEnumerable(Enumerable):
         if not isinstance(key_funcs, list):
             raise TypeError(u"key_funcs should be a list instance")
         super(SortedEnumerable, self).__init__(enumerable)
-        self._key_funcs = [
-            f for f in key_funcs if isinstance(f, OrderingDirection)
-        ]
+        self._key_funcs = [f for f in key_funcs if isinstance(f, OrderingDirection)]
         for o in reversed(self._key_funcs):
             self._data = sorted(self._data, key=o.key, reverse=o.descending)
         self._cycle = itertools.cycle(self._data)
@@ -938,7 +955,8 @@ class SortedEnumerable(Enumerable):
         """
         if func is None:
             raise NullArgumentError(
-                u"then_by_descending requires a lambda function arg")
+                u"then_by_descending requires a lambda function arg"
+            )
         self._key_funcs.append(OrderingDirection(key=func, reverse=True))
         return SortedEnumerable(self, self._key_funcs)
 
@@ -947,15 +965,13 @@ class ZipEnumerable(Enumerable):
     """
     Class to hold state for zipping 2 collections together
     """
+
     def __init__(self, enumerable1, enumerable2, result_func):
         super(ZipEnumerable, self).__init__(enumerable1)
         self.enumerable = enumerable2
         self.result_func = result_func
         self._cycle = itertools.cycle(
-            map(
-                lambda r: self.result_func(r),
-                zip(self.data, self.enumerable)
-            )
+            map(lambda r: self.result_func(r), zip(self.data, self.enumerable))
         )
 
     def __iter__(self):
@@ -973,6 +989,7 @@ class RepeatEnumerable(Enumerable):
     """
     Class to hold state for creating an Enumerable of a repeated element
     """
+
     def __init__(self, element, length):
         self.element = element
         self.length = length
@@ -992,6 +1009,7 @@ class DistinctEnumerable(Enumerable):
     """
     Class to hold state for performing distinct iteration
     """
+
     def __init__(self, enumerable, distinct_key):
         super(DistinctEnumerable, self).__init__(enumerable)
         self.key = distinct_key
@@ -1010,7 +1028,10 @@ class JoinEnumerable(Enumerable):
     """
     Class to hold state for performing inner join of 2 enumerables
     """
-    def __init__(self, outer_enumerable, inner_enumerable, outer_key, inner_key, result_func):
+
+    def __init__(
+        self, outer_enumerable, inner_enumerable, outer_key, inner_key, result_func
+    ):
         """
         Constructor
         :param outer_enumerable -> the outer collection to join against
@@ -1047,7 +1068,10 @@ class GroupJoinEnumerable(Enumerable):
     """
     Class to hold state for performing group join
     """
-    def __init__(self, outer_enumerable, inner_enumerable, outer_key, inner_key, result_func):
+
+    def __init__(
+        self, outer_enumerable, inner_enumerable, outer_key, inner_key, result_func
+    ):
         super(GroupJoinEnumerable, self).__init__(outer_enumerable)
         self.inner_enumerable = inner_enumerable
         self.outer_key = outer_key
@@ -1058,5 +1082,13 @@ class GroupJoinEnumerable(Enumerable):
     def __iter__(self):
         for o in self.data:
             ok = self.outer_key(o)
-            result = self.result_func((o, Grouping(Key({'id': ok}), self.inner_enumerable.where(lambda i: self.inner_key(i) == ok))))
+            result = self.result_func(
+                (
+                    o,
+                    Grouping(
+                        Key({"id": ok}),
+                        self.inner_enumerable.where(lambda i: self.inner_key(i) == ok),
+                    ),
+                )
+            )
             yield result
