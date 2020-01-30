@@ -7,6 +7,7 @@ verify_ssl = true
 pytest = "*"
 pytest-cov = "<2.6"
 black = "*"
+pre-commit = "*"
 
 [packages]
 future = "*"
