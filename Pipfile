@@ -5,13 +5,10 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
-pep8 = "*"
 pytest-cov = "<2.6"
-pycodestyle = "*"
 
 [packages]
-pytest = "*"
 future = "*"
 
 [requires]
-python_version = "2.7"
+python_version = "3.7"

@@ -55,3 +55,4 @@ target/
 /.idea
 .vscode/settings.json
 .pytest_cache/
+.python-version
