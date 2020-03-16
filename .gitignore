@@ -56,3 +56,4 @@ target/
 .vscode/settings.json
 .pytest_cache/
 .python-version
+coverage/lcov.info
