@@ -649,7 +649,7 @@ class WhereEnumerable(Enumerable):
 
     def next(self):
         element = next(self._cycle)
-        if self.predicate(v):
+        if self.predicate(element):
             return element
 
     def __len__(self):
