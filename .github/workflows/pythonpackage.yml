@@ -39,12 +39,13 @@ jobs:
         pip install pytest
         pip install "pytest-cov<2.6"
         pip install python-coveralls
-        pytest --cov=py_linq --cov-report=xml:./coverage/lcov.info
+        pytest --cov=py_linq --cov-report=
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         parallel: true
+        path-to-lcov: .coverage
     - name: Coveralls Finished
       uses: coverallsapp/github-action@master
       with:
