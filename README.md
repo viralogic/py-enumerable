@@ -1,4 +1,4 @@
-[![](https://travis-ci.org/viralogic/py-enumerable.svg?branch=master)](https://travis-ci.org/viralogic/py-enumerable)
+![Python package](https://github.com/viralogic/py-enumerable/workflows/Python%20package/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/viralogic/py-enumerable/badge.svg?branch=master)](https://coveralls.io/github/viralogic/py-enumerable?branch=master)
 
 # py-linq #
