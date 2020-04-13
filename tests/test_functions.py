@@ -274,10 +274,12 @@ class TestFunctions(TestCase):
         self.assertListEqual(
             [1, 2, 3, 4, 5, 6, 7, 8, 9], simple.select_many().to_list()
         )
+        self.assertEqual(9, simple.select_many().count())
         self.assertListEqual(
             [1, 2, 3, 4, 5, 6, 7, 8, 9],
             __complex.select_many(lambda x: x["values"]).to_list(),
         )
+        self.assertEqual(9, __complex.select_many(lambda x: x["values"]).count())
 
     def test_concat(self):
         self.assertListEqual([], self.empty.concat(self.empty).to_list())
@@ -636,6 +638,7 @@ class TestFunctions(TestCase):
 
         test = self.simple.reverse()
         self.assertListEqual(test.to_list(), [3, 2, 1])
+        self.assertEqual(3, test.count())
 
         words = u"the quick brown fox jumps over the lazy dog".split(" ")
         self.assertListEqual(

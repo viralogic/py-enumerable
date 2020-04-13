@@ -1,3 +1,6 @@
+import itertools
+import io
+
 class Key(object):
     def __init__(self, key, **kwargs):
         """
@@ -23,3 +26,30 @@ class OrderingDirection(object):
         """
         self.key = key
         self.descending = reverse
+
+class RepeatableIterable(object):
+    def __init__(self, data):
+        if data is None:
+            data = []
+        if not hasattr(data, "__iter__"):
+            raise TypeError(u"RepeatableIterable must be instantiated with an iterable object")
+        self._data = data
+        self._len = None
+        self.cycle = itertools.cycle(self._data)
+
+    def __len__(self):
+        if self._len is None:
+            self._len = sum(1 for item in self._data)
+        return self._len
+
+    def __iter__(self):
+        i = 0
+        while i < len(self):
+            yield next(self.cycle)
+            i += 1
+
+    def __next__(self):
+        return self.next()
+
+    def next(self):
+        return next(self.cycle)
