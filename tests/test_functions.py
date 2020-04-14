@@ -80,6 +80,9 @@ class TestFunctions(TestCase):
             [1, 2, 3], self.complex.select(lambda x: x["value"]).to_list()
         )
 
+        for i, e in enumerate(self.complex.select(lambda x: x["value"])):
+            self.assertEqual(i + 1, e)
+
     def test_min(self):
         self.assertRaises(NoElementsError, self.empty.min)
         self.assertEqual(1, self.simple.min())
@@ -290,6 +293,10 @@ class TestFunctions(TestCase):
             self.simple.concat(self.complex.select(lambda c: c["value"])).to_list(),
         )
         self.assertListEqual(
+            [1, 2, 3, 1, 2, 3],
+            self.complex.select(lambda c: c["value"]).concat(self.simple).to_list()
+        )
+        self.assertListEqual(
             [1, 2, 3, {"value": 1}, {"value": 2}, {"value": 3}],
             self.simple.concat(self.complex).to_list(),
         )
@@ -329,14 +336,6 @@ class TestFunctions(TestCase):
 
         locations = Enumerable(_locations).distinct(lambda x: x[0])
         self.assertEqual(locations.count(), 3)
-        self.assertListEqual(
-            [
-                ("England", "London", "Branch1", 90000),
-                ("Scotland", "Edinburgh", "Branch1", 20000),
-                ("Wales", "Cardiff", "Branch1", 29700),
-            ],
-            locations.order_by(lambda l: l[0]).to_list(),
-        )
 
     def test_default_if_empty(self):
         self.assertListEqual([None], self.empty.default_if_empty().to_list())
@@ -590,9 +589,7 @@ class TestFunctions(TestCase):
         test = Enumerable(words).aggregate(self.reverse)
         self.assertEqual(test, "dog lazy the over jumps fox brown quick the")
 
-        self.assertRaises(
-            IndexError, Enumerable().aggregate, [lambda x: x[0] + x[1], 0]
-        )
+        self.assertEqual(0, Enumerable().aggregate(lambda x: x[0] + x[1], 0))
 
         test = self.simple.aggregate(self.sum, seed=0)
         self.assertEqual(test, 6)

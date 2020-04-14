@@ -278,7 +278,7 @@ class Enumerable(object):
             raise NoMatchingElement("No matching elements are found")
         if result.count() > 1:
             raise MoreThanOneMatchingElement("More than one matching element is found")
-        return result.first()
+        return result.to_list()[0]
 
     def single_or_default(self, predicate=None):
         """
@@ -365,7 +365,7 @@ class Enumerable(object):
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
-        return DistinctEnumerable(self, key)
+        return GroupedEnumerable(self, key, ['distinct'], lambda g: g.first())
 
     def join(
         self,
@@ -452,9 +452,10 @@ class Enumerable(object):
         first element is used as the seed
         :return: result of the calculation
         """
-        result = seed if seed is not None else self.first()
+        result = seed
         for i, e in enumerate(self):
             if i == 0 and seed is None:
+                result = e
                 continue
             result = func(result, e)
         return result
@@ -634,6 +635,8 @@ class WhereEnumerable(Enumerable):
         if self.predicate(element):
             return element
 
+    
+
     def __len__(self):
         return sum(1 for element in self._iterable if self.predicate(element))
 
@@ -733,15 +736,9 @@ class ConcatenateEnumerable(Enumerable):
     def __init__(self, enumerable1, enumerable2):
         super(ConcatenateEnumerable, self).__init__(enumerable1)
         self.enumerable = enumerable2
-        #self.cycle = itertools.cycle(itertools.chain(iter(self._iterable), iter(self.enumerable._iterable))
 
     def __iter__(self):
-        return itertools.chain(iter(self._iterable), iter(self.enumerable._iterable))
-    #     for e in itertools.chain(self._iterable, self.enumerable._iterable):
-    #         yield e
-
-    # def __len__(self):
-    #     return len(self._iterable) + len(self.enumerable._iterable)
+        return itertools.chain(iter(self._iterable), self.enumerable)
 
 
 class IntersectEnumerable(Enumerable):
@@ -755,7 +752,7 @@ class IntersectEnumerable(Enumerable):
         self.key = key
 
     def __iter__(self):
-        for i in self.data:
+        for i in iter(self._iterable):
             k1 = self.key(i)
             if any(self.key(i2) == k1 for i2 in self.enumerable):
                 yield i
@@ -770,7 +767,7 @@ class ExceptEnumerable(IntersectEnumerable):
         super(ExceptEnumerable, self).__init__(enumerable1, enumerable2, key)
 
     def __iter__(self):
-        for i in self.data:
+        for i in iter(self._iterable):
             k1 = self.key(i)
             if not any(self.key(i2) == k1 for i2 in self.enumerable):
                 yield i
@@ -785,27 +782,15 @@ class UnionEnumerable(Enumerable):
         super(UnionEnumerable, self).__init__(enumerable1)
         self.enumerable = enumerable2
         self.key = key
-        self.union = dict()
-        self._load_data()
-        self._cycle = itertools.cycle((k for k in self.union))
-
-    def _load_data(self):
-        for i in self.data.concat(self.enumerable):
-            key = self.key(i)
-            key_hash = hash(json.dumps(key))
-            if key_hash not in self.union:
-                self.union[key_hash] = i
 
     def __iter__(self):
-        i = 0
-        while i < len(self):
-            k = next(self._cycle)
-            yield self.union[k]
-            i += 1
-
-    def __len__(self):
-        return len(self.union)
-
+        union = dict()
+        for e in itertools.chain(iter(self._iterable), self.enumerable):
+            key = self.key(e)
+            key_hash = hash(json.dumps(key, default=str))
+            if key_hash not in union:
+                yield e
+                union[key_hash] = e
 
 class GroupedEnumerable(Enumerable):
     def __init__(self, enumerable, key, key_names, func=lambda x: x):
@@ -819,12 +804,11 @@ class GroupedEnumerable(Enumerable):
         self.func = func
         self.grouping = dict()
         self._load_data()
-        self._cycle = itertools.cycle((k for k in self.grouping))
 
     def _load_data(self):
-        for d in self.data:
+        for d in iter(self._iterable):
             key_value = self.key(d)
-            kv_hash = self._create_key_hash(key_value)
+            kv_hash = hash(json.dumps(key_value))
             if kv_hash not in self.grouping:
                 key_prop = {}
                 for i, prop in enumerate(self.key_names):
@@ -833,23 +817,14 @@ class GroupedEnumerable(Enumerable):
                     )
                 self.grouping[kv_hash] = Grouping(Key(key_prop), [d])
             else:
-                self.grouping[kv_hash].data.append(d)
+                self.grouping[kv_hash].add(d)
 
     def _can_enumerate(self, key_value):
         return hasattr(key_value, "__len__") and len(key_value) > 0
 
-    def _create_key_hash(self, key_value):
-        return hash(json.dumps(key_value))
-
     def __iter__(self):
-        i = 0
-        while i < len(self):
-            k = next(self._cycle)
+        for k in self.grouping:
             yield self.func(self.grouping[k])
-            i += 1
-
-    def __len__(self):
-        return len(self.grouping)
 
 
 class Grouping(Enumerable):
@@ -869,8 +844,11 @@ class Grouping(Enumerable):
     def __repr__(self):
         return {
             "key": self.key.__repr__(),
-            "enumerable": self._data.__repr__(),
+            "enumerable": list(self._iterable).__repr__(),
         }.__repr__()
+
+    def add(self, item):
+        self._iterable._data.append(item)
 
 
 class SortedEnumerable(Enumerable):
@@ -884,11 +862,12 @@ class SortedEnumerable(Enumerable):
             raise NullArgumentError(u"key_funcs argument cannot be None")
         if not isinstance(key_funcs, list):
             raise TypeError(u"key_funcs should be a list instance")
-        super(SortedEnumerable, self).__init__(enumerable)
         self._key_funcs = [f for f in key_funcs if isinstance(f, OrderingDirection)]
+        data = enumerable
         for o in reversed(self._key_funcs):
-            self._data = sorted(self._data, key=o.key, reverse=o.descending)
-        self._cycle = itertools.cycle(self._data)
+            data = sorted(iter(data), key=o.key, reverse=o.descending)
+        super(SortedEnumerable, self).__init__(data)
+    
 
     def then_by(self, func):
         """
@@ -924,19 +903,9 @@ class ZipEnumerable(Enumerable):
         super(ZipEnumerable, self).__init__(enumerable1)
         self.enumerable = enumerable2
         self.result_func = result_func
-        self._cycle = itertools.cycle(
-            map(lambda r: self.result_func(r), zip(self.data, self.enumerable))
-        )
 
     def __iter__(self):
-        i = 0
-        while i < len(self):
-            yield self.result_func((self.data[i], self.enumerable[i]))
-            i += 1
-
-    def __len__(self):
-        length = min(len(self.data), len(self.enumerable))
-        return length
+        return map(lambda r: self.result_func(r), zip(iter(self._iterable), self.enumerable))
 
 
 class RepeatEnumerable(Enumerable):
@@ -947,35 +916,9 @@ class RepeatEnumerable(Enumerable):
     def __init__(self, element, length):
         self.element = element
         self.length = length
-        self._cycle = itertools.repeat(self.element)
 
     def __iter__(self):
-        i = 0
-        while i < self.length:
-            yield next(self._cycle)
-            i += 1
-
-    def __len__(self):
-        return self.length
-
-
-class DistinctEnumerable(Enumerable):
-    """
-    Class to hold state for performing distinct iteration
-    """
-
-    def __init__(self, enumerable, distinct_key):
-        super(DistinctEnumerable, self).__init__(enumerable)
-        self.key = distinct_key
-        self.set = dict()
-        self._cycle = itertools.cycle(self)
-
-    def __iter__(self):
-        for element in self.data:
-            if not self.key(element) in self.set:
-                self.set[self.key(element)] = element
-        for k in self.set:
-            yield self.set[k]
+        return itertools.repeat(self.element, self.length)
 
 
 class JoinEnumerable(Enumerable):
@@ -999,23 +942,14 @@ class JoinEnumerable(Enumerable):
         self.outer_key = outer_key
         self.inner_key = inner_key
         self.result_func = result_func
-        self.data_cycle = itertools.cycle(self.data)
-        self.enumerable_cycle = itertools.cycle(self.inner_enumerable)
-        self._cycle = itertools.cycle(self)
 
     def __iter__(self):
-        i = 0
-        while i < len(self.data):
-            o = next(self.data_cycle)
-            ok = self.outer_key(o)
-            j = 0
-            while j < len(self.inner_enumerable):
-                inner = next(self.enumerable_cycle)
+        for outer in iter(self._iterable):
+            ok = self.outer_key(outer)
+            for inner in iter(self.inner_enumerable):
                 ik = self.inner_key(inner)
                 if ok == ik:
-                    yield self.result_func((o, inner))
-                j += 1
-            i += 1
+                    yield self.result_func((outer, inner))
 
 
 class GroupJoinEnumerable(Enumerable):
@@ -1031,10 +965,9 @@ class GroupJoinEnumerable(Enumerable):
         self.outer_key = outer_key
         self.inner_key = inner_key
         self.result_func = result_func
-        self._cycle = itertools.cycle(self)
 
     def __iter__(self):
-        for o in self.data:
+        for o in iter(self._iterable):
             ok = self.outer_key(o)
             result = self.result_func(
                 (
