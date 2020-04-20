@@ -111,7 +111,9 @@ class TestFunctions(TestCase):
         self.assertIsInstance(self.simple.first(), int)
         self.assertEqual(1, self.simple.order_by(lambda x: x).first())
         self.assertIsInstance(self.complex.first(), dict)
-        self.assertDictEqual({"value": 1}, self.complex.order_by(lambda x: x['value']).first())
+        self.assertDictEqual(
+            {"value": 1}, self.complex.order_by(lambda x: x["value"]).first()
+        )
 
     def test_first_or_default(self):
         self.assertIsNone(self.empty.first_or_default())
@@ -123,17 +125,21 @@ class TestFunctions(TestCase):
         self.assertIsInstance(self.simple.last(), int)
         self.assertEqual(3, self.simple.order_by(lambda x: x).last())
         self.assertIsInstance(self.complex.last(), dict)
-        self.assertDictEqual({"value": 3}, self.complex.order_by(lambda x: x['value']).last())
         self.assertDictEqual(
-            self.complex.order_by(lambda x: x['value']).last(),
-            self.complex.order_by(lambda x: x['value']).last_or_default()
-            )
+            {"value": 3}, self.complex.order_by(lambda x: x["value"]).last()
+        )
+        self.assertDictEqual(
+            self.complex.order_by(lambda x: x["value"]).last(),
+            self.complex.order_by(lambda x: x["value"]).last_or_default(),
+        )
 
     def test_last_or_default(self):
         self.assertIsNone(self.empty.last_or_default())
         self.assertEqual(3, self.simple.order_by(lambda x: x).last_or_default())
         self.assertIsInstance(self.complex.last_or_default(), dict)
-        self.assertDictEqual({"value": 3}, self.complex.order_by(lambda x: x['value']).last_or_default())
+        self.assertDictEqual(
+            {"value": 3}, self.complex.order_by(lambda x: x["value"]).last_or_default()
+        )
 
     def test_order_by(self):
         self.assertRaises(NullArgumentError, self.simple.order_by, None)
@@ -293,7 +299,7 @@ class TestFunctions(TestCase):
         )
         self.assertListEqual(
             [1, 2, 3, 1, 2, 3],
-            self.complex.select(lambda c: c["value"]).concat(self.simple).to_list()
+            self.complex.select(lambda c: c["value"]).concat(self.simple).to_list(),
         )
         self.assertListEqual(
             [1, 2, 3, {"value": 1}, {"value": 2}, {"value": 3}],

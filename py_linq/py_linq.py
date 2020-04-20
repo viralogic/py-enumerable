@@ -11,11 +11,7 @@ try:
 except ImportError:
     pass
 from builtins import range
-from .core import (
-    Key,
-    OrderingDirection,
-    RepeatableIterable
-)
+from .core import Key, OrderingDirection, RepeatableIterable
 from .decorators import deprecated
 from .exceptions import (
     NoElementsError,
@@ -359,7 +355,7 @@ class Enumerable(object):
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
-        return GroupedEnumerable(self, key, ['distinct'], lambda g: g.first())
+        return GroupedEnumerable(self, key, ["distinct"], lambda g: g.first())
 
     def join(
         self,
@@ -652,7 +648,7 @@ class SkipEnumerable(Enumerable):
         super(SkipEnumerable, self).__init__(enumerable)
         self.n = n
 
-    def __iter__(self):        
+    def __iter__(self):
         for index, element in enumerate(self._iterable):
             if index >= self.n:
                 yield element
@@ -719,6 +715,7 @@ class ConcatenateEnumerable(Enumerable):
     """
     Class to hold state for concatenating Enumerable collections
     """
+
     def __init__(self, enumerable1, enumerable2):
         super(ConcatenateEnumerable, self).__init__(enumerable1)
         self.enumerable = enumerable2
@@ -789,6 +786,7 @@ class UnionEnumerable(Enumerable):
             if key_hash not in union:
                 yield e
                 union[key_hash] = e
+
 
 class GroupedEnumerable(Enumerable):
     def __init__(self, enumerable, key, key_names, func=lambda x: x):
@@ -872,7 +870,6 @@ class SortedEnumerable(Enumerable):
             if i == n:
                 result = e
         return result
-    
 
     def then_by(self, func):
         """
@@ -910,7 +907,9 @@ class ZipEnumerable(Enumerable):
         self.result_func = result_func
 
     def __iter__(self):
-        return map(lambda r: self.result_func(r), zip(iter(self._iterable), self.enumerable))
+        return map(
+            lambda r: self.result_func(r), zip(iter(self._iterable), self.enumerable)
+        )
 
 
 class RepeatEnumerable(Enumerable):

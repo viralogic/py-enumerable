@@ -1,6 +1,7 @@
 import itertools
 import io
 
+
 class Key(object):
     def __init__(self, key, **kwargs):
         """
@@ -27,6 +28,7 @@ class OrderingDirection(object):
         self.key = key
         self.descending = reverse
 
+
 class RepeatableIterable(object):
     def __init__(self, data):
         """
@@ -37,7 +39,9 @@ class RepeatableIterable(object):
         if data is None:
             data = []
         if not hasattr(data, "__iter__"):
-            raise TypeError(u"RepeatableIterable must be instantiated with an iterable object")
+            raise TypeError(
+                u"RepeatableIterable must be instantiated with an iterable object"
+            )
         is_generator = hasattr(data, "gi_running") or isinstance(data, io.TextIOBase)
         self._data = data if not is_generator else [i for i in data]
         self._len = None
