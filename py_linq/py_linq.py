@@ -46,15 +46,9 @@ class Enumerable(object):
         :returns the element at the specified index.
         :raises IndexError if n > number of elements in the iterable
         """
-        if n < 0:
-            raise IndexError
-        i = 0
-        while i < n:
-            next(self._iterable)
-            i += 1
-        if i == len(self):
-            return None
-        return next(self._iterable)
+        for i, e in enumerate(self):
+            if i == n:
+                return e
 
     def __len__(self):
         """
@@ -612,9 +606,6 @@ class SelectEnumerable(Enumerable):
         for e in iter(self._iterable):
             yield self.func(e)
 
-    def next(self):
-        return self.func(next(self._iterable))
-
 
 class WhereEnumerable(Enumerable):
     """
@@ -630,15 +621,10 @@ class WhereEnumerable(Enumerable):
             if self.predicate(e):
                 yield e
 
-    def next(self):
-        element = next(self._iterable)
-        if self.predicate(element):
-            return element
-
-    
-
-    def __len__(self):
-        return sum(1 for element in self._iterable if self.predicate(element))
+    def __getitem__(self, n):
+        for i, e in enumerate(filter(self.predicate, self)):
+            if i == n:
+                return e
 
 
 class SelectManyEnumerable(Enumerable):
@@ -739,6 +725,18 @@ class ConcatenateEnumerable(Enumerable):
 
     def __iter__(self):
         return itertools.chain(iter(self._iterable), self.enumerable)
+
+    def __getitem__(self, n):
+        if n < 0:
+            raise IndexError
+        if n == len(self) + len(self.enumerable):
+            return None
+        i = 0
+        it = self._iterable if n < len(self._iterable) else self.enumerable._iterable
+        while i < n:
+            next(it)
+            i += 1
+        return next(it)
 
 
 class IntersectEnumerable(Enumerable):
@@ -867,6 +865,13 @@ class SortedEnumerable(Enumerable):
         for o in reversed(self._key_funcs):
             data = sorted(iter(data), key=o.key, reverse=o.descending)
         super(SortedEnumerable, self).__init__(data)
+
+    def __getitem__(self, n):
+        result = None
+        for i, e in enumerate(self):
+            if i == n:
+                result = e
+        return result
     
 
     def then_by(self, func):
@@ -946,7 +951,7 @@ class JoinEnumerable(Enumerable):
     def __iter__(self):
         for outer in iter(self._iterable):
             ok = self.outer_key(outer)
-            for inner in iter(self.inner_enumerable):
+            for inner in iter(self.inner_enumerable._iterable):
                 ik = self.inner_key(inner)
                 if ok == ik:
                     yield self.result_func((outer, inner))

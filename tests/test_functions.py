@@ -8,6 +8,8 @@ from py_linq.exceptions import (
     MoreThanOneMatchingElement,
 )
 
+import six
+
 
 class TestFunctions(TestCase):
     def setUp(self):
@@ -107,12 +109,9 @@ class TestFunctions(TestCase):
     def test_first(self):
         self.assertRaises(IndexError, self.empty.first)
         self.assertIsInstance(self.simple.first(), int)
-        self.assertEqual(1, self.simple.first())
+        self.assertEqual(1, self.simple.order_by(lambda x: x).first())
         self.assertIsInstance(self.complex.first(), dict)
-        self.assertDictEqual(self.complex.first(), {"value": 1})
-        self.assertEqual(
-            self.simple.first(), self.complex.select(lambda x: x["value"]).first()
-        )
+        self.assertDictEqual({"value": 1}, self.complex.order_by(lambda x: x['value']).first())
 
     def test_first_or_default(self):
         self.assertIsNone(self.empty.first_or_default())
@@ -122,19 +121,19 @@ class TestFunctions(TestCase):
     def test_last(self):
         self.assertRaises(IndexError, self.empty.last)
         self.assertIsInstance(self.simple.last(), int)
-        self.assertEqual(3, self.simple.last())
+        self.assertEqual(3, self.simple.order_by(lambda x: x).last())
         self.assertIsInstance(self.complex.last(), dict)
-        self.assertDictEqual(self.complex.last(), {"value": 3})
-        self.assertDictEqual(self.complex.last(), self.complex.last_or_default())
-        self.assertEqual(
-            self.simple.last(), self.complex.select(lambda x: x["value"]).last()
-        )
+        self.assertDictEqual({"value": 3}, self.complex.order_by(lambda x: x['value']).last())
+        self.assertDictEqual(
+            self.complex.order_by(lambda x: x['value']).last(),
+            self.complex.order_by(lambda x: x['value']).last_or_default()
+            )
 
     def test_last_or_default(self):
         self.assertIsNone(self.empty.last_or_default())
-        self.assertEqual(3, self.simple.last_or_default())
+        self.assertEqual(3, self.simple.order_by(lambda x: x).last_or_default())
         self.assertIsInstance(self.complex.last_or_default(), dict)
-        self.assertDictEqual({"value": 3}, self.complex.last_or_default())
+        self.assertDictEqual({"value": 3}, self.complex.order_by(lambda x: x['value']).last_or_default())
 
     def test_order_by(self):
         self.assertRaises(NullArgumentError, self.simple.order_by, None)
@@ -339,8 +338,8 @@ class TestFunctions(TestCase):
 
     def test_default_if_empty(self):
         self.assertListEqual([None], self.empty.default_if_empty().to_list())
-        self.assertListEqual(_simple, self.simple.default_if_empty().to_list())
-        self.assertListEqual(_complex, self.complex.default_if_empty().to_list())
+        six.assertCountEqual(self, _simple, self.simple.default_if_empty().to_list())
+        six.assertCountEqual(self, _complex, self.complex.default_if_empty().to_list())
 
     def test_any(self):
         self.assertFalse(self.empty.any(lambda x: x == 1))
