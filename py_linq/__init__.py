@@ -1,6 +1,6 @@
 """ Linq for Python """
 
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 
 try:
     from py_linq import Enumerable
