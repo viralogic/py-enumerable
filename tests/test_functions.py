@@ -335,8 +335,8 @@ class TestFunctions(TestCase):
 
     def test_distinct(self):
         self.assertListEqual([], self.empty.distinct().to_list())
-        self.assertListEqual(
-            _simple, self.simple.concat(self.simple).distinct().to_list()
+        six.assertCountEqual(
+            self, _simple, self.simple.concat(self.simple).distinct().to_list()
         )
 
         locations = Enumerable(_locations).distinct(lambda x: x[0])
