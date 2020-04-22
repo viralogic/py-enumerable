@@ -8,6 +8,8 @@ from py_linq.exceptions import (
     MoreThanOneMatchingElement,
 )
 
+import six
+
 
 class TestFunctions(TestCase):
     def setUp(self):
@@ -80,6 +82,9 @@ class TestFunctions(TestCase):
             [1, 2, 3], self.complex.select(lambda x: x["value"]).to_list()
         )
 
+        for i, e in enumerate(self.complex.select(lambda x: x["value"])):
+            self.assertEqual(i + 1, e)
+
     def test_min(self):
         self.assertRaises(NoElementsError, self.empty.min)
         self.assertEqual(1, self.simple.min())
@@ -104,11 +109,10 @@ class TestFunctions(TestCase):
     def test_first(self):
         self.assertRaises(IndexError, self.empty.first)
         self.assertIsInstance(self.simple.first(), int)
-        self.assertEqual(1, self.simple.first())
+        self.assertEqual(1, self.simple.order_by(lambda x: x).first())
         self.assertIsInstance(self.complex.first(), dict)
-        self.assertDictEqual(self.complex.first(), {"value": 1})
-        self.assertEqual(
-            self.simple.first(), self.complex.select(lambda x: x["value"]).first()
+        self.assertDictEqual(
+            {"value": 1}, self.complex.order_by(lambda x: x["value"]).first()
         )
 
     def test_first_or_default(self):
@@ -119,19 +123,23 @@ class TestFunctions(TestCase):
     def test_last(self):
         self.assertRaises(IndexError, self.empty.last)
         self.assertIsInstance(self.simple.last(), int)
-        self.assertEqual(3, self.simple.last())
+        self.assertEqual(3, self.simple.order_by(lambda x: x).last())
         self.assertIsInstance(self.complex.last(), dict)
-        self.assertDictEqual(self.complex.last(), {"value": 3})
-        self.assertDictEqual(self.complex.last(), self.complex.last_or_default())
-        self.assertEqual(
-            self.simple.last(), self.complex.select(lambda x: x["value"]).last()
+        self.assertDictEqual(
+            {"value": 3}, self.complex.order_by(lambda x: x["value"]).last()
+        )
+        self.assertDictEqual(
+            self.complex.order_by(lambda x: x["value"]).last(),
+            self.complex.order_by(lambda x: x["value"]).last_or_default(),
         )
 
     def test_last_or_default(self):
         self.assertIsNone(self.empty.last_or_default())
-        self.assertEqual(3, self.simple.last_or_default())
+        self.assertEqual(3, self.simple.order_by(lambda x: x).last_or_default())
         self.assertIsInstance(self.complex.last_or_default(), dict)
-        self.assertDictEqual({"value": 3}, self.complex.last_or_default())
+        self.assertDictEqual(
+            {"value": 3}, self.complex.order_by(lambda x: x["value"]).last_or_default()
+        )
 
     def test_order_by(self):
         self.assertRaises(NullArgumentError, self.simple.order_by, None)
@@ -274,10 +282,12 @@ class TestFunctions(TestCase):
         self.assertListEqual(
             [1, 2, 3, 4, 5, 6, 7, 8, 9], simple.select_many().to_list()
         )
+        self.assertEqual(9, simple.select_many().count())
         self.assertListEqual(
             [1, 2, 3, 4, 5, 6, 7, 8, 9],
             __complex.select_many(lambda x: x["values"]).to_list(),
         )
+        self.assertEqual(9, __complex.select_many(lambda x: x["values"]).count())
 
     def test_concat(self):
         self.assertListEqual([], self.empty.concat(self.empty).to_list())
@@ -286,6 +296,10 @@ class TestFunctions(TestCase):
         self.assertListEqual(
             [1, 2, 3, 1, 2, 3],
             self.simple.concat(self.complex.select(lambda c: c["value"])).to_list(),
+        )
+        self.assertListEqual(
+            [1, 2, 3, 1, 2, 3],
+            self.complex.select(lambda c: c["value"]).concat(self.simple).to_list(),
         )
         self.assertListEqual(
             [1, 2, 3, {"value": 1}, {"value": 2}, {"value": 3}],
@@ -321,25 +335,17 @@ class TestFunctions(TestCase):
 
     def test_distinct(self):
         self.assertListEqual([], self.empty.distinct().to_list())
-        self.assertListEqual(
-            _simple, self.simple.concat(self.simple).distinct().to_list()
+        six.assertCountEqual(
+            self, _simple, self.simple.concat(self.simple).distinct().to_list()
         )
 
         locations = Enumerable(_locations).distinct(lambda x: x[0])
         self.assertEqual(locations.count(), 3)
-        self.assertListEqual(
-            [
-                ("England", "London", "Branch1", 90000),
-                ("Scotland", "Edinburgh", "Branch1", 20000),
-                ("Wales", "Cardiff", "Branch1", 29700),
-            ],
-            locations.order_by(lambda l: l[0]).to_list(),
-        )
 
     def test_default_if_empty(self):
         self.assertListEqual([None], self.empty.default_if_empty().to_list())
-        self.assertListEqual(_simple, self.simple.default_if_empty().to_list())
-        self.assertListEqual(_complex, self.complex.default_if_empty().to_list())
+        six.assertCountEqual(self, _simple, self.simple.default_if_empty().to_list())
+        six.assertCountEqual(self, _complex, self.complex.default_if_empty().to_list())
 
     def test_any(self):
         self.assertFalse(self.empty.any(lambda x: x == 1))
@@ -588,9 +594,7 @@ class TestFunctions(TestCase):
         test = Enumerable(words).aggregate(self.reverse)
         self.assertEqual(test, "dog lazy the over jumps fox brown quick the")
 
-        self.assertRaises(
-            IndexError, Enumerable().aggregate, [lambda x: x[0] + x[1], 0]
-        )
+        self.assertEqual(0, Enumerable().aggregate(lambda x: x[0] + x[1], 0))
 
         test = self.simple.aggregate(self.sum, seed=0)
         self.assertEqual(test, 6)
@@ -636,6 +640,7 @@ class TestFunctions(TestCase):
 
         test = self.simple.reverse()
         self.assertListEqual(test.to_list(), [3, 2, 1])
+        self.assertEqual(3, test.count())
 
         words = u"the quick brown fox jumps over the lazy dog".split(" ")
         self.assertListEqual(
