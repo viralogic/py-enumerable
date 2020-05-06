@@ -9,6 +9,7 @@ pytest-cov = "<2.6"
 black = "*"
 pre-commit = "*"
 flake8 = "*"
+flit = "*"
 
 [packages]
 future = "*"
