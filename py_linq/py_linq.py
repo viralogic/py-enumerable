@@ -35,6 +35,12 @@ class Enumerable(object):
     def __iter__(self):
         return iter(self._iterable)
 
+    def next(self):
+        return next(self._iterable)
+
+    def __next__(self):
+        return self.next()
+
     def __getitem__(self, n):
         """
         Gets item in iterable at specified zero-based index
@@ -950,7 +956,7 @@ class JoinEnumerable(Enumerable):
     def __iter__(self):
         for outer in iter(self._iterable):
             ok = self.outer_key(outer)
-            for inner in iter(self.inner_enumerable._iterable):
+            for inner in iter(self.inner_enumerable):
                 ik = self.inner_key(inner)
                 if ok == ik:
                     yield self.result_func((outer, inner))

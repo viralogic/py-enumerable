@@ -171,3 +171,12 @@ class IssueTests(TestCase):
             )
         self.assertEqual(1, len(result))
         self.assertEqual("This line should be counted", result[0])
+
+    def test_issue_47(self):
+        marks = Enumerable([(25,'a'), (49,'b'), (50,'c'), (80,'d'), (90,'e')])
+        passing = marks.where(lambda x: x[0] >= 50)
+        self.assertListEqual([(50, 'c'), (80, 'd'), (90, 'e')], passing.to_list())
+        omarks = Enumerable([(80,'eighty'),(49,'fortynine')])
+        join_result = omarks.join(passing, lambda o:o[0], lambda y:y[0], lambda result: result).to_list()
+        self.assertListEqual([((80, 'eighty'), (80, 'd'))], join_result)
+
