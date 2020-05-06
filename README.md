@@ -23,6 +23,16 @@ To access the LINQ functions an iterable needs to be wrapped by the Enumerable
 
 Please visit the project [site](https://viralogic.github.io/py-enumerable) for better documentation
 
+## Contributing ##
+
+Contributions are welcomed. This project uses [pipenv](https://pipenv-fork.readthedocs.io/en/latest/) to handle the few library dependencies. [Pre-commit](https://pre-commit.com/) is also used so that formatting and linting checks are performed on commit.
+
+1. Clone the repository using `git clone https://github.com/viralogic/py-enumerable.git`
+2. Install pipenv globally `pip install pipenv`
+3. CD into the root of your cloned repository directory and `pipenv install --dev` to install all packages from the repository Pipfile.
+4. Install `pre-commit` by typing `pipenv run pre-commit install`
+5. You should now be ready to start coding!
+
 ## Authors ##
 
 [Bruce Fenske](https://github.com/viralogic)
