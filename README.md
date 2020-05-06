@@ -55,7 +55,17 @@ Contributions are welcomed. This project uses [pipenv](https://pipenv-fork.readt
     </thead>
     <tbody>
         <tr>
-            <td>TBD</td>
+            <td>21-Apr-2020</td>
+            <td style='text-align: right;'>1.2.2</td>
+            <td>
+                <ul>
+                    <li>Issue #38 - Fixed issue where to_list calls were taking a very long time. Added some regression testing for this issue</li>
+                    <li>General performance improvements across code-base where identified</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>21-Jan-2020</td>
             <td style='text-align: right;'>1.2.1</td>
             <td>
                 <ul>
