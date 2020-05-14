@@ -2,6 +2,7 @@ import itertools
 import json
 import io
 from queue import LifoQueue
+from six import string_types
 
 # python 2 to 3 compatibility imports
 try:
@@ -822,7 +823,9 @@ class GroupedEnumerable(Enumerable):
                 self.grouping[kv_hash].add(d)
 
     def _can_enumerate(self, key_value):
-        return hasattr(key_value, "__len__") and len(key_value) > 0
+        return hasattr(key_value, "__len__") \
+            and len(key_value) > 0 \
+            and not isinstance(key_value, string_types)
 
     def __iter__(self):
         for k in self.grouping:
