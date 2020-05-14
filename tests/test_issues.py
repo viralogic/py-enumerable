@@ -200,7 +200,8 @@ class IssueTests(TestCase):
                 return self.field
 
         test = Enumerable([MyObject("Bruce"), MyObject("Bruce"), MyObject("Fenske"), MyObject("Luke")])
-        group = test.group_by(key_names=['field_name'], key=lambda r: r.get_field())
+        group = test.group_by(key_names=['field_name'], key=lambda r: r.get_field()) \
+            .order_by(lambda g: g.key.field_name)
         self.assertEqual("Bruce", group[0].key.field_name)
 
     def test_issue_50_2(self):
