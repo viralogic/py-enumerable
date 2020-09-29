@@ -10,14 +10,18 @@ with experience using the expressiveness and power of LINQ.
 
 Available as a package from PyPI.
 
-    pip install py-linq
+```bash
+pip install py-linq
+```
 
 ## Usage
 
 To access the LINQ functions an iterable needs to be wrapped by the Enumerable
 
-    from py_linq import Enumerable
-    my_collection = Enumerable([1,2,3])
+```python
+from py_linq import Enumerable
+my_collection = Enumerable([1, 2, 3])
+```
 
 ## Documentation ##
 
