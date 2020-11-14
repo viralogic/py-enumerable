@@ -1,5 +1,6 @@
 import unittest
 import logging
+
 try:
     from time import clock as clock
 except ImportError:
