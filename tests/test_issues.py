@@ -173,50 +173,69 @@ class IssueTests(TestCase):
         self.assertEqual("This line should be counted", result[0])
 
     def test_issue_47(self):
-        marks = Enumerable([(25,'a'), (49,'b'), (50,'c'), (80,'d'), (90,'e')])
+        marks = Enumerable([(25, "a"), (49, "b"), (50, "c"), (80, "d"), (90, "e")])
         passing = marks.where(lambda x: x[0] >= 50)
-        self.assertListEqual([(50, 'c'), (80, 'd'), (90, 'e')], passing.to_list())
-        omarks = Enumerable([(80,'eighty'),(49,'fortynine')])
-        join_result = omarks.join(passing, lambda o:o[0], lambda y:y[0], lambda result: result).to_list()
-        self.assertListEqual([((80, 'eighty'), (80, 'd'))], join_result)
+        self.assertListEqual([(50, "c"), (80, "d"), (90, "e")], passing.to_list())
+        omarks = Enumerable([(80, "eighty"), (49, "fortynine")])
+        join_result = omarks.join(
+            passing, lambda o: o[0], lambda y: y[0], lambda result: result
+        ).to_list()
+        self.assertListEqual([((80, "eighty"), (80, "d"))], join_result)
 
     def test_empty_join(self):
-        marks = Enumerable([(25,'a'), (49,'b'), (50,'c'), (80,'d'), (90,'e')])
+        marks = Enumerable([(25, "a"), (49, "b"), (50, "c"), (80, "d"), (90, "e")])
         passing = marks.where(lambda x: x[0] > 90)
         self.assertListEqual([], passing.to_list())
-        omarks = Enumerable([(80,'eighty'),(49,'fortynine')])
-        join_result = omarks.join(passing, lambda o:o[0], lambda y:y[0], lambda result: result).to_list()
+        omarks = Enumerable([(80, "eighty"), (49, "fortynine")])
+        join_result = omarks.join(
+            passing, lambda o: o[0], lambda y: y[0], lambda result: result
+        ).to_list()
         self.assertListEqual([], join_result)
 
     def test_issue_50(self):
         """
         Only single char for key value on group_by
         """
+
         class MyObject(object):
             def __init__(self, name):
                 self.field = name
-                
+
             def get_field(self):
                 return self.field
 
-        test = Enumerable([MyObject("Bruce"), MyObject("Bruce"), MyObject("Fenske"), MyObject("Luke")])
-        group = test.group_by(key_names=['field_name'], key=lambda r: r.get_field())
+        test = Enumerable(
+            [MyObject("Bruce"), MyObject("Bruce"), MyObject("Fenske"), MyObject("Luke")]
+        )
+        group = test.group_by(key_names=["field_name"], key=lambda r: r.get_field())
         self.assertEqual("Bruce", group[0].key.field_name)
 
     def test_issue_50_2(self):
         class MyObject(object):
             def __init__(self, name):
                 self.field = name
-                
+
             def get_field(self):
                 return self.field
 
         def get_field(item):
             return item.get_field()
 
-        test = Enumerable([MyObject("Bruce"), MyObject("Bruce"), MyObject("Fenske"), MyObject("Luke")])
-        group = test.group_by(key_names=['field_name'], key=get_field).order_by(lambda g: g.key.field_name)
+        test = Enumerable(
+            [MyObject("Bruce"), MyObject("Bruce"), MyObject("Fenske"), MyObject("Luke")]
+        )
+        group = test.group_by(key_names=["field_name"], key=get_field).order_by(
+            lambda g: g.key.field_name
+        )
         self.assertEqual("Bruce", group[0].key.field_name)
 
-
-
+    def test_issue_53(self):
+        test = Enumerable({"name": "test", "value": "test"})
+        test = test.add({"name": "test2", "value": "test2"})
+        self.assertListEqual(
+            ["name", "value", {"name": "test2", "value": "test2"}], test.to_list()
+        )
+        test = test.add(42)
+        self.assertListEqual(
+            ["name", "value", {"name": "test2", "value": "test2"}, 42], test.to_list()
+        )
