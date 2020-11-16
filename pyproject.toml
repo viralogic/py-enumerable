@@ -6,7 +6,7 @@ authors = ["Bruce Fenske <bwfenske@ualberta.ca>"]
 license = "MIT License"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = ">=3.6.1"
 future = "^0.18.2"
 
 [tool.poetry.dev-dependencies]
