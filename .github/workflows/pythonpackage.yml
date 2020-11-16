@@ -5,36 +5,29 @@ name: Python package
 
 on:
   push:
-    branches: [ master, development ]
+    branches:
+      - '**'
+      - '!master'
   pull_request:
-    branches: [ master, development ]
-
+    branches:
+      - 'development'
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Install Poetry
+      uses: dschep/install-poetry-action@v1.2
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install future
+      run: poetry install
     - name: Lint with flake8
-      run: |
-        pip install flake8
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      run: poetry run flake8 . --ignore=W503,E712,E231,E203 --count --max-complexity=10 --max-line-length=88 --show-source --statistics  --exclude=.git,__pycache__,.venv
     - name: Test with pytest
-      run: |
-        pip install pytest
-        pytest
+      run: poetry run pytest tests
