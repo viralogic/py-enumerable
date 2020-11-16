@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: Test Continuous Deployment
 
 on:
   push:
@@ -31,5 +31,7 @@ jobs:
       run: poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
     - name: Configure PyPI repository
       run: poetry config repositories.test https://test.pypi.org/legacy/
+    - name: Build PyPI package
+      run: poetry build
     - name: Publish to Test PyPI
       run: poetry publish --repository test
