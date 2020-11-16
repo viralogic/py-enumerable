@@ -28,7 +28,7 @@ jobs:
     - name: Test with pytest
       run: poetry run pytest tests
     - name: Configure publishing credentials
-      run: poetry config pypi-token.pypi ${{ PYPI_TOKEN }}
+      run: poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
     - name: Configure PyPI repository
       run: poetry config repositories.test https://test.pypi.org/legacy/
     - name: Publish to Test PyPI
