@@ -3,7 +3,11 @@ name = "py-linq"
 version = "1.2.4"
 description = "LINQ (Language Integrated Query) is a popular querying language available in .NET. This library ports the language so that developers can query collections of objects using the same syntax. This library would be useful for Python developers with experience using the expressiveness and power of LINQ."
 authors = ["Bruce Fenske <bwfenske@ualberta.ca>"]
-license = "MIT License"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/viralogic/py-enumerable"
+homepage = "https://github.com/viralogic/py-enumerable"
+keywords = ["LINQ", "py-linq"]
 
 [tool.poetry.dependencies]
 python = ">=3.6.1"
