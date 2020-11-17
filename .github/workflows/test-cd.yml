@@ -5,11 +5,11 @@ on:
     branches:
       - 'release/*'
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6]
+        python-version: [3.6, 3.7, 3.8, 3.9]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -27,5 +27,12 @@ jobs:
       run: poetry run flake8 . --ignore=W503,E712,E231,E203 --count --max-complexity=10 --max-line-length=88 --show-source --statistics  --exclude=.git,__pycache__,.venv
     - name: Test with pytest
       run: poetry run pytest tests
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6]
+    steps:
     - name: Publish to Test PyPI
       run: poetry publish --build --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }} --dry-run
