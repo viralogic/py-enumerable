@@ -24,10 +24,9 @@ jobs:
       env:
         POETRY_VIRTUALENVS_CREATE: false
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
-        POETRY_REPOSITORIES_TEST: https://test.pypi.org/legacy/
     - name: Lint with flake8
       run: poetry run flake8 . --ignore=W503,E712,E231,E203 --count --max-complexity=10 --max-line-length=88 --show-source --statistics  --exclude=.git,__pycache__,.venv
     - name: Test with pytest
       run: poetry run pytest tests
     - name: Publish to Test PyPI
-      run: poetry publish --build --repository test
+      run: poetry publish --build --dry-run
