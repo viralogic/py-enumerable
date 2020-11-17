@@ -23,8 +23,8 @@ jobs:
         poetry install
       env:
         POETRY_VIRTUALENVS_CREATE: false
-        POETRY_HTTP_BASIC_PYPI_USERNAME: __token__
-        POETRY_HTTP_BASIC_PYPI_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        POETRY_HTTP_BASIC_PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        POETRY_HTTP_BASIC_PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     - name: Lint with flake8
       run: poetry run flake8 . --ignore=W503,E712,E231,E203 --count --max-complexity=10 --max-line-length=88 --show-source --statistics  --exclude=.git,__pycache__,.venv
     - name: Test with pytest
