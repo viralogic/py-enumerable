@@ -1,9 +1,9 @@
-name: Test Continuous Deployment
+name: Production Continuous Deployment
 
 on:
   push:
     branches:
-      - 'release/*'
+      - 'master'
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -47,4 +47,4 @@ jobs:
       env:
         POETRY_VIRTUALENVS_CREATE: false
     - name: Publish to Test PyPI
-      run: poetry publish --build --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }} --dry-run
+      run: poetry publish --build --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }}
