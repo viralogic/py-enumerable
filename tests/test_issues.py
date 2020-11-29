@@ -4,6 +4,7 @@ from unittest import TestCase
 from py_linq import Enumerable
 from tests import _empty, _simple, _complex
 from py_linq import exceptions
+import itertools
 
 
 class IssueTests(TestCase):
@@ -32,26 +33,11 @@ class IssueTests(TestCase):
             for i in range(10):
                 yield i
 
-        def low_iter():
-            for i in range(5):
-                yield i
-
-        def high_iter():
-            for k in range(5):
-                yield k + 5
-
-        data = my_iter()
-        a = Enumerable(data)
-
-        low = a.where(lambda x: x < 5)
-        high = a.where(lambda x: x >= 5)
+        low = Enumerable((i for i in range(10))).where(lambda x: x < 5)
+        high = Enumerable((i for i in range(10))).where(lambda x: x >= 5)
 
         self.assertListEqual(
             [(0, 5), (1, 6), (2, 7), (3, 8), (4, 9)], low.zip(high).to_list()
-        )
-
-        self.assertListEqual(
-            [(0, 5), (1, 6), (2, 7), (3, 8), (4, 9)], list(zip(low, high))
         )
 
     def test_generator_to_Enumerable(self):
@@ -230,12 +216,73 @@ class IssueTests(TestCase):
         self.assertEqual("Bruce", group[0].key.field_name)
 
     def test_issue_53(self):
-        test = Enumerable({"name": "test", "value": "test"})
-        test = test.add({"name": "test2", "value": "test2"})
+        test = Enumerable([{"name": "test", "value": "test"}])
+        test.add({"name": "test2", "value": "test2"})
         self.assertListEqual(
-            ["name", "value", {"name": "test2", "value": "test2"}], test.to_list()
+            [
+                {"name": "test", "value": "test"},
+                {"name": "test2", "value": "test2"},
+            ],
+            test.to_list(),
         )
-        test = test.add(42)
+        test.add(42)
         self.assertListEqual(
-            ["name", "value", {"name": "test2", "value": "test2"}, 42], test.to_list()
+            [
+                {"name": "test", "value": "test"},
+                {"name": "test2", "value": "test2"},
+                42,
+            ],
+            test.to_list(),
+        )
+
+    def test_issue_53_2(self):
+        test = Enumerable()
+        self.assertListEqual([], test.to_list())
+        test.add({"name": "test", "value": "test"})
+        self.assertListEqual([{"name": "test", "value": "test"}], test.to_list())
+        test.add(42)
+        self.assertListEqual([{"name": "test", "value": "test"}, 42], test.to_list())
+
+    def test_issue_52(self):
+        def func(r):
+            return r
+
+        e1 = Enumerable([{"value": 1}, {"value": 2}, {"value": 3}, {"value": 0}])
+        e2 = Enumerable([1, 2, 3, 1, 2, 1])
+        res = e1.group_join(
+            e2,
+            outer_key=lambda x: x["value"],
+            inner_key=lambda y: y,
+            result_func=lambda r: func(r),
+        )
+
+        expected = [
+            ({"value": 1}, {"key": "{'id': 1}", "enumerable": "[1, 1, 1]"}),
+            ({"value": 2}, {"key": "{'id': 2}", "enumerable": "[2, 2]"}),
+            ({"value": 3}, {"key": "{'id': 3}", "enumerable": "[3]"}),
+        ]
+
+        self.assertEqual(len(expected), res.count())
+        self.assertEqual(3, next(res)[1].count())
+        self.assertEqual(2, next(res)[1].count())
+        self.assertEqual(1, next(res)[1].count())
+
+    def test_issue_52_2(self):
+
+        e1 = Enumerable([{"value": 1}, {"value": 2}, {"value": 3}, {"value": 0}])
+        e2 = Enumerable([1, 2, 3, 1, 2, 1])
+        res = e1.group_join(
+            e2,
+            outer_key=lambda x: x["value"],
+            inner_key=lambda y: y,
+            result_func=lambda r: (r[0], r[1].to_list()),
+        )
+
+        self.assertListEqual(
+            [
+                ({"value": 1}, [1, 1, 1]),
+                ({"value": 2}, [2, 2]),
+                ({"value": 3}, [3]),
+            ],
+            res.to_list(),
         )
