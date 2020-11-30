@@ -84,8 +84,7 @@ class Enumerable(object):
         :param func: lambda expression on how to perform transformation
         :return: new Enumerable object containing transformed data
         """
-        self._iterable = SelectEnumerable(Enumerable(iter(self)), func)
-        return self
+        return SelectEnumerable(Enumerable(iter(self)), func)
 
     def sum(self, func=lambda x: x):
         """
@@ -222,9 +221,7 @@ class Enumerable(object):
         if key is None:
             raise NullArgumentError(u"No key for sorting given")
         kf = [OrderingDirection(key, reverse=False)]
-        sorted = SortedEnumerable(Enumerable(iter(self)), key_funcs=kf)
-        self._iterable = sorted
-        return sorted
+        return SortedEnumerable(Enumerable(iter(self)), key_funcs=kf)
 
     def order_by_descending(self, key):
         """
@@ -235,9 +232,7 @@ class Enumerable(object):
         if key is None:
             raise NullArgumentError(u"No key for sorting given")
         kf = [OrderingDirection(key, reverse=True)]
-        sorted = SortedEnumerable(Enumerable(iter(self)), key_funcs=kf)
-        self._iterable = sorted
-        return sorted
+        return SortedEnumerable(Enumerable(iter(self)), key_funcs=kf)
 
     def skip(self, n):
         """
@@ -245,8 +240,7 @@ class Enumerable(object):
         :param n: Number of elements to skip as int
         :return: new Enumerable object
         """
-        self._iterable = SkipEnumerable(Enumerable(iter(self)), n)
-        return self
+        return SkipEnumerable(Enumerable(iter(self)), n)
 
     def take(self, n):
         """
@@ -254,8 +248,7 @@ class Enumerable(object):
         :param n: Number of elements to take
         :return: new Enumerable object
         """
-        self._iterable = TakeEnumerable(Enumerable(iter(self)), n)
-        return self
+        return TakeEnumerable(Enumerable(iter(self)), n)
 
     def where(self, predicate):
         """
@@ -265,8 +258,7 @@ class Enumerable(object):
         """
         if predicate is None:
             raise NullArgumentError("No predicate given for where clause")
-        self._iterable = WhereEnumerable(Enumerable(iter(self)), predicate)
-        return self
+        return WhereEnumerable(Enumerable(iter(self)), predicate)
 
     def single(self, predicate=None):
         """
@@ -306,8 +298,7 @@ class Enumerable(object):
         :param func: selector as lambda expression
         :return: new Enumerable object
         """
-        self._iterable = SelectManyEnumerable(Enumerable(iter(self)), func)
-        return self
+        return SelectManyEnumerable(Enumerable(iter(self)), func)
 
     def add(self, element):
         """
@@ -327,8 +318,9 @@ class Enumerable(object):
         """
         if not isinstance(enumerable, Enumerable):
             raise TypeError(u"enumerable argument must be an instance of Enumerable")
-        self._iterable = ConcatenateEnumerable(Enumerable(iter(self)), enumerable)
-        return self
+        concatenated = ConcatenateEnumerable(Enumerable(iter(self)), enumerable)
+        self._iterable = concatenated
+        return concatenated
 
     def group_by(self, key_names=[], key=lambda x: x, result_func=lambda x: x):
         """
@@ -363,10 +355,7 @@ class Enumerable(object):
         :param result_func: transformation function as lambda expression
         :return: Enumerable of grouping objects
         """
-        self._iterable = GroupedEnumerable(
-            Enumerable(iter(self)), key, key_names, result_func
-        )
-        return self
+        return GroupedEnumerable(Enumerable(iter(self)), key, key_names, result_func)
 
     def distinct(self, key=lambda x: x):
         """
@@ -375,10 +364,9 @@ class Enumerable(object):
         :param key: key selector as lambda expression
         :return: new Enumerable object
         """
-        self._iterable = GroupedEnumerable(
+        return GroupedEnumerable(
             Enumerable(iter(self)), key, ["distinct"], lambda g: g.first()
         )
-        return self
 
     def join(
         self,
@@ -399,10 +387,9 @@ class Enumerable(object):
             raise TypeError(
                 u"inner_enumerable parameter must be an instance of Enumerable"
             )
-        self._iterable = JoinEnumerable(
+        return JoinEnumerable(
             Enumerable(iter(self)), inner_enumerable, outer_key, inner_key, result_func
         )
-        return self
 
     def default_if_empty(self, value=None):
         """
@@ -454,8 +441,7 @@ class Enumerable(object):
             )
             .select(lambda gj: result_func(gj))
         )
-        self._iterable = group_joined
-        return self
+        return group_joined
 
     def any(self, predicate=None):
         """
@@ -475,8 +461,7 @@ class Enumerable(object):
         """
         if not isinstance(enumerable, Enumerable):
             raise TypeError(u"enumerable parameter must be an instance of Enumerable")
-        self._iterable = IntersectEnumerable(Enumerable(iter(self)), enumerable, key)
-        return self
+        return IntersectEnumerable(Enumerable(iter(self)), enumerable, key)
 
     def aggregate(self, func, seed=None):
         """
@@ -586,8 +571,7 @@ class Enumerable(object):
         Inverts the order of the elements in a sequence
         :return: Enumerable with elements in reversed order
         """
-        self._iterable = ReversedEnumerable(Enumerable(iter(self)))
-        return self
+        return ReversedEnumerable(Enumerable(iter(self)))
 
     def skip_last(self, n):
         """
@@ -604,8 +588,7 @@ class Enumerable(object):
         :param predicate: a predicate as a lambda expression
         :return: Enumerable
         """
-        self._iterable = SkipWhileEnumerable(Enumerable(iter(self)), predicate)
-        return self
+        return SkipWhileEnumerable(Enumerable(iter(self)), predicate)
 
     def take_last(self, n):
         """
@@ -622,8 +605,7 @@ class Enumerable(object):
         :param predicate: a predicate as a lambda expression
         :return: Enumerable
         """
-        self._iterable = TakeWhileEnumerable(Enumerable(iter(self)), predicate)
-        return self
+        return TakeWhileEnumerable(Enumerable(iter(self)), predicate)
 
     def zip(self, enumerable, func=lambda x: x):
         """
@@ -635,8 +617,7 @@ class Enumerable(object):
         """
         if not isinstance(enumerable, Enumerable):
             raise TypeError()
-        self._iterable = ZipEnumerable(Enumerable(iter(self)), enumerable, func)
-        return self
+        return ZipEnumerable(Enumerable(iter(self)), enumerable, func)
 
 
 class SelectEnumerable(Enumerable):
@@ -937,9 +918,7 @@ class SortedEnumerable(Enumerable):
         if func is None:
             raise NullArgumentError(u"then by requires a lambda function arg")
         self._key_funcs.append(OrderingDirection(key=func, reverse=False))
-        sorted = SortedEnumerable(self, self._key_funcs)
-        self._iterable = sorted
-        return self
+        return SortedEnumerable(self, self._key_funcs)
 
     def then_by_descending(self, func):
         """
@@ -952,9 +931,7 @@ class SortedEnumerable(Enumerable):
                 u"then_by_descending requires a lambda function arg"
             )
         self._key_funcs.append(OrderingDirection(key=func, reverse=True))
-        sorted = SortedEnumerable(self, self._key_funcs)
-        self._iterable = sorted
-        return self
+        return SortedEnumerable(self, self._key_funcs)
 
 
 class ZipEnumerable(Enumerable):
