@@ -33,11 +33,18 @@ class IssueTests(TestCase):
             for i in range(10):
                 yield i
 
-        low = Enumerable((i for i in range(10))).where(lambda x: x < 5)
-        high = Enumerable((i for i in range(10))).where(lambda x: x >= 5)
+        data = my_iter()
+        a = Enumerable(data)
+
+        low = a.where(lambda x: x < 5)
+        high = a.where(lambda x: x >= 5)
 
         self.assertListEqual(
             [(0, 5), (1, 6), (2, 7), (3, 8), (4, 9)], low.zip(high).to_list()
+        )
+
+        self.assertListEqual(
+            [(0, 5), (1, 6), (2, 7), (3, 8), (4, 9)], list(zip(low, high))
         )
 
     def test_generator_to_Enumerable(self):
