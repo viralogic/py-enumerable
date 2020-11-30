@@ -313,8 +313,12 @@ class TestFunctions(TestCase):
 
     def test_concat(self):
         self.assertListEqual([], Enumerable().concat(Enumerable()).to_list())
-        self.assertListEqual([1, 2, 3], self.empty.concat(self.simple).to_list())
-        self.assertListEqual([1, 2, 3], self.simple.concat(Enumerable()).to_list())
+        self.assertListEqual(
+            [1, 2, 3], Enumerable().concat(Enumerable([1, 2, 3])).to_list()
+        )
+        self.assertListEqual(
+            [1, 2, 3], Enumerable([1, 2, 3]).concat(Enumerable()).to_list()
+        )
         self.assertListEqual(
             [1, 2, 3, 1, 2, 3],
             Enumerable([1, 2, 3])
@@ -815,7 +819,7 @@ class TestFunctions(TestCase):
 
     def test_skip_last(self):
         test = Enumerable([1, 2, 3, 4, 5]).skip_last(2)
-        self.assertListEqual(test.to_list(), [1, 2, 3])
+        self.assertListEqual([1, 2, 3], test.to_list())
 
         test = Enumerable(["one", "two", "three", "four", "five"]).skip(1).skip_last(1)
         self.assertListEqual(test.to_list(), ["two", "three", "four"])
