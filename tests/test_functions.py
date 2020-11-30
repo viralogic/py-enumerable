@@ -1,3 +1,4 @@
+from py_linq.py_linq import SelectEnumerable, WhereEnumerable
 from unittest import TestCase
 from py_linq import Enumerable
 from tests import _empty, _simple, _complex, _locations
@@ -73,17 +74,25 @@ class TestFunctions(TestCase):
         self.assertEqual(self.complex.count(lambda x: x["value"] > 1), 2)
 
     def test_select(self):
-        self.assertListEqual([], self.empty.select(lambda x: x["value"]).to_list())
+        self.assertListEqual(
+            [], Enumerable.empty().select(lambda x: x["value"]).to_list()
+        )
         self.assertListEqual(
             [{"value": 1}, {"value": 2}, {"value": 3}],
-            self.simple.select(lambda x: {"value": x}).to_list(),
+            Enumerable([1, 2, 3]).select(lambda x: {"value": x}).to_list(),
         )
         self.assertListEqual(
-            [1, 2, 3], self.complex.select(lambda x: x["value"]).to_list()
+            [1, 2, 3],
+            Enumerable(
+                [
+                    {"value": 1},
+                    {"value": 2},
+                    {"value": 3},
+                ]
+            )
+            .select(lambda x: x["value"])
+            .to_list(),
         )
-
-        for i, e in enumerate(self.complex.select(lambda x: x["value"])):
-            self.assertEqual(i + 1, e)
 
     def test_min(self):
         self.assertRaises(NoElementsError, self.empty.min)
@@ -192,9 +201,9 @@ class TestFunctions(TestCase):
         self.assertEqual(median, self.complex.median(lambda x: x["value"]))
 
     def test_skip(self):
-        self.assertListEqual([], self.empty.skip(2).to_list())
-        self.assertListEqual([], self.simple.skip(3).to_list())
-        self.assertListEqual([2, 3], self.simple.skip(1).to_list())
+        self.assertListEqual([], Enumerable().skip(2).to_list())
+        self.assertListEqual([], Enumerable([1, 2, 3]).skip(3).to_list())
+        self.assertListEqual([2, 3], Enumerable([1, 2, 3]).skip(1).to_list())
 
     def test_take(self):
         self.assertListEqual(_simple, self.simple.take(4).to_list())
@@ -218,7 +227,8 @@ class TestFunctions(TestCase):
     def test_select_with_filter(self):
         self.assertListEqual(
             [2],
-            self.complex.where(lambda x: x["value"] == 2)
+            Enumerable([{"value": 1}, {"value": 2}, {"value": 3}])
+            .where(lambda x: x["value"] == 2)
             .select(lambda x: x["value"])
             .to_list(),
         )
@@ -268,53 +278,142 @@ class TestFunctions(TestCase):
         )
 
     def test_select_many(self):
-        empty = Enumerable([[], [], []])
-        simple = Enumerable([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-        __complex = Enumerable(
-            [
-                {"key": 1, "values": [1, 2, 3]},
-                {"key": 2, "values": [4, 5, 6]},
-                {"key": 3, "values": [7, 8, 9]},
-            ]
-        )
-
-        self.assertListEqual([], empty.select_many().to_list())
-        self.assertListEqual(
-            [1, 2, 3, 4, 5, 6, 7, 8, 9], simple.select_many().to_list()
-        )
-        self.assertEqual(9, simple.select_many().count())
+        self.assertListEqual([], Enumerable([[], [], []]).select_many().to_list())
         self.assertListEqual(
             [1, 2, 3, 4, 5, 6, 7, 8, 9],
-            __complex.select_many(lambda x: x["values"]).to_list(),
+            Enumerable([[1, 2, 3], [4, 5, 6], [7, 8, 9]]).select_many().to_list(),
         )
-        self.assertEqual(9, __complex.select_many(lambda x: x["values"]).count())
+        self.assertEqual(
+            9, Enumerable([[1, 2, 3], [4, 5, 6], [7, 8, 9]]).select_many().count()
+        )
+        self.assertListEqual(
+            [1, 2, 3, 4, 5, 6, 7, 8, 9],
+            Enumerable(
+                [
+                    {"key": 1, "values": [1, 2, 3]},
+                    {"key": 2, "values": [4, 5, 6]},
+                    {"key": 3, "values": [7, 8, 9]},
+                ]
+            )
+            .select_many(lambda x: x["values"])
+            .to_list(),
+        )
+        self.assertEqual(
+            9,
+            Enumerable(
+                [
+                    {"key": 1, "values": [1, 2, 3]},
+                    {"key": 2, "values": [4, 5, 6]},
+                    {"key": 3, "values": [7, 8, 9]},
+                ]
+            )
+            .select_many(lambda x: x["values"])
+            .count(),
+        )
 
     def test_concat(self):
-        self.assertListEqual([], self.empty.concat(self.empty).to_list())
-        self.assertListEqual(_simple, self.empty.concat(self.simple).to_list())
-        self.assertListEqual(_simple, self.simple.concat(self.empty).to_list())
+        self.assertListEqual([], Enumerable().concat(Enumerable()).to_list())
         self.assertListEqual(
-            [1, 2, 3, 1, 2, 3],
-            self.simple.concat(self.complex.select(lambda c: c["value"])).to_list(),
+            [1, 2, 3], Enumerable().concat(Enumerable([1, 2, 3])).to_list()
+        )
+        self.assertListEqual(
+            [1, 2, 3], Enumerable([1, 2, 3]).concat(Enumerable()).to_list()
         )
         self.assertListEqual(
             [1, 2, 3, 1, 2, 3],
-            self.complex.select(lambda c: c["value"]).concat(self.simple).to_list(),
+            Enumerable([1, 2, 3])
+            .concat(
+                Enumerable(
+                    [
+                        {"value": 1},
+                        {"value": 2},
+                        {"value": 3},
+                    ]
+                ).select(lambda c: c["value"])
+            )
+            .to_list(),
+        )
+        self.assertListEqual(
+            [1, 2, 3, 1, 2, 3],
+            Enumerable(
+                [
+                    {"value": 1},
+                    {"value": 2},
+                    {"value": 3},
+                ]
+            )
+            .select(lambda c: c["value"])
+            .concat(Enumerable([1, 2, 3]))
+            .to_list(),
         )
         self.assertListEqual(
             [1, 2, 3, {"value": 1}, {"value": 2}, {"value": 3}],
-            self.simple.concat(self.complex).to_list(),
+            Enumerable([1, 2, 3])
+            .concat(
+                Enumerable(
+                    [
+                        {"value": 1},
+                        {"value": 2},
+                        {"value": 3},
+                    ]
+                )
+            )
+            .to_list(),
         )
 
+    def test_concat_mutating(self):
+        empty = Enumerable()
+        empty.concat(Enumerable())
+        self.assertListEqual([], empty.to_list())
+
+        simple = Enumerable()
+        simple.concat(Enumerable([1, 2, 3]))
+        self.assertListEqual([1, 2, 3], simple.to_list())
+
+        double_simple = Enumerable([1, 2, 3])
+        double_simple.concat(
+            Enumerable(
+                [
+                    {"value": 1},
+                    {"value": 2},
+                    {"value": 3},
+                ]
+            ).select(lambda c: c["value"])
+        )
+        self.assertListEqual([1, 2, 3, 1, 2, 3], double_simple.to_list())
+
+        simple_complex = Enumerable([1, 2, 3])
+        simple_complex.concat(
+            Enumerable(
+                [
+                    {"value": 1},
+                    {"value": 2},
+                    {"value": 3},
+                ]
+            )
+        )
+        self.assertListEqual(
+            [1, 2, 3, {"value": 1}, {"value": 2}, {"value": 3}],
+            simple_complex.to_list(),
+        )
+
+    def test_multiple_concatenate(self):
+        simple = Enumerable([1, 2, 3])
+        simple.add(4)
+        self.assertEqual(4, simple.count())
+        simple.add(5)
+        self.assertEqual(5, simple.count())
+        self.assertEqual(5, simple.last())
+
     def test_group_by(self):
-        simple_grouped = self.simple.group_by(key_names=["id"])
+        simple_grouped = Enumerable([1, 2, 3]).group_by(key_names=["id"])
         self.assertEqual(3, simple_grouped.count())
         second = simple_grouped.single(lambda s: s.key.id == 2)
         self.assertListEqual([2], second.to_list())
 
-        complex_grouped = self.complex.group_by(
-            key_names=["value"], key=lambda x: x["value"]
-        )
+        complex_grouped = Enumerable(
+            [{"value": 1}, {"value": 2}, {"value": 3}]
+        ).group_by(key_names=["value"], key=lambda x: x["value"])
         self.assertEqual(complex_grouped.count(), 3)
         self.assertListEqual(
             [1, 2, 3],
@@ -334,9 +433,11 @@ class TestFunctions(TestCase):
         self.assertEqual(240000, london.sum(lambda c: c[3]))
 
     def test_distinct(self):
-        self.assertListEqual([], self.empty.distinct().to_list())
+        self.assertListEqual([], Enumerable.empty().distinct().to_list())
         six.assertCountEqual(
-            self, _simple, self.simple.concat(self.simple).distinct().to_list()
+            self,
+            [1, 2, 3],
+            Enumerable([1, 2, 3]).concat(Enumerable([1, 2, 3])).distinct().to_list(),
         )
 
         locations = Enumerable(_locations).distinct(lambda x: x[0])
@@ -348,15 +449,23 @@ class TestFunctions(TestCase):
         six.assertCountEqual(self, _complex, self.complex.default_if_empty().to_list())
 
     def test_any(self):
-        self.assertFalse(self.empty.any(lambda x: x == 1))
-        self.assertFalse(self.empty.any())
+        self.assertFalse(Enumerable.empty().any(lambda x: x == 1))
+        self.assertFalse(Enumerable.empty().any())
 
-        self.assertTrue(self.simple.any(lambda x: x == 1))
-        self.assertTrue(self.simple.any())
+        self.assertTrue(Enumerable([1, 2, 3]).any(lambda x: x == 1))
+        self.assertTrue(Enumerable([1, 2, 3]).any())
 
-        self.assertTrue(self.complex.any())
-        self.assertFalse(self.complex.any(lambda x: x["value"] < 1))
-        self.assertTrue(self.complex.any(lambda x: x["value"] >= 1))
+        self.assertTrue(Enumerable([{"value": 1}, {"value": 2}, {"value": 3}]).any())
+        self.assertFalse(
+            Enumerable([{"value": 1}, {"value": 2}, {"value": 3}]).any(
+                lambda x: x["value"] < 1
+            )
+        )
+        self.assertTrue(
+            Enumerable([{"value": 1}, {"value": 2}, {"value": 3}]).any(
+                lambda x: x["value"] >= 1
+            )
+        )
 
     def test_contains(self):
         self.assertFalse(self.empty.contains(1))
@@ -364,15 +473,66 @@ class TestFunctions(TestCase):
         self.assertTrue(self.complex.select(lambda x: x["value"]).contains(1))
 
     def test_intersect(self):
-        self.assertRaises(TypeError, self.empty.intersect, [])
-        self.assertListEqual(self.empty.intersect(self.empty).to_list(), [])
-        self.assertListEqual(self.empty.intersect(self.simple).to_list(), [])
-        self.assertListEqual(self.simple.intersect(self.simple).to_list(), _simple)
-        self.assertListEqual(self.simple.intersect(Enumerable([2])).to_list(), [2])
-        self.assertListEqual(self.simple.intersect(self.complex).to_list(), [])
-        self.assertListEqual(self.complex.intersect(self.complex).to_list(), _complex)
+        self.assertRaises(TypeError, Enumerable.empty().intersect, [])
+        self.assertListEqual([], Enumerable().intersect(Enumerable.empty()).to_list())
         self.assertListEqual(
-            self.complex.intersect(Enumerable([{"value": 1}])).to_list(), [{"value": 1}]
+            [], Enumerable.empty().intersect(Enumerable([1, 2, 3])).to_list()
+        )
+        self.assertListEqual(
+            [1, 2, 3], Enumerable([1, 2, 3]).intersect(Enumerable([1, 2, 3])).to_list()
+        )
+        self.assertListEqual(
+            [2], Enumerable([1, 2, 3]).intersect(Enumerable([2])).to_list()
+        )
+        self.assertListEqual(
+            [],
+            Enumerable([1, 2, 3])
+            .intersect(
+                Enumerable(
+                    [
+                        {"value": 1},
+                        {"value": 2},
+                        {"value": 3},
+                    ]
+                )
+            )
+            .to_list(),
+        )
+        self.assertListEqual(
+            [
+                {"value": 1},
+                {"value": 2},
+                {"value": 3},
+            ],
+            Enumerable(
+                [
+                    {"value": 1},
+                    {"value": 2},
+                    {"value": 3},
+                ]
+            )
+            .intersect(
+                Enumerable(
+                    [
+                        {"value": 1},
+                        {"value": 2},
+                        {"value": 3},
+                    ]
+                )
+            )
+            .to_list(),
+        )
+        self.assertListEqual(
+            Enumerable(
+                [
+                    {"value": 1},
+                    {"value": 2},
+                    {"value": 3},
+                ]
+            )
+            .intersect(Enumerable([{"value": 1}]))
+            .to_list(),
+            [{"value": 1}],
         )
 
     def test_except(self):
@@ -464,20 +624,28 @@ class TestFunctions(TestCase):
         )
 
     def test_join(self):
-        self.assertRaises(TypeError, self.empty.join, [])
-        self.assertListEqual([], self.empty.join(self.empty).to_list())
-        self.assertListEqual([], self.empty.join(self.simple).to_list())
-        self.assertListEqual([], self.empty.join(self.complex).to_list())
+        self.assertRaises(TypeError, Enumerable.empty().join, [])
+        self.assertListEqual([], Enumerable().join(Enumerable()).to_list())
+        self.assertListEqual([], Enumerable().join(Enumerable([1, 2, 3])).to_list())
+        self.assertListEqual(
+            [],
+            Enumerable()
+            .join(Enumerable([{"value": 1}, {"value": 2}, {"value": 3}]))
+            .to_list(),
+        )
 
-        self.assertListEqual([], self.simple.join(self.empty).to_list())
         self.assertListEqual(
             [(1, 1), (2, 2), (3, 3)],
-            self.simple.join(self.simple).order_by(lambda x: (x[0], x[1])).to_list(),
+            Enumerable([1, 2, 3])
+            .join(Enumerable([1, 2, 3]))
+            .order_by(lambda x: (x[0], x[1]))
+            .to_list(),
         )
         self.assertListEqual(
             [(1, 1), (2, 2), (3, 3)],
-            self.simple.join(
-                self.complex,
+            Enumerable([1, 2, 3])
+            .join(
+                Enumerable([{"value": 1}, {"value": 2}, {"value": 3}]),
                 inner_key=lambda x: x["value"],
                 result_func=lambda x: (x[0], x[1]["value"]),
             )
@@ -487,40 +655,37 @@ class TestFunctions(TestCase):
 
         self.assertListEqual(
             [(1, 1), (2, 2), (3, 3)],
-            self.complex.join(
-                self.complex, result_func=lambda x: (x[0]["value"], x[1]["value"])
+            Enumerable([{"value": 1}, {"value": 2}, {"value": 3}])
+            .join(
+                Enumerable([{"value": 1}, {"value": 2}, {"value": 3}]),
+                result_func=lambda x: (x[0]["value"], x[1]["value"]),
             )
             .order_by(lambda x: (x[0], x[1]))
             .to_list(),
         )
 
     def test_group_join(self):
-        self.assertRaises(TypeError, self.empty.group_join, [])
-        self.assertListEqual([], self.empty.group_join(self.empty).to_list())
+        self.assertRaises(TypeError, Enumerable.empty().group_join, [])
+        self.assertListEqual([], Enumerable().group_join(Enumerable()).to_list())
 
-        simple_empty_gj = self.simple.group_join(self.empty)
-        self.assertEqual(3, simple_empty_gj.count())
-        self.assertListEqual(
-            [(1, []), (2, []), (3, [])],
-            simple_empty_gj.select(lambda g: (g[0], g[1].to_list())).to_list(),
-        )
+        simple_empty_gj = Enumerable([1, 2, 3]).group_join(self.empty)
+        self.assertListEqual([], simple_empty_gj.to_list())
 
-        complex_simple_gj = self.complex.group_join(
-            self.simple, outer_key=lambda x: x["value"]
-        )
+        complex_simple_gj = Enumerable(
+            [{"value": 1}, {"value": 2}, {"value": 3}]
+        ).group_join(Enumerable([1, 2, 3, 3]), outer_key=lambda x: x["value"])
         self.assertListEqual(
-            [({"value": 1}, [1]), ({"value": 2}, [2]), ({"value": 3}, [3])],
+            [({"value": 1}, [1]), ({"value": 2}, [2]), ({"value": 3}, [3, 3])],
             complex_simple_gj.select(lambda g: (g[0], g[1].to_list())).to_list(),
         )
 
-        simple_gj = self.simple.group_join(
+        simple_gj = Enumerable([1, 2, 3]).group_join(
             Enumerable([2, 3]),
             result_func=lambda x: {"number": x[0], "collection": x[1].to_list()},
         )
-        self.assertEqual(3, simple_gj.count())
+        self.assertEqual(2, simple_gj.count())
         self.assertListEqual(
             [
-                {"number": 1, "collection": []},
                 {"number": 2, "collection": [2]},
                 {"number": 3, "collection": [3]},
             ],
@@ -654,7 +819,7 @@ class TestFunctions(TestCase):
 
     def test_skip_last(self):
         test = Enumerable([1, 2, 3, 4, 5]).skip_last(2)
-        self.assertListEqual(test.to_list(), [1, 2, 3])
+        self.assertListEqual([1, 2, 3], test.to_list())
 
         test = Enumerable(["one", "two", "three", "four", "five"]).skip(1).skip_last(1)
         self.assertListEqual(test.to_list(), ["two", "three", "four"])
