@@ -607,6 +607,18 @@ class Enumerable(object):
         """
         return TakeWhileEnumerable(Enumerable(iter(self)), predicate)
 
+    def to_dict(self, key=lambda x: x, value=lambda x: x):
+        """
+        Converts the enumerable into a dictionary
+        :param key: key selector to use to create dictionary keys
+        :param value: optional value selector to use to assign values to dictionary keys
+        :return: dict
+        """
+        result = {}
+        for i, e in enumerate(self):
+            result[key(e)] = value(e)
+        return result
+
     def zip(self, enumerable, func=lambda x: x):
         """
         Merges 2 Enumerables using the given function. If the 2 collections are of unequal length, then
