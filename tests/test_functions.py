@@ -845,15 +845,15 @@ class TestFunctions(TestCase):
         test = Enumerable([]).skip_while(lambda x: x < 5)
         self.assertListEqual(test.to_list(), [])
 
-    def test_to_dict(self):
-        test = Enumerable(["ab", "bc", "cd", "de"]).to_dict(lambda t: t[0])
+    def test_to_dictionary(self):
+        test = Enumerable(["ab", "bc", "cd", "de"]).to_dictionary(lambda t: t[0])
         self.assertDictEqual(test, {"a": "ab", "b": "bc", "c": "cd", "d": "de"})
 
         test = Enumerable([
             [0, 1, 2],
             [3, 4, 5],
             [6, 7, 8]
-        ]).to_dict(lambda t: t[0], lambda t: t[1:])
+        ]).to_dictionary(lambda t: t[0], lambda t: t[1:])
         self.assertDictEqual(test, {0: [1, 2], 3: [4, 5], 6: [7, 8]})
 
     def test_zip(self):

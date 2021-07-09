@@ -1,6 +1,6 @@
-## to_dict
+## to_dictionary
 
-`to_dict()`
+`to_dictionary()`
 
 Creates a `dict` from an `Enumerable`. This is not an executing function.
 
@@ -25,7 +25,7 @@ collection = Enumerable([
     [6, 7, 8]
 ])
 
-collection.to_dict(lambda t: t[0], lambda t: t[1:])
+collection.to_dictionary(lambda t: t[0], lambda t: t[1:])
 """
 {
     0: [1, 2],
@@ -34,7 +34,7 @@ collection.to_dict(lambda t: t[0], lambda t: t[1:])
 }
 """
 
-collection.to_dict(lambda t: t[-1])
+collection.to_dictionary(lambda t: t[-1])
 """
 {
     2: [0, 1, 2],

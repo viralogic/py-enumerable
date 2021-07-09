@@ -607,7 +607,7 @@ class Enumerable(object):
         """
         return TakeWhileEnumerable(Enumerable(iter(self)), predicate)
 
-    def to_dict(self, key=lambda x: x, value=lambda x: x):
+    def to_dictionary(self, key=lambda x: x, value=lambda x: x):
         """
         Converts the enumerable into a dictionary
         :param key: key selector to use to create dictionary keys
