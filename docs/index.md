@@ -76,4 +76,4 @@ Once you have created an `Enumerable` instance, the LINQ methods will become ava
 45. [default_if_empty](/py-enumerable/default_if_empty)
 46. [single](/py-enumerable/single)
 47. [single_or_default](/py-enumerable/single-or-default)
-48. [to_dict](/py-enumerable/to-dict)
+48. [to_dictionary](/py-enumerable/to-dictionary)
