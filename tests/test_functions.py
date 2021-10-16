@@ -1,5 +1,7 @@
+from io import StringIO
 from py_linq.py_linq import SelectEnumerable, WhereEnumerable
 from unittest import TestCase
+from unittest.mock import patch
 from py_linq import Enumerable
 from tests import _empty, _simple, _complex, _locations
 from py_linq.exceptions import (
@@ -93,6 +95,20 @@ class TestFunctions(TestCase):
             .select(lambda x: x["value"])
             .to_list(),
         )
+
+    def test_for_each(self):
+
+        with patch("sys.stdout", new=StringIO()) as fake_out:
+            self.simple.for_each(print)
+            self.assertEqual(fake_out.getvalue(), "1\n2\n3\n")
+
+        with patch("sys.stdout", new=StringIO()) as fake_out:
+            self.complex.for_each(lambda x: print(x["value"]))
+            self.assertEqual(fake_out.getvalue(), "1\n2\n3\n")
+
+        output = []
+        self.complex.for_each(lambda x: output.append(x))
+        self.assertListEqual(output, self.complex.to_list())
 
     def test_min(self):
         self.assertRaises(NoElementsError, self.empty.min)
@@ -199,6 +215,16 @@ class TestFunctions(TestCase):
         median = float(2)
         self.assertEqual(median, self.simple.median())
         self.assertEqual(median, self.complex.median(lambda x: x["value"]))
+
+    def test_index_of(self):
+        self.assertEqual(1, self.simple.index_of(2))
+        self.assertEqual(1, self.complex.index_of({"value": 2}))
+
+    def test_last_index_of(self):
+        self.assertEqual(4, self.simple.concat(Enumerable(_simple)).last_index_of(2))
+        self.assertEqual(
+            4, self.complex.concat(Enumerable(_complex)).last_index_of({"value": 2})
+        )
 
     def test_skip(self):
         self.assertListEqual([], Enumerable().skip(2).to_list())
@@ -849,11 +875,13 @@ class TestFunctions(TestCase):
         test = Enumerable(["ab", "bc", "cd", "de"]).to_dictionary(lambda t: t[0])
         self.assertDictEqual(test, {"a": "ab", "b": "bc", "c": "cd", "d": "de"})
 
-        test = Enumerable([
-            [0, 1, 2],
-            [3, 4, 5],
-            [6, 7, 8]
-        ]).to_dictionary(lambda t: t[0], lambda t: t[1:])
+        test = Enumerable(
+            [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+            ]
+        ).to_dictionary(lambda t: t[0], lambda t: t[1:])
         self.assertDictEqual(test, {0: [1, 2], 3: [4, 5], 6: [7, 8]})
 
     def test_zip(self):

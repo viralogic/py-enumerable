@@ -86,6 +86,15 @@ class Enumerable(object):
         """
         return SelectEnumerable(Enumerable(iter(self)), func)
 
+    def for_each(self, func=lambda x: x):
+        """
+        Execute a given function per each element
+        :param func: the function to execute
+        :return: None
+        """
+        for x in self:
+            func(x)
+
     def sum(self, func=lambda x: x):
         """
         Returns the sum of af data elements
@@ -140,6 +149,33 @@ class Enumerable(object):
             if length % 2 == 1
             else (float(result[i - 1]) + float(result[i])) / float(2)
         )
+
+    def index_of(self, element):
+        """
+        Returns the index of the first occurrence of a given element.
+
+        :param element: the element for which to retrieve the index
+        :return: Index of given element
+        """
+        for i, e in enumerate(self):
+            if e == element:
+                return i
+
+        return None
+
+    def last_index_of(self, element):
+        """
+        Returns the index of the last occurrence of a given element.
+
+        :param element: the element for which to retrieve the last index
+        :return: Index of last occurence of given element
+        """
+        last_index = self.count() - 1
+        for i, e in enumerate(self.reverse()):
+            if e == element:
+                return last_index - i
+
+        return None
 
     def element_at(self, n):
         """
