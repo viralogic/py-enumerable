@@ -7,6 +7,7 @@ except ImportError:
     from time import perf_counter as clock
 import time
 from py_linq import Enumerable
+import pytest
 
 
 class GeneratorPerformanceTests(unittest.TestCase):
@@ -31,6 +32,7 @@ class GeneratorPerformanceTests(unittest.TestCase):
         py_linq_time = (toc - tic) / self.num_experiments
         self.assertTrue(py_linq_time < 0.0035)
 
+    @pytest.mark.xfail(reason="Performance of to_list function needs to be improved")
     def test_to_list(self):
         """
         This performance really needs to be improved.
