@@ -1,6 +1,6 @@
 ## union
 
-`union(enumerable, key=lambda x: x)`
+`union(enumerable, key)`
 
 Returns `Enumerable` that is a union between two `Enumerable` collections. Note that the key selector `lambda` function needs to map to comparable values in both `Enumerable` collections. This is not an executing function.
 

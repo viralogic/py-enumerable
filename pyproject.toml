@@ -12,6 +12,7 @@ keywords = ["LINQ", "py-linq"]
 [tool.poetry.dependencies]
 python = ">=3.6.1"
 future = "^0.18.2"
+six = "^1.16.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.1.2"
