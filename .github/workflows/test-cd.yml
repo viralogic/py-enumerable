@@ -27,6 +27,8 @@ jobs:
       run: poetry run flake8 .
     - name: Test with pytest
       run: poetry run pytest tests --cov=py_linq --cov-branch --cov-report term
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
   deploy:
     needs: test
     runs-on: ubuntu-latest
