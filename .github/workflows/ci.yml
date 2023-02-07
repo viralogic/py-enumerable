@@ -34,8 +34,4 @@ jobs:
     - name: Lint with flake8
       run: poetry run flake8 .
     - name: Test with pytest
-      run: poetry run pytest tests --cov=py_linq --cov-branch --cov-report=xml:coverage.xml
-    - uses: codecov/codecov-action@v2
-      with:
-        files: ./coverage.xml
-        dry_run: true
+      run: poetry run pytest tests --cov=py_linq --cov-branch --cov-report term
