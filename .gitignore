@@ -59,3 +59,5 @@ target/
 coverage/lcov.info
 cov.xml
 lcov.info
+.benchmarks/
+.vscode/

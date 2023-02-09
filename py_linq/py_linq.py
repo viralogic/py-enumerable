@@ -87,7 +87,7 @@ class Enumerable(object):
         Converts the iterable into a list
         :return: list object
         """
-        return [x for x in self]
+        return self._iterable.to_list()
 
     def count(self, predicate=None) -> int:
         """
@@ -155,11 +155,11 @@ class Enumerable(object):
         result = self.order_by(func).select(func).to_list()
         length = len(result)
         i = int(length / 2)
-        return (
-            result[i]
-            if length % 2 == 1
-            else (float(result[i - 1]) + float(result[i])) / float(2)
-        )
+        if length % 2 == 0:
+            median = (result[i - 1] + result[i]) / 2
+        else:
+            median = result[i]
+        return median
 
     def element_at(self, n) -> Any:
         """
@@ -644,7 +644,7 @@ class Enumerable(object):
         """
         if not isinstance(enumerable, Enumerable):
             raise TypeError()
-        return ZipEnumerable(Enumerable(iter(self)), enumerable, func)
+        return Enumerable(map(func, zip(Enumerable(iter(self)), enumerable)))
 
 
 class SkipWhileEnumerable(Enumerable):
@@ -820,19 +820,3 @@ class SortedEnumerable(Enumerable):
             )
         self._key_funcs.append(OrderingDirection(key=func, reverse=True))
         return SortedEnumerable(self, self._key_funcs)
-
-
-class ZipEnumerable(Enumerable):
-    """
-    Class to hold state for zipping 2 collections together
-    """
-
-    def __init__(self, enumerable1, enumerable2, result_func):
-        super(ZipEnumerable, self).__init__(enumerable1)
-        self.enumerable = enumerable2
-        self.result_func = result_func
-
-    def __iter__(self):
-        return map(
-            lambda r: self.result_func(r), zip(iter(self._iterable), self.enumerable)
-        )

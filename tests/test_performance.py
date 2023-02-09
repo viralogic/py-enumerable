@@ -1,74 +1,51 @@
-# import unittest
-# import logging
-
-# try:
-#     from time import clock as clock
-# except ImportError:
-#     from time import perf_counter as clock
-# import time
-# from py_linq import Enumerable
-# import pytest
+from typing import (
+    Generator,
+    List,
+    Dict,
+)
+import pytest
+from py_linq import Enumerable
 
 
-# class GeneratorPerformanceTests(unittest.TestCase):
-#     def setUp(self):
-#         self.test_generator = ({"id": x, "value": x} for x in range(0, 80000))
-#         self.num_experiments = 100
-#         self.logger = logging.getLogger(__name__)
+@pytest.fixture
+def test_generator() -> Generator:
+    return ({"id": x, "value": x} for x in range(0, 80000))
 
-#     def test_constructor(self):
-#         tic = clock()
-#         for i in range(0, self.num_experiments):
-#             e = Enumerable(self.test_generator)
-#         toc = clock()
-#         py_linq_time = (toc - tic) / self.num_experiments
-#         self.assertTrue(py_linq_time < 0.035)
 
-#     def test_select(self):
-#         tic = clock()
-#         for i in range(0, self.num_experiments):
-#             e = Enumerable(self.test_generator).select(lambda b: {"id": b["id"]})
-#         toc = clock()
-#         py_linq_time = (toc - tic) / self.num_experiments
-#         self.assertTrue(py_linq_time < 0.0035)
+@pytest.fixture
+def test_enumerable(test_generator) -> Enumerable:
+    return Enumerable(test_generator)
 
-#     @pytest.mark.xfail(reason="Performance of to_list function needs to be improved")
-#     def test_to_list(self):
-#         """
-#         This performance really needs to be improved.
-#         """
-#         num_experiments = 10
-#         tic = clock()
-#         for i in range(0, num_experiments):
-#             e = (
-#                 Enumerable(({"id": x, "value": x} for x in range(0, 80000)))
-#                 .select(lambda b: {"id": b["id"]})
-#                 .to_list()
-#             )
-#         toc = clock()
-#         py_linq_time = (toc - tic) / num_experiments
 
-#         tic = clock()
-#         for i in range(0, num_experiments):
-#             l = list(
-#                 map(
-#                     lambda b: {"id": b["id"]},
-#                     ({"id": x, "value": x} for x in range(0, 80000)),
-#                 )
-#             )
-#         toc = clock()
-#         python_list_time = (toc - tic) / num_experiments
+def test_constructor(benchmark, test_generator: Generator) -> None:
+    data = benchmark(Enumerable, test_generator)
+    assert data is not None
 
-#         tic = clock()
-#         for i in range(0, num_experiments):
-#             l = [
-#                 i
-#                 for i in map(
-#                     lambda b: {"id": b["id"]},
-#                     ({"id": x, "value": x} for x in range(0, 80000)),
-#                 )
-#             ]
-#         toc = clock()
-#         python_list_comp_time = (toc - tic) / num_experiments
 
-#         self.assertTrue(py_linq_time < python_list_comp_time * 14)
+def test_select(benchmark, test_enumerable: Enumerable) -> None:
+    benchmark(test_enumerable.select, lambda b: {"id": b["id"]})
+
+
+def test_to_list(benchmark, test_enumerable: Enumerable) -> None:
+    benchmark(test_enumerable.to_list)
+
+
+def test_list_comprehension(benchmark, test_generator: Generator) -> None:
+    def to_list() -> List[Dict[str, int]]:
+        return [{"id": b["id"]} for b in test_generator]
+
+    benchmark(to_list)
+
+
+def test_list(benchmark, test_generator: Generator) -> None:
+    benchmark(list, test_generator)
+
+def test_iter(benchmark, test_enumerable: Enumerable) -> None:
+    def iterate():
+        it = iter(test_enumerable)
+        try:
+            while next(it):
+                continue
+        except StopIteration:
+            pass
+    benchmark(iterate)

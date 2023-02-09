@@ -39,7 +39,6 @@ python-versions = ">=3.6"
 [package.dependencies]
 appdirs = "*"
 click = ">=7.1.2"
-dataclasses = {version = ">=0.6", markers = "python_version < \"3.7\""}
 mypy-extensions = ">=0.4.3"
 pathspec = ">=0.6,<1"
 regex = ">=2020.1.8"
@@ -85,14 +84,6 @@ python-versions = ">=3.6"
 
 [package.extras]
 toml = ["tomli"]
-
-[[package]]
-name = "dataclasses"
-version = "0.6"
-description = "A backport of the dataclasses module for Python 3.6"
-category = "dev"
-optional = false
-python-versions = "*"
 
 [[package]]
 name = "distlib"
@@ -158,21 +149,6 @@ zipp = ">=0.5"
 [package.extras]
 docs = ["jaraco.packaging (>=8.2)", "rst.linker (>=1.9)", "sphinx"]
 testing = ["flufl.flake8", "importlib-resources (>=1.3)", "packaging", "pep517", "pyfakefs", "pytest (>=4.6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.0.1)", "pytest-flake8", "pytest-mypy"]
-
-[[package]]
-name = "importlib-resources"
-version = "5.1.2"
-description = "Read resources from Python packages"
-category = "dev"
-optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-zipp = {version = ">=0.4", markers = "python_version < \"3.8\""}
-
-[package.extras]
-docs = ["jaraco.packaging (>=8.2)", "rst.linker (>=1.9)", "sphinx"]
-testing = ["pytest (>=4.6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=1.2.3)", "pytest-cov", "pytest-enabler", "pytest-flake8", "pytest-mypy"]
 
 [[package]]
 name = "iniconfig"
@@ -251,7 +227,6 @@ python-versions = ">=3.6.1"
 cfgv = ">=2.0.0"
 identify = ">=1.0.0"
 importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
-importlib-resources = {version = "*", markers = "python_version < \"3.7\""}
 nodeenv = ">=0.11.1"
 pyyaml = ">=5.1"
 toml = "*"
@@ -264,6 +239,14 @@ description = "library with cross-python path, ini-parsing, io, code, log facili
 category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[[package]]
+name = "py-cpuinfo"
+version = "9.0.0"
+description = "Get CPU info with pure Python"
+category = "dev"
+optional = false
+python-versions = "*"
 
 [[package]]
 name = "pycodestyle"
@@ -310,6 +293,23 @@ toml = "*"
 
 [package.extras]
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xmlschema"]
+
+[[package]]
+name = "pytest-benchmark"
+version = "4.0.0"
+description = "A ``pytest`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+py-cpuinfo = "*"
+pytest = ">=3.8"
+
+[package.extras]
+aspect = ["aspectlib"]
+elasticsearch = ["elasticsearch"]
+histogram = ["pygal", "pygaljs"]
 
 [[package]]
 name = "pytest-cov"
@@ -388,7 +388,6 @@ appdirs = ">=1.4.3,<2"
 distlib = ">=0.3.1,<1"
 filelock = ">=3.0.0,<4"
 importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
-importlib-resources = {version = ">=1.0", markers = "python_version < \"3.7\""}
 six = ">=1.9.0,<2"
 
 [package.extras]
@@ -409,8 +408,8 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=4.6)", "pytest-black (
 
 [metadata]
 lock-version = "1.1"
-python-versions = ">=3.6.1"
-content-hash = "fcd69b811d12d78bd2326882f0dae399981a5f99d88740f0ca88e430098c9733"
+python-versions = ">=3.7"
+content-hash = "169d9cc1a9cc0e49012e95c9bb71a75be2a46ed066a46e503afbb939a113ce90"
 
 [metadata.files]
 appdirs = [
@@ -489,10 +488,6 @@ coverage = [
     {file = "coverage-6.2-pp36.pp37.pp38-none-any.whl", hash = "sha256:5829192582c0ec8ca4a2532407bc14c2f338d9878a10442f5d03804a95fac9de"},
     {file = "coverage-6.2.tar.gz", hash = "sha256:e2cad8093172b7d1595b4ad66f24270808658e11acf43a8f95b41276162eb5b8"},
 ]
-dataclasses = [
-    {file = "dataclasses-0.6-py3-none-any.whl", hash = "sha256:454a69d788c7fda44efd71e259be79577822f5e3f53f029a22d08004e951dc9f"},
-    {file = "dataclasses-0.6.tar.gz", hash = "sha256:6988bd2b895eef432d562370bb707d540f32f7360ab13da45340101bc2307d84"},
-]
 distlib = [
     {file = "distlib-0.3.1-py2.py3-none-any.whl", hash = "sha256:8c09de2c67b3e7deef7184574fc060ab8a793e7adbb183d942c389c8b13c52fb"},
     {file = "distlib-0.3.1.zip", hash = "sha256:edf6116872c863e1aa9d5bb7cb5e05a022c519a4594dc703843343a9ddd9bff1"},
@@ -515,10 +510,6 @@ identify = [
 importlib-metadata = [
     {file = "importlib_metadata-4.0.1-py3-none-any.whl", hash = "sha256:d7eb1dea6d6a6086f8be21784cc9e3bcfa55872b52309bc5fad53a8ea444465d"},
     {file = "importlib_metadata-4.0.1.tar.gz", hash = "sha256:8c501196e49fb9df5df43833bdb1e4328f64847763ec8a50703148b73784d581"},
-]
-importlib-resources = [
-    {file = "importlib_resources-5.1.2-py3-none-any.whl", hash = "sha256:ebab3efe74d83b04d6bf5cd9a17f0c5c93e60fb60f30c90f56265fce4682a469"},
-    {file = "importlib_resources-5.1.2.tar.gz", hash = "sha256:642586fc4740bd1cad7690f836b3321309402b20b332529f25617ff18e8e1370"},
 ]
 iniconfig = [
     {file = "iniconfig-1.1.1-py2.py3-none-any.whl", hash = "sha256:011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3"},
@@ -556,6 +547,10 @@ py = [
     {file = "py-1.10.0-py2.py3-none-any.whl", hash = "sha256:3b80836aa6d1feeaa108e046da6423ab8f6ceda6468545ae8d02d9d58d18818a"},
     {file = "py-1.10.0.tar.gz", hash = "sha256:21b81bda15b66ef5e1a777a21c4dcd9c20ad3efd0b3f817e7a809035269e1bd3"},
 ]
+py-cpuinfo = [
+    {file = "py-cpuinfo-9.0.0.tar.gz", hash = "sha256:3cdbbf3fac90dc6f118bfd64384f309edeadd902d7c8fb17f02ffa1fc3f49690"},
+    {file = "py_cpuinfo-9.0.0-py3-none-any.whl", hash = "sha256:859625bc251f64e21f077d099d4162689c762b5d6a4c3c97553d56241c9674d5"},
+]
 pycodestyle = [
     {file = "pycodestyle-2.7.0-py2.py3-none-any.whl", hash = "sha256:514f76d918fcc0b55c6680472f0a37970994e07bbb80725808c17089be302068"},
     {file = "pycodestyle-2.7.0.tar.gz", hash = "sha256:c389c1d06bf7904078ca03399a4816f974a1d590090fecea0c63ec26ebaf1cef"},
@@ -571,6 +566,10 @@ pyparsing = [
 pytest = [
     {file = "pytest-6.2.5-py3-none-any.whl", hash = "sha256:7310f8d27bc79ced999e760ca304d69f6ba6c6649c0b60fb0e04a4a77cacc134"},
     {file = "pytest-6.2.5.tar.gz", hash = "sha256:131b36680866a76e6781d13f101efb86cf674ebb9762eb70d3082b6f29889e89"},
+]
+pytest-benchmark = [
+    {file = "pytest-benchmark-4.0.0.tar.gz", hash = "sha256:fb0785b83efe599a6a956361c0691ae1dbb5318018561af10f3e915caa0048d1"},
+    {file = "pytest_benchmark-4.0.0-py3-none-any.whl", hash = "sha256:fdb7db64e31c8b277dff9850d2a2556d8b60bcb0ea6524e36e28ffd7c87f71d6"},
 ]
 pytest-cov = [
     {file = "pytest-cov-2.12.1.tar.gz", hash = "sha256:261ceeb8c227b726249b376b8526b600f38667ee314f910353fa318caa01f4d7"},

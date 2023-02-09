@@ -7,6 +7,7 @@ from typing import (
     Any,
     Iterable,
     Optional,
+    List,
 )
 from copy import deepcopy
 
@@ -131,6 +132,16 @@ class RepeatableIterable(object):
     @current.setter
     def current(self, node: TNode) -> None:
         self._current = node
+
+    def to_list(self) -> List[Any]:
+        result = []
+        if len(self) == 0:
+            return result
+        current = self.head
+        while current is not None:
+            result.append(current.value)
+            current = current.next
+        return result
 
     @property
     def head(self) -> Optional[TNode]:

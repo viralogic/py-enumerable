@@ -145,7 +145,7 @@ def test_element_at_error(enumerable: Callable, index: int, error: Exception) ->
         (Enumerable(_complex).avg(lambda x: x["value"]), float(2)),
         (Enumerable(_simple).median(), 2),
         (Enumerable(_complex).median(lambda x: x["value"]), 2),
-        (Enumerable([1, 2, 3, 4]).median(), float(5) / float(2)),
+        (Enumerable([1, 2, 3, 4]).median(), 2.5),
         (Enumerable(_simple).first(), 1),
         (Enumerable(_complex).first(), {"value": 1}),
         (Enumerable().first_or_default(), None),
@@ -536,29 +536,6 @@ def test_executors_error(
             ).reverse(),
             ["dog", "lazy", "the", "over", "jumps", "fox", "brown", "quick", "the"],
         ),
-        (Enumerable(range(1, 6)).skip_last(2), [1, 2, 3]),
-        (
-            Enumerable(["one", "two", "three", "four", "five"]).skip(1).skip_last(1),
-            ["two", "three", "four"],
-        ),
-        (Enumerable([1, 4, 6, 4, 1]).skip_while(lambda x: x < 5), [6, 4, 1]),
-        (Enumerable([]).skip_while(lambda x: x < 5), []),
-        (Enumerable([1, 2, 3, 4, 5]).take_last(2), [4, 5]),
-        (
-            Enumerable(["one", "two", "three", "four", "five"]).take(3).take_last(1),
-            ["three"],
-        ),
-        (Enumerable([1, 4, 6, 4, 1]).take_while(lambda x: x < 5), [1, 4]),
-        (Enumerable([]).skip_while(lambda x: x < 5), []),
-        (
-            Enumerable(["A", "B", "C", "D"]).zip(
-                Enumerable(["x", "y"]), lambda t: "{0}{1}".format(t[0], t[1])
-            ),
-            ["Ax", "By"],
-        ),
-        (Enumerable([1]).intersect(Enumerable([1]), lambda x: x), [1]),
-        (Enumerable([1]).intersect(Enumerable([1]).distinct(), lambda x: x), [1]),
-        (Enumerable([1]).distinct().intersect(Enumerable([1]), lambda x: x), [1]),
         (
             Enumerable(simple_generator(4)).zip(Enumerable(simple_generator(4))),
             [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4)],

@@ -34,6 +34,6 @@ jobs:
     - name: Lint with flake8
       run: poetry run flake8 .
     - name: Test with pytest
-      run: poetry run pytest tests --cov=py_linq --cov-branch --cov-report term
+      run: poetry run pytest tests --cov=py_linq --cov-branch --cov-report term --benchmark-skip
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
