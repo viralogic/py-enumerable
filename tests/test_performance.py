@@ -40,6 +40,7 @@ def test_list_comprehension(benchmark, test_generator: Generator) -> None:
 def test_list(benchmark, test_generator: Generator) -> None:
     benchmark(list, test_generator)
 
+
 def test_iter(benchmark, test_enumerable: Enumerable) -> None:
     def iterate():
         it = iter(test_enumerable)
@@ -48,4 +49,5 @@ def test_iter(benchmark, test_enumerable: Enumerable) -> None:
                 continue
         except StopIteration:
             pass
+
     benchmark(iterate)
