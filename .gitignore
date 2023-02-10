@@ -57,3 +57,8 @@ target/
 .pytest_cache/
 .python-version
 coverage/lcov.info
+cov.xml
+lcov.info
+.benchmarks/
+.vscode/
+

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "py-linq"
-version = "1.3.0"
+version = "1.4.0"
 description = "LINQ (Language Integrated Query) is a popular querying language available in .NET. This library ports the language so that developers can query collections of objects using the same syntax. This library would be useful for Python developers with experience using the expressiveness and power of LINQ."
 authors = ["Bruce Fenske <bwfenske@ualberta.ca>"]
 license = "MIT"
@@ -12,6 +12,7 @@ keywords = ["LINQ", "py-linq"]
 [tool.poetry.dependencies]
 python = ">=3.6.1"
 future = "^0.18.2"
+six = "^1.16.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.1.2"

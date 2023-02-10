@@ -1,4 +1,4 @@
-![Python package](https://github.com/viralogic/py-enumerable/workflows/Python%20package/badge.svg)
+[![codecov](https://codecov.io/gh/viralogic/py-enumerable/branch/master/graph/badge.svg?token=u72ojmMvEn)](https://codecov.io/gh/viralogic/py-enumerable)
 
 # py-linq #
 

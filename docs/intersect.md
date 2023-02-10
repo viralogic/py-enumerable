@@ -1,6 +1,6 @@
 ## intersect
 
-`intersect(enumerable, key=lambda x: x)`
+`intersect(enumerable, key)`
 
 Returns an `Enumerable` that is the result of an intersection between two `Enumerable` instance based on the value of the key given. This is not an executing function.
 
