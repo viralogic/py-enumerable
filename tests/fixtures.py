@@ -3,6 +3,7 @@ import pytest
 
 
 _simple = [1, 2, 3]
+_simpleWithNone = [1,2,None,4]
 _complex = [{"value": 1}, {"value": 2}, {"value": 3}]
 
 _locations = [
@@ -30,6 +31,10 @@ def empty() -> Enumerable:
 @pytest.fixture
 def simple() -> Enumerable:
     return Enumerable(_simple)
+
+@pytest.fixture
+def simpleWithNone() -> Enumerable:
+    return Enumerable(_simpleWithNone)
 
 
 @pytest.fixture

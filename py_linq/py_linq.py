@@ -460,7 +460,10 @@ class Enumerable(object):
         :param predicate: condition to satisfy as lambda expression
         :return: boolean True or False
         """
-        return self.first_or_default(predicate) is not None
+        if predicate is None: predicate = lambda x: True
+        for item in self:
+            if predicate(item): return True
+        return False
 
     def intersect(self, enumerable: TEnumerable, key: Callable):
         """
