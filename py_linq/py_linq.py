@@ -3,6 +3,7 @@ import itertools
 import json
 from typing import (
     List,
+    Set,
     Any,
     Iterable,
     TypeVar,
@@ -88,6 +89,13 @@ class Enumerable(object):
         :return: list object
         """
         return [x for x in self]
+    
+    def to_set(self) -> Set[Any]:
+        """
+        Converts the iterable into a set
+        :return: set object
+        """
+        return {x for x in self}
 
     def count(self, predicate=None) -> int:
         """
