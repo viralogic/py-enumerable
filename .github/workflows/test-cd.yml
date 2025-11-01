@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -24,15 +24,17 @@ jobs:
       env:
         POETRY_VIRTUALENVS_CREATE: false
     - name: Lint with flake8
-      run: poetry run flake8 . --ignore=W503,E712,E231,E203 --count --max-complexity=10 --max-line-length=88 --show-source --statistics  --exclude=.git,__pycache__,.venv
+      run: poetry run flake8 .
     - name: Test with pytest
-      run: poetry run pytest tests
+      run: poetry run pytest tests --cov=py_linq --cov-branch --cov-report term
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
   deploy:
     needs: test
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6]
+        python-version: [3.7]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}

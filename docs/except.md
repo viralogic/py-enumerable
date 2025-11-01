@@ -1,6 +1,6 @@
 ## except
 
-`except_(enumerable, key=lambda x: x)`
+`except_(enumerable, key)`
 
 Returns an `Enumerable` that contains elements not found in the given `enumerable` argument. This is also known as a set difference. This is not an executing function.
 
@@ -23,6 +23,6 @@ e1 = Enumerable([
     {'value': 2},
     {'value': 3}
 ])
-diff = e1.except_(Enumerable([{'value': 1}])
+diff = e1.except_(Enumerable([{'value': 1}], key=lambda x: x['value'])
 # [{'value': 2}, {'value': 3}]
 </code></pre>

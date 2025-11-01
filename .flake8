@@ -1,4 +1,11 @@
 [flake8]
-max-line-length = 127
+max-line-length = 88
 max-complexity = 10
-select = E9,F63,F7,F82
+ignore = W503,E712,E231,E203,E501,E741,F401,F811,F841
+exclude =
+    .git,
+    __pycache__,
+    .venv
+count = True
+show-source = True
+statistics = True
