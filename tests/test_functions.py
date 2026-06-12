@@ -853,6 +853,74 @@ def test_group_join(
     assert expected == result
 
 
+def test_reverse_issue_79() -> None:
+    """
+    Regression test for #79: .reverse() returning original order
+    after the Enumerable has been iterated.
+    """
+    # Case 1: reporter's exact scenario — iterate, then reverse
+    e = Enumerable([1, 2, 3])
+    _ = list(e)
+    assert list(e.reverse()) == [3, 2, 1]
+    assert e.reverse().last() == 1
+    assert e.reverse().first() == 3
+
+    # Case 2: reverse after add chain
+    e2 = Enumerable().add(1).add(2).add(3)
+    assert list(e2.reverse()) == [3, 2, 1]
+
+    # Case 3: reverse after add chain, after iteration
+    _ = list(e2)
+    assert list(e2.reverse()) == [3, 2, 1]
+
+    # Case 4: double reverse yields original order (after iteration)
+    e3 = Enumerable([1, 2, 3])
+    _ = list(e3)
+    assert list(e3.reverse().reverse()) == [1, 2, 3]
+
+    # Case 5: single element
+    e4 = Enumerable([42])
+    _ = list(e4)
+    assert list(e4.reverse()) == [42]
+
+    # Case 6: None values
+    e5 = Enumerable([None, 1, None, 3])
+    _ = list(e5)
+    assert list(e5.reverse()) == [3, None, 1, None]
+
+    # Case 7: generator source after iteration
+    def gen():
+        for x in (1, 2, 3):
+            yield x
+
+    e6 = Enumerable(gen())
+    _ = list(e6)
+    assert list(e6.reverse()) == [3, 2, 1]
+
+    # Case 8: last/last_or_default with predicate (missing return fix)
+    e7 = Enumerable([1, 2, 3, 2, 1])
+    _ = list(e7)
+    assert e7.last(lambda x: x == 2) == 2
+    assert e7.last_or_default(lambda x: x == 4) is None
+
+    # Case 9: reverse after where chain
+    e8 = Enumerable([1, 2, 3, 4, 5])
+    _ = list(e8)
+    assert list(e8.where(lambda x: x > 2).reverse()) == [5, 4, 3]
+
+    # Case 10: multiple reverse calls (re-entry into __reversed__)
+    e9 = Enumerable([1, 2, 3])
+    _ = list(e9)
+    assert list(e9.reverse()) == [3, 2, 1]
+    assert list(e9.reverse()) == [3, 2, 1]
+    assert list(e9.reverse()) == [3, 2, 1]
+
+    # Case 11: strings
+    e10 = Enumerable("hello")
+    _ = list(e10)
+    assert list(e10.reverse()) == ["o", "l", "l", "e", "h"]
+
+
 def test_retain_ordering():
     """
     This is a test case submitted around the ordering of an Enumerable not being

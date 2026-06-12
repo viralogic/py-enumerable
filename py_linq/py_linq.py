@@ -218,7 +218,7 @@ class Enumerable(object):
         contains no elements
         """
         if func is not None:
-            self.reverse().where(func).first()
+            return self.reverse().where(func).first()
         return self.reverse().first()
 
     def last_or_default(self, func=None) -> Optional[Any]:

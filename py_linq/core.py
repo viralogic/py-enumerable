@@ -1,5 +1,4 @@
 import itertools
-import inspect
 import io
 from dataclasses import dataclass
 from typing import (
@@ -21,6 +20,7 @@ class Node(object):
 
     value: Any
     next: Optional[TNode] = None
+    prev: Optional[TNode] = None
 
 
 class Key(object):
@@ -67,6 +67,7 @@ class RepeatableIterable(object):
         self._len = None
         self._root: TNode = None
         self._current: TNode = None
+        self._tail: TNode = None
 
     def __len__(self):
         if self._len is None:
@@ -74,28 +75,22 @@ class RepeatableIterable(object):
         return self._len
 
     def __reversed__(self) -> Any:
-        if inspect.isgenerator(self._data) or isinstance(self._data, itertools.chain):
-            # We need to collect the data from a generator since reversing a generator
-            # is not possible
-            self._data = list(self._data)
         if self._root is None:
-            i = 0
-            for index, item in enumerate(reversed(self._data)):
-                node = Node(value=item)
-                if index == 0:
+            prev_node = None
+            for i, item in enumerate(self._data):
+                node = Node(value=item, prev=prev_node)
+                if i == 0:
                     self._root = node
-                    self._current = self._root
                 else:
-                    self._current.next = node
-                    self._current = self._current.next
-                yield node.value
-                i += 1
-            self._len = i
-        else:
-            while self._current is not None:
-                yield self._current.value
-                self._current = self._current.next
-        self._current = self._root
+                    prev_node.next = node
+                prev_node = node
+            self._tail = prev_node
+            self._len = i + 1 if prev_node else 0
+            self._current = self._root
+        current = self._tail
+        while current is not None:
+            yield current.value
+            current = current.prev
 
     def __iter__(self) -> Any:
         if self._root is None:
@@ -104,14 +99,17 @@ class RepeatableIterable(object):
                 node = Node(value=item)
                 if index == 0:
                     self._root = node
-                    self._current = self._root
+                    self._current = node
                 else:
                     self._current.next = node
-                    self._current = self._current.next
+                    node.prev = self._current
+                    self._current = node
                 yield node.value
                 i += 1
+            self._tail = self._current
             self._len = i
         else:
+            self._current = self._root
             while self._current is not None:
                 yield self._current.value
                 self._current = self._current.next
