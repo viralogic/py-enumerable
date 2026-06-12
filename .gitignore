@@ -61,4 +61,5 @@ cov.xml
 lcov.info
 .benchmarks/
 .vscode/
+.venv/
 

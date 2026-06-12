@@ -16,7 +16,7 @@
 1. Reproduce with a minimal `Enumerable(...)` test case
 2. Write the failing test first — prefer `@pytest.mark.parametrize` in `test_functions.py`; use standalone `def test_` for complex cases
 3. **Critical regression**: repeated calls (`.first()` → `.first()`, iterate → `.any()`) must not break — the `RepeatableIterable` linked-list cache is the top failure mode
-4. `poetry run flake8 .` → `poetry run pytest tests` — in that order
+4. `uv run flake8 .` → `uv run pytest tests` — in that order
 
 ## Testing conventions
 
@@ -28,7 +28,7 @@
 
 ## Tech debt
 
-- **Version sync**: both `pyproject.toml` (`[tool.poetry].version`) and `py_linq/__init__.py` (`__version__`) must match — check both when bumping
+- **Version sync**: both `pyproject.toml` (`[project].version`) and `py_linq/__init__.py` (`__version__`) must match — check both when bumping
 - **Python 2 compat**: `six`, `future`, and `imap`/`ifilter`/`izip` fallbacks in `py_linq.py` — assess removal if dropping Py2
 - **`except_`**: trailing underscore because `except` is a Python keyword
 
@@ -46,14 +46,14 @@
 - `release/*` → dry-run publish to Test PyPI
 - All other branches → CI only
 - PRs target the `development` branch
-- CI order: lint → test (Python 3.7–3.10 matrix)
+- CI order: lint → test (Python 3.8–3.10 matrix)
 - No PR template — write a clear title and description
 
 ## Prerequisite checklist
 
 ```bash
-poetry install                 # if deps changed
-poetry run pre-commit install  # one-time setup
-poetry run flake8 .            # before commit
-poetry run pytest tests        # after lint
+uv sync                       # if deps changed
+uv run pre-commit install     # one-time setup
+uv run flake8 .            # before commit
+uv run pytest tests        # after lint
 ```

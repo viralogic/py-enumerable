@@ -17,23 +17,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10"]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install poetry and dependencies
+    - name: Install uv and dependencies
       run: |
         pip install -U pip
-        pip install poetry
-        poetry install
-      env:
-        POETRY_VIRTUALENVS_CREATE: false
+        pip install uv
+        uv sync
     - name: Lint with flake8
-      run: poetry run flake8 .
+      run: uv run flake8 .
     - name: Test with pytest
-      run: poetry run pytest tests --cov=py_linq --cov-branch --cov-report term
+      run: uv run pytest tests --cov=py_linq --cov-branch --cov-report term
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
