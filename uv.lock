@@ -504,12 +504,6 @@ wheels = [
 ]
 
 [[package]]
-name = "future"
-version = "0.18.3"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8f/2e/cf6accf7415237d6faeeebdc7832023c90e0282aa16fd3263db0eb4715ec/future-0.18.3.tar.gz", hash = "sha256:34a17436ed1e96697a86f9de3d15a3b0be01d8bc8de9c1dffd59fb8234ed5307", size = 840896, upload-time = "2023-01-13T03:15:17.607Z" }
-
-[[package]]
 name = "identify"
 version = "2.6.1"
 source = { registry = "https://pypi.org/simple" }
@@ -709,7 +703,6 @@ name = "py-linq"
 version = "1.4.0"
 source = { editable = "." }
 dependencies = [
-    { name = "future" },
     { name = "six" },
 ]
 
@@ -726,7 +719,6 @@ dev = [
 requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=20.8b1,<21" },
     { name = "flake8", marker = "extra == 'dev'", specifier = ">=3.8.4,<4" },
-    { name = "future", specifier = ">=0.18.2,<0.19" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=2.8.2,<3" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=6.1.2,<7" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=2.10.1,<3" },

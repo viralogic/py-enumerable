@@ -14,14 +14,6 @@ from typing import (
 from queue import LifoQueue
 from six import string_types
 
-# python 2 to 3 compatibility imports
-try:
-    from itertools import imap as map
-    from itertools import ifilter as filter
-    from itertools import izip as zip
-except ImportError:
-    pass
-from builtins import range
 from .core import Key, OrderingDirection, RepeatableIterable, Node
 from .decorators import deprecated
 from .exceptions import (

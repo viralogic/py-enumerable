@@ -29,7 +29,7 @@
 ## Tech debt
 
 - **Version sync**: both `pyproject.toml` (`[project].version`) and `py_linq/__init__.py` (`__version__`) must match — check both when bumping
-- **Python 2 compat**: `six`, `future`, and `imap`/`ifilter`/`izip` fallbacks in `py_linq.py` — assess removal if dropping Py2
+- **Python 2 compat**: `six` remains for `string_types` in `py_linq.py` — consider replacing with `str` if dropping Py2 compat entirely
 - **`except_`**: trailing underscore because `except` is a Python keyword
 
 ## Naming

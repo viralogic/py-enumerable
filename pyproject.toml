@@ -7,7 +7,6 @@ license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
-    "future>=0.18.2,<0.19",
     "six>=1.16.0,<2",
 ]
 keywords = ["LINQ", "py-linq"]
