@@ -186,6 +186,7 @@ def test_element_at_error(enumerable: Callable, index: int, error: Exception) ->
         (Enumerable([1, 1, 1]).all(lambda x: x == 1), True),
         (Enumerable([]).all(lambda x: x == 1), True),
         (Enumerable(_simple).all(lambda x: x == 1), False),
+        (Enumerable([1, 2, 3, 2]).to_set(), {1, 2, 3}),
         (
             Enumerable(["ab", "bc", "cd", "de"]).to_dictionary(lambda t: t[0]),
             {"a": "ab", "b": "bc", "c": "cd", "d": "de"},
