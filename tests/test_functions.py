@@ -9,7 +9,6 @@ from py_linq.exceptions import (
 )
 
 from py_linq.py_linq import Grouping, Key
-import six
 import pytest
 from tests.fixtures import (
     _simple,
