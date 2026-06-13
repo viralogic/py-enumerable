@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - run: uv sync
+      - run: uv sync --all-extras
 
       - run: uv run ruff check .
 
@@ -44,7 +44,7 @@ jobs:
         with:
           python-version: "3.13"
 
-      - run: uv sync
+      - run: uv sync --all-extras
 
       - run: uv build
 
@@ -60,7 +60,7 @@ jobs:
         with:
           python-version: "3.13"
 
-      - run: uv sync
+      - run: uv sync --all-extras
 
       - run: uv build
 
