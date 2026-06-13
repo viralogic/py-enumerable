@@ -10,7 +10,7 @@
 ## Python / toolchain
 - Python 3.8.20 (`.python-version`); supports `>=3.8`
 - **uv** for dependency management. Dev commands use `uv run ...`
-- **Pre-commit**: Black (rev 23.1.0, lang py3.7) + Ruff (rev v0.15.17)
+- **Pre-commit**: Black (rev 24.10.0) + Ruff (rev v0.15.17)
 - Black line length: 88 (ruff config matches)
 - Ruff config lives in `pyproject.toml` under `[tool.ruff]`
 
