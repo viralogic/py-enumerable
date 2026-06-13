@@ -1,8 +1,8 @@
 [project]
 name = "py-linq"
-version = "1.4.0"
+version = "1.5.0"
 description = "LINQ (Language Integrated Query) is a popular querying language available in .NET. This library ports the language so that developers can query collections of objects using the same syntax. This library would be useful for Python developers with experience using the expressiveness and power of LINQ."
-authors = [{name = "Bruce Fenske", email = "bwfenske@ualberta.ca"}]
+authors = [{name = "Bruce Fenske", email = "fenskebw@gmail.com"}]
 license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.8"
