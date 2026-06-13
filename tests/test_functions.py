@@ -577,8 +577,12 @@ def test_executors_error(
             .zip(Enumerable(simple_generator(9)).where(lambda i: i < 5)),
             [(5, 0), (6, 1), (7, 2), (8, 3), (9, 4)],
         ),
+        (Enumerable(simple_generator(2)).chunk(2), [[0, 1], [2]]),
         (Enumerable(simple_generator(2)), [0, 1, 2]),
         (Enumerable((i for i in simple_generator(2))), [0, 1, 2]),
+        (Enumerable([1, 2, 3, 4, 5]).chunk(2), [[1, 2], [3, 4], [5]]),
+        (Enumerable([1, 2, 3]).chunk(1), [[1], [2], [3]]),
+        (Enumerable().chunk(2), []),
         (
             Enumerable(powers(2)).join(
                 Enumerable(powers(10)),

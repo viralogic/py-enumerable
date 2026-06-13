@@ -646,6 +646,15 @@ class Enumerable(object):
             raise TypeError()
         return ZipEnumerable(Enumerable(iter(self)), enumerable, func)
 
+    def chunk(self, n: int) -> TEnumerable:
+        """
+        Splits the elements into chunks of at most n elements
+        :param n: the maximum size of each chunk
+        :return: Enumerable of lists
+        """
+        it = iter(self)
+        return Enumerable(data=iter(lambda: list(itertools.islice(it, n)), []))
+
 
 class SkipWhileEnumerable(Enumerable):
     """
