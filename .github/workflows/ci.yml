@@ -47,7 +47,7 @@ jobs:
 
       - run: uv build
 
-      - run: uv publish --dry-run
+      - run: uv publish --dry-run --username __token__ --password pypi-
 
   publish:
     if: github.ref == 'refs/heads/master'
