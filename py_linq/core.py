@@ -87,32 +87,56 @@ class RepeatableIterable(object):
             self._tail = prev_node
             self._len = i + 1 if prev_node else 0
             self._current = self._root
-        current = self._tail
+        tail = self._tail
+        if tail is None and self._root is not None:
+            cur = self._root
+            while cur.next is not None:
+                cur = cur.next
+            tail = cur
+        current = tail
         while current is not None:
             yield current.value
             current = current.prev
 
     def __iter__(self) -> Any:
+        if self._root is not None and self._len is None and not hasattr(self._data, '__next__'):
+            self._root = None
+            self._current = None
+            self._tail = None
+            self._len = None
         if self._root is None:
             i = 0
+            prev_node = None
             for index, item in enumerate(self._data):
-                node = Node(value=item)
+                node = Node(value=item, prev=prev_node)
                 if index == 0:
                     self._root = node
-                    self._current = node
                 else:
-                    self._current.next = node
-                    node.prev = self._current
-                    self._current = node
+                    prev_node.next = node
                 yield node.value
+                prev_node = node
                 i += 1
-            self._tail = self._current
+            self._tail = prev_node
             self._len = i
         else:
             self._current = self._root
+            last_node = None
+            i = 0
             while self._current is not None:
                 yield self._current.value
+                last_node = self._current
                 self._current = self._current.next
+                i += 1
+            if self._len is None:
+                prev_node = last_node
+                for item in self._data:
+                    node = Node(value=item, prev=prev_node)
+                    prev_node.next = node
+                    yield node.value
+                    prev_node = node
+                    i += 1
+                self._tail = prev_node
+                self._len = i
         self._current = self._root
 
     def __next__(self):
