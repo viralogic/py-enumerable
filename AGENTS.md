@@ -10,16 +10,16 @@
 ## Python / toolchain
 - Python 3.8.20 (`.python-version`); supports `>=3.8`
 - **uv** for dependency management. Dev commands use `uv run ...`
-- **Pre-commit**: Black (rev 23.1.0, lang py3.7) + Flake8 (rev 6.0.0)
-- Black line length: 88 (`.flake8` matches)
-- Flake8 ignores: `W503,E712,E231,E203,E501,E741,F401,F811,F841`
+- **Pre-commit**: Black (rev 23.1.0, lang py3.7) + Ruff (rev v0.15.17)
+- Black line length: 88 (ruff config matches)
+- Ruff config lives in `pyproject.toml` under `[tool.ruff]`
 
 ## Commands
 | Action | Command |
 |--------|---------|
 | Install deps | `uv sync` |
 | Install pre-commit hooks | `uv run pre-commit install` |
-| Lint | `uv run flake8 .` |
+| Lint | `uv run ruff check .` |
 | Test (single run) | `uv run pytest tests` |
 | Test with coverage | `uv run pytest tests --cov=py_linq --cov-branch --cov-report term` |
 | Build | `uv build` |

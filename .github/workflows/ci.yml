@@ -30,7 +30,7 @@ jobs:
 
       - run: uv sync
 
-      - run: uv run flake8 .
+      - run: uv run ruff check .
 
       - run: uv run pytest tests --cov=py_linq --cov-branch --cov-report term
 
