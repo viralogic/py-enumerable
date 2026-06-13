@@ -6,9 +6,7 @@ authors = [{name = "Bruce Fenske", email = "bwfenske@ualberta.ca"}]
 license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.8"
-dependencies = [
-    "six>=1.16.0,<2",
-]
+dependencies = []
 keywords = ["LINQ", "py-linq"]
 urls = {repository = "https://github.com/viralogic/py-enumerable", homepage = "https://github.com/viralogic/py-enumerable"}
 

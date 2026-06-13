@@ -32,6 +32,7 @@ def empty() -> Enumerable:
 def simple() -> Enumerable:
     return Enumerable(_simple)
 
+
 @pytest.fixture
 def simpleWithNone() -> Enumerable:
     return Enumerable(_simpleWithNone)

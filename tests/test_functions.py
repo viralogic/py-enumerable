@@ -174,7 +174,7 @@ def test_element_at_error(enumerable: Callable, index: int, error: Exception) ->
         (Enumerable(_complex).any(), True),
         (Enumerable(_complex).any(lambda x: x["value"] < 1), False),
         (Enumerable(_complex).any(lambda x: x["value"] > 1), True),
-        (Enumerable(_simpleWithNone).any(lambda x: x==None), True),
+        (Enumerable(_simpleWithNone).any(lambda x: x is None), True),
         (Enumerable().contains(1), False),
         (Enumerable(_simple).contains(1), True),
         (Enumerable(_complex).select(lambda x: x["value"]).contains(1), True),

@@ -12,7 +12,7 @@ from typing import (
     Callable,
 )
 from queue import LifoQueue
-from six import string_types
+
 
 from .core import Key, OrderingDirection, RepeatableIterable, Node
 from .decorators import deprecated
@@ -452,9 +452,14 @@ class Enumerable(object):
         :param predicate: condition to satisfy as lambda expression
         :return: boolean True or False
         """
-        if predicate is None: predicate = lambda x: True
+        if predicate is None:
+
+            def always_true(x):
+                return True
+            predicate = always_true
         for item in self:
-            if predicate(item): return True
+            if predicate(item):
+                return True
         return False
 
     def intersect(self, enumerable: TEnumerable, key: Callable):
@@ -740,7 +745,7 @@ class GroupedRepeatableIterable(RepeatableIterable):
         return (
             hasattr(key_value, "__len__")
             and len(key_value) > 0
-            and not isinstance(key_value, string_types)
+            and not isinstance(key_value, str)
         )
 
     def __iter__(self) -> Any:
